@@ -225,23 +225,22 @@ class EditorViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Try GP SDK first - check if already connected
-                val gpConnected = gpPrinterService.isConnected()
-                val gpDevice = gpPrinterService.getCurrentDevice()
-                val btDevice = connectedDevice ?: gpDevice
+                // Always reconnect before printing - SDK connection is not persistent
+                val btDevice = connectedDevice ?: gpPrinterService.getCurrentDevice() ?: bluetoothRepository.getConnectedDevice()
 
-                android.util.Log.d("PrintDebug", "Editor print - GP connected: $gpConnected, GP device: $gpDevice, BT device: $btDevice")
+                android.util.Log.d("PrintDebug", "Editor print - BT device: $btDevice")
 
-                val result = if (gpConnected && gpDevice != null) {
-                    // GP SDK is already connected, use it directly
-                    android.util.Log.d("PrintDebug", "Using GpPrinterService (already connected)")
-                    gpPrinterService.print(label)
-                } else if (btDevice != null) {
-                    // Try to connect and print
+                val result = if (btDevice != null) {
+                    // Disconnect first to ensure clean state
+                    gpPrinterService.disconnect()
+                    // Connect and print
                     android.util.Log.d("PrintDebug", "Connecting GpPrinterService for label print")
                     val connectResult = gpPrinterService.connect(btDevice)
                     if (connectResult.isSuccess) {
-                        gpPrinterService.print(label)
+                        val printResult = gpPrinterService.print(label)
+                        // Disconnect after printing
+                        gpPrinterService.disconnect()
+                        printResult
                     } else {
                         Result.failure(connectResult.exceptionOrNull() ?: Exception("连接失败"))
                     }

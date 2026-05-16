@@ -157,31 +157,27 @@ class DeviceViewModel @Inject constructor(
             android.util.Log.d("PrintDebug", "Current protocol from settings: ${settings.printProtocol}")
             android.util.Log.d("PrintDebug", "Density: ${settings.printDensity}, Speed: ${settings.printSpeed}, Gap: ${settings.gapMm}")
 
-            // Check if GpPrinterService is connected first
-            val gpConnected = gpPrinterService.isConnected()
-            android.util.Log.d("PrintDebug", "GP connected: $gpConnected")
+            // Always reconnect before printing - SDK connection is not persistent
+            val btDevice = connectedDevice ?: bluetoothRepository.getConnectedDevice()
+            android.util.Log.d("PrintDebug", "BT Device: $btDevice, local connectedDevice: $connectedDevice")
 
-            val result = if (gpConnected) {
-                // GpPrinterService is already connected, use it directly
-                android.util.Log.d("PrintDebug", "Using GpPrinterService (already connected)")
-                gpPrinterService.printTestPage(device.name)
-            } else {
-                // Try to get device and connect
-                val btDevice = connectedDevice ?: bluetoothRepository.getConnectedDevice()
-                android.util.Log.d("PrintDebug", "BT Device: $btDevice, local connectedDevice: $connectedDevice")
-
-                if (btDevice != null) {
-                    android.util.Log.d("PrintDebug", "Connecting GpPrinterService then printing")
-                    val connectResult = gpPrinterService.connect(btDevice)
-                    if (connectResult.isSuccess) {
-                        gpPrinterService.printTestPage(device.name)
-                    } else {
-                        Result.failure(connectResult.exceptionOrNull() ?: Exception("Connection failed"))
-                    }
+            val result = if (btDevice != null) {
+                android.util.Log.d("PrintDebug", "Connecting GpPrinterService for test print")
+                // Disconnect first to ensure clean state
+                gpPrinterService.disconnect()
+                // Connect and print
+                val connectResult = gpPrinterService.connect(btDevice)
+                if (connectResult.isSuccess) {
+                    val printResult = gpPrinterService.printTestPage(device.name)
+                    // Disconnect after printing
+                    gpPrinterService.disconnect()
+                    printResult
                 } else {
-                    android.util.Log.d("PrintDebug", "No device available, using legacy PrintService")
-                    printService.printTestPage(device.name)
+                    Result.failure(connectResult.exceptionOrNull() ?: Exception("Connection failed"))
                 }
+            } else {
+                android.util.Log.d("PrintDebug", "No device available, using legacy PrintService")
+                printService.printTestPage(device.name)
             }
 
             result.onSuccess {
