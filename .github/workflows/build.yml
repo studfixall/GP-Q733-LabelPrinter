@@ -40,7 +40,15 @@ jobs:
       run: chmod +x gradlew
       
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --stacktrace --info 2>&1 | tee build-debug.log
+      continue-on-error: true
+      
+    - name: Upload Debug Build Log
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: debug-build-log
+        path: build-debug.log
       
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
