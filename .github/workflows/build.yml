@@ -79,7 +79,7 @@ jobs:
       run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
       
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: build-${{ steps.date.outputs.date }}-${{ github.run_number }}
         name: Build ${{ steps.date.outputs.date }} (#${{ github.run_number }})
@@ -88,5 +88,8 @@ jobs:
           apks/release/*.apk
         draft: false
         prerelease: true
+        fail_on_unmatched_files: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      timeout-minutes: 5
+      continue-on-error: true
