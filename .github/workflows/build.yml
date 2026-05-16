@@ -42,7 +42,8 @@ jobs:
       run: ./gradlew clean
       
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace --info
+      run: ./gradlew assembleDebug --stacktrace --info 2>&1 | head -500
+      timeout-minutes: 30
       
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
@@ -52,8 +53,9 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
         
     - name: Build Release APK
-      run: ./gradlew assembleRelease --stacktrace
+      run: ./gradlew assembleRelease --stacktrace 2>&1 | head -500
       if: success()
+      timeout-minutes: 30
       
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1

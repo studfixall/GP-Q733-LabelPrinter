@@ -108,4 +108,15 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+    useBuildCache = false
+}
+
+// Fix for Hilt/kapt issues in CI
+tasks.withType<org.jetbrains.kotlin.gradle.internal.KaptTask>().configureEach {
+    kaptOptions {
+        arguments {
+            arg("dagger.fastInit", "enabled")
+            arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
+        }
+    }
 }
