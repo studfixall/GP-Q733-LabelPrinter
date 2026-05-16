@@ -136,9 +136,14 @@ class GpPrinterService @Inject constructor(
         val interface_ = printer?.printerInterface
         val state = interface_?.connectState
         val connected = state == com.rt.printerlibrary.enumerate.ConnectStateEnum.Connected
-        android.util.Log.d("PrintDebug", "GpPrinterService.isConnected() - printer=$printer, interface=$interface_, state=$state, connected=$connected")
+        android.util.Log.d("PrintDebug", "GpPrinterService.isConnected() - printer=${printer != null}, state=$state, connected=$connected")
         return connected
     }
+
+    /**
+     * Get current connected device
+     */
+    fun getCurrentDevice(): BluetoothDevice? = currentDevice
 
     /**
      * Print a label using official SDK

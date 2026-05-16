@@ -225,20 +225,29 @@ class EditorViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Try GP SDK first
-                val btDevice = connectedDevice
-                android.util.Log.d("PrintDebug", "Editor print - BT Device: $btDevice, GP connected: ${gpPrinterService.isConnected()}")
+                // Try GP SDK first - check if already connected
+                val gpConnected = gpPrinterService.isConnected()
+                val gpDevice = gpPrinterService.getCurrentDevice()
+                val btDevice = connectedDevice ?: gpDevice
 
-                val result = if (btDevice != null) {
-                    android.util.Log.d("PrintDebug", "Using GpPrinterService for label")
-                    // Ensure GP SDK is connected
-                    if (!gpPrinterService.isConnected()) {
-                        gpPrinterService.connect(btDevice)
-                    }
+                android.util.Log.d("PrintDebug", "Editor print - GP connected: $gpConnected, GP device: $gpDevice, BT device: $btDevice")
+
+                val result = if (gpConnected && gpDevice != null) {
+                    // GP SDK is already connected, use it directly
+                    android.util.Log.d("PrintDebug", "Using GpPrinterService (already connected)")
                     gpPrinterService.print(label)
+                } else if (btDevice != null) {
+                    // Try to connect and print
+                    android.util.Log.d("PrintDebug", "Connecting GpPrinterService for label print")
+                    val connectResult = gpPrinterService.connect(btDevice)
+                    if (connectResult.isSuccess) {
+                        gpPrinterService.print(label)
+                    } else {
+                        Result.failure(connectResult.exceptionOrNull() ?: Exception("连接失败"))
+                    }
                 } else {
-                    // Fallback to legacy print
-                    android.util.Log.d("PrintDebug", "Using legacy print for label - no BT device")
+                    // No device available
+                    android.util.Log.d("PrintDebug", "No BT device available for printing")
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "请先连接蓝牙打印机"
                     )
