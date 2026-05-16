@@ -22,9 +22,16 @@ jobs:
         
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
-      
+      with:
+        api-level: 34
+        build-tools: 34.0.0
+        
     - name: Accept Android SDK Licenses
-      run: yes | sdkmanager --licenses || true
+      run: |
+        export ANDROID_HOME=$HOME/android-sdk
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        yes | sdkmanager --licenses || true
+        sdkmanager "platforms;android-34" "build-tools;34.0.0" || true
       
     - name: Cache Gradle packages
       uses: actions/cache@v4
@@ -39,29 +46,31 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
+    - name: Check Gradle wrapper
+      run: ./gradlew --version
+      
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace --info 2>&1 | tee build-debug.log
-      continue-on-error: true
-      
-    - name: Upload Debug Build Log
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: debug-build-log
-        path: build-debug.log
-      
+      run: ./gradlew assembleDebug --stacktrace
+      env:
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
+        
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
         name: debug-apk
         path: app/build/outputs/apk/debug/*.apk
         
     - name: Build Release APK
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease --stacktrace
+      if: success()
+      env:
+        ANDROID_HOME: ${{ env.ANDROID_HOME }}
       
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1
       id: sign_release
+      if: success()
       with:
         releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -73,6 +82,7 @@ jobs:
       
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
         name: release-apk
         path: ${{ steps.sign_release.outputs.signedReleaseFile }}
