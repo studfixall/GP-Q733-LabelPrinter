@@ -192,6 +192,13 @@ class ScanProductViewModel @Inject constructor(
     }
 
     /**
+     * 设置错误信息
+     */
+    fun setError(message: String) {
+        _uiState.value = _uiState.value.copy(error = message)
+    }
+
+    /**
      * 获取可用的商品模板
      */
     fun getProductTemplates(): List<LabelTemplate> {

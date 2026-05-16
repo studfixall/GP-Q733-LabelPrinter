@@ -1,5 +1,7 @@
 package com.gp.q733.presentation.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.gp.q733.domain.model.LabelElement
@@ -17,6 +20,8 @@ import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.presentation.viewmodel.LabelTemplate
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +32,7 @@ fun ScanProductScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
+    val context = LocalContext.current
     
     // 扫码对话框状态
     var showScanDialog by remember { mutableStateOf(false) }
@@ -35,6 +41,35 @@ fun ScanProductScreen(
     
     // 获取可用的商品模板
     val productTemplates = viewModel.getProductTemplates()
+    
+    // ZXing 扫码启动器
+    val scanLauncher = rememberLauncherForActivityResult(
+        contract = ScanContract()
+    ) { result ->
+        if (result.contents != null) {
+            // 扫码成功，查询商品
+            viewModel.onManualBarcodeEntered(result.contents)
+        }
+    }
+    
+    // 相机权限请求启动器
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // 权限 granted，启动扫码
+            val options = ScanOptions()
+                .setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+                .setPrompt("将条码对准扫描框")
+                .setCameraId(0)
+                .setBeepEnabled(true)
+                .setBarcodeImageEnabled(false)
+            scanLauncher.launch(options)
+        } else {
+            // 权限被拒绝
+            viewModel.setError("需要相机权限才能扫码")
+        }
+    }
     
     Scaffold(
         topBar = {
@@ -93,7 +128,10 @@ fun ScanProductScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
-                            onClick = { showScanDialog = true },
+                            onClick = {
+                                // 请求相机权限并启动扫码
+                                cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            },
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.QrCodeScanner, contentDescription = null)
