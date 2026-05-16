@@ -32,7 +32,7 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace 2>&1 | tail -200
+      run: ./gradlew assembleDebug --stacktrace
       timeout-minutes: 30
 
     - name: Upload Debug APK
@@ -43,7 +43,7 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
 
     - name: Build Release APK (unsigned)
-      run: ./gradlew assembleRelease --stacktrace 2>&1 | tail -200
+      run: ./gradlew assembleRelease --stacktrace
       timeout-minutes: 30
 
     - name: Sign Release APK
