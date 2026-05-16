@@ -22,38 +22,28 @@ jobs:
         
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
-      with:
-        api-level: 34
-        build-tools: 34.0.0
-        
-    - name: Accept Android SDK Licenses
-      run: |
-        export ANDROID_HOME=$HOME/android-sdk
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
-        yes | sdkmanager --licenses || true
-        sdkmanager "platforms;android-34" "build-tools;34.0.0" || true
       
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v3
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    
-    - name: Grant execute permission for gradlew
+        gradle-version: wrapper
+        
+    - name: Make gradlew executable
       run: chmod +x gradlew
       
-    - name: Check Gradle wrapper
-      run: ./gradlew --version
+    - name: Check environment
+      run: |
+        echo "JAVA_HOME: $JAVA_HOME"
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        java -version
+        ./gradlew --version
+      
+    - name: Clean build
+      run: ./gradlew clean
       
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace
-      env:
-        ANDROID_HOME: ${{ env.ANDROID_HOME }}
-        
+      run: ./gradlew assembleDebug --stacktrace --info
+      
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       if: success()
@@ -64,13 +54,11 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease --stacktrace
       if: success()
-      env:
-        ANDROID_HOME: ${{ env.ANDROID_HOME }}
       
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1
       id: sign_release
-      if: success()
+      if: success() && github.event_name == 'push'
       with:
         releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -79,52 +67,12 @@ jobs:
         keyPassword: ${{ secrets.KEY_PASSWORD }}
       env:
         BUILD_TOOLS_VERSION: "34.0.0"
+      continue-on-error: true
       
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       if: success()
       with:
         name: release-apk
-        path: ${{ steps.sign_release.outputs.signedReleaseFile }}
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    permissions:
-      contents: write
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Download Debug APK
-      uses: actions/download-artifact@v4
-      with:
-        name: debug-apk
-        path: apks/debug
-        
-    - name: Download Release APK
-      uses: actions/download-artifact@v4
-      with:
-        name: release-apk
-        path: apks/release
-    
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
-      
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: build-${{ steps.date.outputs.date }}-${{ github.run_number }}
-        name: Build ${{ steps.date.outputs.date }} (#${{ github.run_number }})
-        files: |
-          apks/debug/*.apk
-          apks/release/*.apk
-        draft: false
-        prerelease: true
-        fail_on_unmatched_files: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      timeout-minutes: 5
-      continue-on-error: true
+        path: app/build/outputs/apk/release/*-signed.apk
+        if-no-files-found: ignore
