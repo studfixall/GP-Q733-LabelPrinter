@@ -48,7 +48,8 @@ class ScanProductViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val labelDataStore: LabelDataStore,
     private val settingsDataStore: SettingsDataStore,
-    private val bluetoothRepository: BluetoothRepository
+    private val bluetoothRepository: BluetoothRepository,
+    private val gpPrinterService: com.gp.q733.domain.print.GpPrinterService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScanProductUiState())
@@ -134,13 +135,44 @@ class ScanProductViewModel @Inject constructor(
                 // 保存打印记录
                 labelDataStore.saveLabel(filledLabel)
                 
-                // 通过蓝牙发送打印
-                // TODO: 调用打印服务
-                // printService.print(filledLabel)
+                // 检查打印机连接状态
+                if (!gpPrinterService.isConnected()) {
+                    // 尝试获取已连接设备并重新连接
+                    val btDevice = bluetoothRepository.getConnectedDevice()
+                    if (btDevice != null) {
+                        val connectResult = gpPrinterService.connect(btDevice)
+                        if (connectResult.isFailure) {
+                            _uiState.value = _uiState.value.copy(
+                                printStatus = PrintStatus.Failed,
+                                error = "打印机连接失败: ${connectResult.exceptionOrNull()?.message}"
+                            )
+                            return@launch
+                        }
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            printStatus = PrintStatus.Failed,
+                            error = "打印机未连接"
+                        )
+                        return@launch
+                    }
+                }
                 
-                _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Success)
+                // 执行打印
+                val result = gpPrinterService.print(filledLabel)
+                
+                result.onSuccess {
+                    _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Success)
+                }.onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        printStatus = PrintStatus.Failed,
+                        error = "打印失败: ${error.message}"
+                    )
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Failed)
+                _uiState.value = _uiState.value.copy(
+                    printStatus = PrintStatus.Failed,
+                    error = "打印异常: ${e.message}"
+                )
             }
         }
     }

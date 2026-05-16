@@ -199,6 +199,7 @@ class GpPrinterService @Inject constructor(
     /**
      * CPCL label print - fully aligned with SDK example usage
      * Key: getCpclHeaderCmd takes mm values, Position takes dots values
+     * NOTE: CPCL coordinates start from 0,0 (left-top corner of printable area)
      */
     private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = CpclFactory()
@@ -222,8 +223,10 @@ class GpPrinterService @Inject constructor(
                 is LabelElement.Text -> {
                     val textSetting = TextSetting()
                     textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-                    // Position in dots - convert from mm
-                    textSetting.txtPrintPosition = Position(mmToDots(element.x), mmToDots(element.y))
+                    // Position in dots - convert from mm, ensure non-negative
+                    val xPos = mmToDots(element.x).coerceAtLeast(0)
+                    val yPos = mmToDots(element.y).coerceAtLeast(0)
+                    textSetting.txtPrintPosition = Position(xPos, yPos)
                     textSetting.printRotation = PrintRotation.Rotate0
                     textSetting.setxMultiplication(1)
                     textSetting.setyMultiplication(1)
@@ -238,7 +241,10 @@ class GpPrinterService @Inject constructor(
                     barcodeSetting.wideInDot = 4
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
                     barcodeSetting.heightInDot = mmToDots(element.height)
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    // Ensure non-negative coordinates
+                    val xPos = mmToDots(element.x).coerceAtLeast(0)
+                    val yPos = mmToDots(element.y).coerceAtLeast(0)
+                    barcodeSetting.position = Position(xPos, yPos)
 
                     val barcodeType = when (element.format) {
                         com.gp.q733.domain.model.BarcodeFormat.CODE128 -> BarcodeType.CODE128
@@ -257,7 +263,10 @@ class GpPrinterService @Inject constructor(
                     barcodeSetting.printRotation = PrintRotation.Rotate0
                     val qrSize = (element.size / 4).toInt().coerceIn(1, 15)
                     barcodeSetting.qrcodeDotSize = qrSize
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    // Ensure non-negative coordinates
+                    val xPos = mmToDots(element.x).coerceAtLeast(0)
+                    val yPos = mmToDots(element.y).coerceAtLeast(0)
+                    barcodeSetting.position = Position(xPos, yPos)
                     try {
                         cmd.append(cmd.getBarcodeCmd(BarcodeType.QR_CODE, barcodeSetting, element.content))
                     } catch (e: SdkException) {
@@ -265,10 +274,10 @@ class GpPrinterService @Inject constructor(
                     }
                 }
                 is LabelElement.Line -> {
-                    val x1 = mmToDots(element.x)
-                    val y1 = mmToDots(element.y)
-                    val x2 = mmToDots(element.x + element.width)
-                    val y2 = mmToDots(element.y + element.height)
+                    val x1 = mmToDots(element.x).coerceAtLeast(0)
+                    val y1 = mmToDots(element.y).coerceAtLeast(0)
+                    val x2 = mmToDots(element.x + element.width).coerceAtLeast(0)
+                    val y2 = mmToDots(element.y + element.height).coerceAtLeast(0)
                     // BOX: x1 y1 x2 y2 thickness
                     cmd.append("BOX $x1 $y1 $x2 $y2 1\r\n".toByteArray(Charsets.UTF_8))
                 }
@@ -395,6 +404,7 @@ class GpPrinterService @Inject constructor(
     /**
      * CPCL test page - aligned with SDK cpclPrint3() example
      * Uses SDK's TextSetting/BarcodeSetting/Position correctly
+     * NOTE: CPCL coordinates start from 0,0 (left-top corner of printable area)
      */
     private fun createCpclTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = CpclFactory()
@@ -408,14 +418,15 @@ class GpPrinterService @Inject constructor(
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        // Use dots for position (SDK convention), start from small values like SDK examples
-        var yPos = 10
+        // Use dots for position (SDK convention), start from 0 for left alignment
+        var yPos = 0
         val lineHeight = 30
+        val leftMargin = 0  // Start from left edge
 
         // Title
         val titleSetting = TextSetting()
         titleSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-        titleSetting.txtPrintPosition = Position(10, yPos)
+        titleSetting.txtPrintPosition = Position(leftMargin, yPos)
         titleSetting.printRotation = PrintRotation.Rotate0
         titleSetting.setxMultiplication(1)
         titleSetting.setyMultiplication(1)
@@ -430,19 +441,19 @@ class GpPrinterService @Inject constructor(
         normalSetting.setxMultiplication(1)
         normalSetting.setyMultiplication(1)
 
-        normalSetting.txtPrintPosition = Position(10, yPos)
+        normalSetting.txtPrintPosition = Position(leftMargin, yPos)
         cmd.append(cmd.getTextCmd(normalSetting, "设备: $deviceName", "GBK"))
         yPos += lineHeight
 
-        normalSetting.txtPrintPosition = Position(10, yPos)
+        normalSetting.txtPrintPosition = Position(leftMargin, yPos)
         cmd.append(cmd.getTextCmd(normalSetting, "协议: CPCL", "GBK"))
         yPos += lineHeight
 
-        normalSetting.txtPrintPosition = Position(10, yPos)
+        normalSetting.txtPrintPosition = Position(leftMargin, yPos)
         cmd.append(cmd.getTextCmd(normalSetting, "标签: ${width}x${height}mm", "GBK"))
         yPos += lineHeight
 
-        normalSetting.txtPrintPosition = Position(10, yPos)
+        normalSetting.txtPrintPosition = Position(leftMargin, yPos)
         cmd.append(cmd.getTextCmd(normalSetting, "密度: ${settings.printDensity} 速度: ${settings.printSpeed}", "GBK"))
         yPos += lineHeight + 10
 
@@ -453,7 +464,7 @@ class GpPrinterService @Inject constructor(
         barcodeSetting.wideInDot = 4
         barcodeSetting.heightInDot = 56
         barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
-        barcodeSetting.position = Position(10, yPos)
+        barcodeSetting.position = Position(leftMargin, yPos)
         try {
             cmd.append(cmd.getBarcodeCmd(BarcodeType.CODE128, barcodeSetting, "TEST123456"))
         } catch (e: SdkException) {
@@ -465,7 +476,7 @@ class GpPrinterService @Inject constructor(
         val qrSetting = BarcodeSetting()
         qrSetting.printRotation = PrintRotation.Rotate0
         qrSetting.qrcodeDotSize = 6
-        qrSetting.position = Position(10, yPos)
+        qrSetting.position = Position(leftMargin, yPos)
         try {
             cmd.append(cmd.getBarcodeCmd(BarcodeType.QR_CODE, qrSetting, "https://www.example.com"))
         } catch (e: SdkException) {
@@ -475,7 +486,7 @@ class GpPrinterService @Inject constructor(
 
         // Timestamp
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        normalSetting.txtPrintPosition = Position(10, yPos)
+        normalSetting.txtPrintPosition = Position(leftMargin, yPos)
         cmd.append(cmd.getTextCmd(normalSetting, "时间: $timestamp", "GBK"))
 
         // End command (SDK handles FORM/PRINT)
