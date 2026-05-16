@@ -27,25 +27,10 @@ android {
         multiDexEnabled = true
     }
 
-    signingConfigs {
-        create("release") {
-            val storeFilePath = System.getenv("KEYSTORE_FILE")
-            val storePasswordVal = System.getenv("KEY_STORE_PASSWORD")
-            val keyAliasVal = System.getenv("ALIAS")
-            val keyPasswordVal = System.getenv("KEY_PASSWORD")
-            if (storeFilePath != null && file(storeFilePath).exists()) {
-                storeFile = file(storeFilePath)
-                storePassword = storePasswordVal
-                keyAlias = keyAliasVal
-                keyPassword = keyPasswordVal
-            }
-        }
-    }
     buildTypes {
         release {
             isMinifyEnabled = false
             isShrinkResources = false
-            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

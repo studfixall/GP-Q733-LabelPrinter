@@ -31,12 +31,6 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x gradlew
 
-    - name: Decode keystore
-      if: github.event_name == 'push'
-      run: |
-        printf '%s' "${{ secrets.SIGNING_KEY }}" | base64 -d > app/keystore.jks
-        ls -la app/keystore.jks
-
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace 2>&1 | tail -200
       timeout-minutes: 30
@@ -48,19 +42,25 @@ jobs:
         name: debug-apk
         path: app/build/outputs/apk/debug/*.apk
 
-    - name: Build Release APK
-      if: github.event_name == 'push'
+    - name: Build Release APK (unsigned)
       run: ./gradlew assembleRelease --stacktrace 2>&1 | tail -200
-      env:
-        KEYSTORE_FILE: app/keystore.jks
-        KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
-        ALIAS: ${{ secrets.ALIAS }}
-        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       timeout-minutes: 30
+
+    - name: Sign Release APK
+      uses: r0adkll/sign-android-release@v1
+      id: sign_release
+      with:
+        releaseDirectory: app/build/outputs/apk/release
+        signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+        alias: ${{ secrets.ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
+      env:
+        BUILD_TOOLS_VERSION: "34.0.0"
 
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
-      if: github.event_name == 'push' && success()
+      if: success()
       with:
         name: release-apk
-        path: app/build/outputs/apk/release/*.apk
+        path: ${{ steps.sign_release.outputs.signedReleaseFile }}
