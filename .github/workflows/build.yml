@@ -38,11 +38,8 @@ jobs:
         java -version
         ./gradlew --version
       
-    - name: Clean build
-      run: ./gradlew clean
-      
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace --info 2>&1 | head -500
+      run: ./gradlew assembleDebug --stacktrace 2>&1 | tail -200
       timeout-minutes: 30
       
     - name: Upload Debug APK
@@ -53,7 +50,7 @@ jobs:
         path: app/build/outputs/apk/debug/*.apk
         
     - name: Build Release APK
-      run: ./gradlew assembleRelease --stacktrace 2>&1 | head -500
+      run: ./gradlew assembleRelease --stacktrace 2>&1 | tail -200
       if: success()
       timeout-minutes: 30
       
