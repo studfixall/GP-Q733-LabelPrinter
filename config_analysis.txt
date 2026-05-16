@@ -1,0 +1,73 @@
+=== UniApp Configuration Analysis ===
+
+=== manifest.json ===
+Name: 管e通
+Version: N/A (N/A)
+Description: 管e通
+
+Permissions:
+  Bluetooth
+  Webview-x5
+  SQLite
+  Maps
+  Geolocation
+  Contacts
+  Push
+  Barcode
+  Payment
+  Share
+  Camera
+  FacialRecognitionVerify
+  Record
+  OAuth
+  Speech
+  LivePusher
+  UniNView
+
+=== dcloud_url.json ===
+{
+  "version": "0.1.1",
+  "data": {}
+}
+
+=== dcloud_control.xml ===
+<?xml version="1.0"?>
+<hbuilder version="1.9.9.81924" ns="true" authority="*" auxiliary="false" gv="eaaec9f6e656fb9b6eec4ce15759285605c388ee"><apps><app appid="__UNI__092D5A7" appver="400.02.072"/></apps><lia>NcnBDcMwCEDRXThXDJBtSKAWiQErjtVWVXcvB0f60j+8L1wrLLCF4UWxUszBA3aesKsXDi9IraFRrYmNb30PN0ls6jwiS+XPxN6RnM9QxlE2pJeYpB/9dtMqWPRpdMgJvz8=</lia></hbuilder>
+
+
+=== dcloud_properties.xml ===
+<?xml version="1.0" encoding="utf-8"?>
+<properties>
+  <features><feature name="Contacts" value="io.dcloud.feature.contacts.ContactsFeatureImpl"/>
+<feature name="Console" value="io.dcloud.feature.pdr.LoggerFeatureImpl"/>
+<feature name="Device" value="io.dcloud.feature.device.DeviceFeatureImpl"/>
+<feature name="File" value="io.dcloud.js.file.FileFeatureImpl"/>
+<feature name="Proximity" value="io.dcloud.feature.sensor.ProximityFeatureImpl"/>
+<feature name="Storage" value="io.dcloud.feature.pdr.NStorageFeatureImpl"/>
+<feature name="Cache" value="io.dcloud.feature.pdr.CoreCacheFeatureImpl"/>
+<feature name="Invocation" value="io.dcloud.invocation.Invocation"/>
+<feature name="Navigator" value="io.dcloud.feature.ui.navigator.NavigatorUIFeatureImpl"/>
+<feature name="NativeUI" value="io.dcloud.feature.ui.nativeui.NativeUIFeatureImpl"/>
+<feature name="UI" value="io.dcloud.feature.ui.UIFeatureImpl"><module name="Navigator" value="io.dcloud.feature.ui.NavView"/></feature>
+<feature name="Gallery" value="io.dcloud.js.gallery.GalleryFeatureImpl"/>
+<feature name="Downloader" value="io.dcloud.net.DownloaderFeatureImpl"/>
+<feature name="Uploader" value="io.dcloud.net.UploadFeature"/>
+<feature name="Audio" value="io.dcloud.feature.audio.AudioFeatureImpl"/>
+<feature name="Runtime" value="io.dcloud.feature.pdr.RuntimeFeatureImpl"/>
+<feature name="XMLHttpRequest" value="io.dcloud.net.XMLHttpRequestFeature"/>
+<feature name="Accelerometer" value="io.dcloud.feature.sensor.AccelerometerFeatureImpl"/>
+<feature name="Orientation" value="io.dcloud.feature.sensor.OrientationFeatureImpl"/>
+<feature name="NativeObj" value="io.dcloud.feature.nativeObj.FeatureImpl"/>
+<feature name="Geolocation" value="io.dcloud.js.geolocation.GeolocationFeatureImpl"/>
+<feature name="Stream" value="io.dcloud.appstream.js.StreamAppFeatureImpl"/>
+<feature name="Zip" value="io.dcloud.feature.pdr.ZipFeature"/>
+<feature name="Bluetooth" value="io.dcloud.feature.bluetooth.BluetoothFeature"/>
+<feature name="Sqlite" value="
+
+=== API Endpoints from app-service.js ===
+Found 3 unique URLs:
+  http://mbm.enjoyit.com.cn
+  http://momentjs.com/guides/
+  https://www.enjoyit.com.cn
+
+=== API Patterns ===

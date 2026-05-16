@@ -1,0 +1,137 @@
+=== Deep APK Analysis ===
+
+=== Config Files ===
+  META-INF/com/android/build/gradle/app-metadata.properties
+  assets/apps/__UNI__092D5A7/www/manifest.json
+  assets/apps/__UNI__092D5A7/www/static/font/CommonIcon/iconfont.json
+  assets/data/dcloud_configs.json
+  assets/data/dcloud_control.xml
+  assets/data/dcloud_properties.xml
+  assets/data/dcloud_url.json
+  assets/dcloud_uniplugins.json
+  assets/grs_sdk_global_route_config_mlkit.json
+  assets/grs_sdk_global_route_config_opendevicesdk.json
+  assets/grs_sdk_global_route_config_opensdkService.json
+  assets/grs_sdk_server_config.json
+  assets/supplierconfig.json
+  HMSCore-availableupdate.properties
+  HMSCore-base.properties
+  HMSCore-baselegacyapi.properties
+  HMSCore-device.properties
+  HMSCore-hatool.properties
+  HMSCore-log.properties
+  HMSCore-stats.properties
+  HMSCore-ui.properties
+  agconnect-core.properties
+  assets/ae/GNaviConfig.xml
+  assets/map_assets/3dlandscape.xml
+  assets/map_assets/3dportrait.xml
+  kotlin-tooling-metadata.json
+  network-common.properties
+  network-framework-compat.properties
+  network-grs.properties
+  AndroidManifest.xml
+
+=== JavaScript Files (UniApp) ===
+Total JS files: 526
+  assets/apps/__UNI__092D5A7/www/__uniappchooselocation.js
+  assets/apps/__UNI__092D5A7/www/__uniappes6.js
+  assets/apps/__UNI__092D5A7/www/__uniappopenlocation.js
+  assets/apps/__UNI__092D5A7/www/__uniapppicker.js
+  assets/apps/__UNI__092D5A7/www/__uniappquill.js
+  assets/apps/__UNI__092D5A7/www/__uniappquillimageresize.js
+  assets/apps/__UNI__092D5A7/www/__uniappscan.js
+  assets/apps/__UNI__092D5A7/www/app-config-service.js
+  assets/apps/__UNI__092D5A7/www/app-config.js
+  assets/apps/__UNI__092D5A7/www/app-service.js
+
+=== Native Libraries (.so) ===
+  lib/arm64-v8a/lib39285EFA.so
+  lib/arm64-v8a/libAMapSDK_MAP_v9_5_0.so
+  lib/arm64-v8a/libAPSE_7.0.1.so
+  lib/arm64-v8a/libAPSE_J.so
+  lib/arm64-v8a/libTRAECodec.so
+  lib/arm64-v8a/libaliyunaf.so
+  lib/arm64-v8a/libbreakpad-core.so
+  lib/arm64-v8a/libc++_shared.so
+  lib/arm64-v8a/libdcblur.so
+  lib/arm64-v8a/libenc.so
+  lib/arm64-v8a/libgifimage.so
+  lib/arm64-v8a/libimagepipeline.so
+  lib/arm64-v8a/liblamemp3.so
+  lib/arm64-v8a/libliteavsdk.so
+  lib/arm64-v8a/libmsoptimize.so
+  lib/arm64-v8a/libnative-filters.so
+  lib/arm64-v8a/libnative-imagetranscoder.so
+  lib/arm64-v8a/libpl_droidsonroids_gif.so
+  lib/arm64-v8a/libsaturn.so
+  lib/arm64-v8a/libscannative.so
+  lib/arm64-v8a/libsecuritydevice.so
+  lib/arm64-v8a/libstatic-webp.so
+  lib/arm64-v8a/libstlport_shared.so
+  lib/arm64-v8a/libtoyger.so
+  lib/arm64-v8a/libtraeimp-rtmp.so
+  lib/arm64-v8a/libtxffmpeg.so
+  lib/arm64-v8a/libweexcore.so
+  lib/arm64-v8a/libweexjsb.so
+  lib/arm64-v8a/libweexjss.so
+  lib/arm64-v8a/libweexjst.so
+  lib/arm64-v8a/libyuv.so
+  lib/arm64-v8a/libzkfv_tj.so
+  lib/armeabi-v7a/lib39285EFA.so
+  lib/armeabi-v7a/libAMapSDK_MAP_v9_5_0.so
+  lib/armeabi-v7a/libAPSE_7.0.1.so
+  lib/armeabi-v7a/libAPSE_J.so
+  lib/armeabi-v7a/libTRAECodec.so
+  lib/armeabi-v7a/libaliyunaf.so
+  lib/armeabi-v7a/libbreakpad-core.so
+  lib/armeabi-v7a/libc++_shared.so
+  lib/armeabi-v7a/libdcblur.so
+  lib/armeabi-v7a/libenc.so
+  lib/armeabi-v7a/libgifimage.so
+  lib/armeabi-v7a/libimagepipeline.so
+  lib/armeabi-v7a/liblamemp3.so
+  lib/armeabi-v7a/libliteavsdk.so
+  lib/armeabi-v7a/libnative-filters.so
+  lib/armeabi-v7a/libnative-imagetranscoder.so
+  lib/armeabi-v7a/libpl_droidsonroids_gif.so
+  lib/armeabi-v7a/libsaturn.so
+  lib/armeabi-v7a/libscannative.so
+  lib/armeabi-v7a/libsecuritydevice.so
+  lib/armeabi-v7a/libstatic-webp.so
+  lib/armeabi-v7a/libstlport_shared.so
+  lib/armeabi-v7a/libtoyger.so
+  lib/armeabi-v7a/libtraeimp-rtmp.so
+  lib/armeabi-v7a/libtxffmpeg.so
+  lib/armeabi-v7a/libweexcore.so
+  lib/armeabi-v7a/libweexjsb.so
+  lib/armeabi-v7a/libweexjss.so
+  lib/armeabi-v7a/libweexjst.so
+  lib/armeabi-v7a/libyuv.so
+  lib/armeabi-v7a/libzkfv_tj.so
+
+=== Certificate ===
+MANIFEST.MF found
+  Certificate: META-INF/CERT.RSA
+
+=== Interesting Files ===
+  assets/apps/__UNI__092D5A7/www/app-config-service.js
+  assets/apps/__UNI__092D5A7/www/app-config.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/ChangePassWord.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/ChangePassWord.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/ChangeUserPassWord.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/ChangeUserPassWord.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/MyInforSetting.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/MyInforSetting.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/MyInforSettingNew.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Home/MyInforSettingNew.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/SettingNew.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/SettingNew.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/SettingNew_copy.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/SettingNew_copy.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/setting.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/Login/setting.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/SignIn/AddSettingSignIn.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/SignIn/AddSettingSignIn.js
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/SignIn/MoreSetting.html
+  assets/apps/__UNI__092D5A7/www/hybrid/html/OaViews/SignIn/SettingSignIn.html

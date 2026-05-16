@@ -1,0 +1,61 @@
+管e通 APK 蓝牙问题修复方案摘要
+================================
+
+## 问题定位
+
+1. **权限已声明** ✅
+   - AndroidManifest.xml 中已声明 4 个蓝牙权限：
+     * BLUETOOTH
+     * BLUETOOTH_ADMIN
+     * BLUETOOTH_SCAN
+     * BLUETOOTH_CONNECT
+
+2. **JS 代码问题** ⚠️
+   - 发现自定义封装函数 webBluetoothDevice
+   - 可能未正确调用底层蓝牙 API
+   - 缺少动态权限申请
+   - 缺少蓝牙状态监听
+
+## 修复方案
+
+### 1. 添加权限检查函数
+```javascript
+async function checkBluetoothPermissions() {
+    if (uni.getSystemInfoSync().platform !== 'android') return true;
+    
+    const permissions = [
+        'android.permission.BLUETOOTH',
+        'android.permission.BLUETOOTH_ADMIN',
+        'android.permission.BLUETOOTH_SCAN',
+        'android.permission.BLUETOOTH_CONNECT'
+    ];
+    
+    for (const permission of permissions) {
+        const result = await uni.authorize({ scope: permission });
+        if (!result) return false;
+    }
+    return true;
+}
+```
+
+### 2. 添加蓝牙适配器初始化
+```javascript
+function initBluetoothAdapter() {
+    uni.openBluetoothAdapter({
+        success: () => console.log('蓝牙适配器初始化成功'),
+        fail: (err) => console.error('蓝牙适配器初始化失败:', err)
+    });
+}
+```
+
+### 3. 添加状态监听
+```javascript
+uni.onBluetoothAdapterStateChange((res) => {
+    console.log('蓝牙状态变化:', res.available ? '可用' : '不可用');
+});
+```
+
+## 详细报告
+完整修复报告见：bluetooth_fix_report.md
+
+生成时间：2026-05-06 09:35

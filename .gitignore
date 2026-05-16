@@ -1,0 +1,82 @@
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio
+*.iml
+.idea/
+.navigation/
+captures/
+output.json
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+.cxx/
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Android Profiling
+*.hprof
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# APK work files
+apk_work/
+apk_extracted/
+apk_signer_tool/
+*.apk
+
+# Temp files
+*.tmp
+%TEMP%/
+
+# OpenClaw state
+.openclaw/
+.consolidate-state.json
+
+# Large tool directories
+apktools/
+decompiled/
+LabelPrinter/
+jdk-extract/
+gradle-extract/
+
+# JDK and Gradle extracted files (large binaries)
+*.tar.gz
+*.zip
+*.7z
+*.exe
+*.msi
+*.dll
+*.so
+*.dylib
+
+# Build outputs
+*.apk
+*.aab
+*.jar
+*.aar
+
+# Documentation and reports
+task-summary_*.md
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Analysis reports
+*.md
+task-summary_*.txt

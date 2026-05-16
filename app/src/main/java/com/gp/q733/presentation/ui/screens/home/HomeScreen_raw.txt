@@ -1,0 +1,498 @@
+﻿package com.gp.q733.presentation.ui.screens.home
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.gp.q733.domain.model.Label
+import com.gp.q733.presentation.viewmodel.HomeViewModel
+import com.gp.q733.presentation.viewmodel.PrinterStatus
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    onNavigateToDevice: () -> Unit,
+    onNavigateToEditor: (templateId: String, width: Float?, height: Float?) -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onEditLabel: (Label) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    
+    // 鏂板缓鏍囩瀵硅瘽妗嗙姸鎬?    var showNewLabelDialog by remember { mutableStateOf(false) }
+    var labelWidth by remember { mutableStateOf("50") }
+    var labelHeight by remember { mutableStateOf("30") }
+    var showScanDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("GP-Q733 鏍囩鎵撳嵃") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Status Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "鎵撳嵃鏈虹姸鎬?,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = when (uiState.printerStatus) {
+                                PrinterStatus.Connected -> Icons.Default.CheckCircle
+                                PrinterStatus.Connecting -> Icons.Default.Sync
+                                PrinterStatus.Disconnected -> Icons.Default.LinkOff
+                                PrinterStatus.Error -> Icons.Default.Error
+                            },
+                            contentDescription = null,
+                            tint = when (uiState.printerStatus) {
+                                PrinterStatus.Connected -> MaterialTheme.colorScheme.primary
+                                PrinterStatus.Connecting -> MaterialTheme.colorScheme.tertiary
+                                PrinterStatus.Disconnected -> MaterialTheme.colorScheme.outline
+                                PrinterStatus.Error -> MaterialTheme.colorScheme.error
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = when (uiState.printerStatus) {
+                                PrinterStatus.Connected -> "宸茶繛鎺?
+                                PrinterStatus.Connecting -> "杩炴帴涓?.."
+                                PrinterStatus.Disconnected -> "鏈繛鎺?
+                                PrinterStatus.Error -> "杩炴帴閿欒"
+                            },
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+
+            // Quick Actions
+            Text(
+                text = "蹇嵎鎿嶄綔",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Bluetooth,
+                    label = "杩炴帴璁惧",
+                    onClick = onNavigateToDevice
+                )
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Add,
+                    label = "鏂板缓鏍囩",
+                    onClick = { showNewLabelDialog = true }
+                )
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵爜鎵撳嵃",
+                    onClick = { showScanDialog = true }
+                )
+            }
+
+            // 鎵弿鏉＄爜鎸夐挳
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵弿鏉＄爜",
+                    onClick = { showScanDialog = true }
+                )
+                // 鍗犱綅鎸夐挳淇濇寔甯冨眬涓€鑷?                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            // 鎵爜鎵撳嵃鎸夐挳
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵爜鎵撳嵃",
+                    onClick = { showScanDialog = true }
+                )
+            }
+
+            // 鎵弿鍒涘缓鎸夐挳
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵弿鍒涘缓",
+                    onClick = { showScanDialog = true }
+                )
+                // 鍗犱綅锛屼繚鎸佸榻?                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            // Scan Barcode Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵爜鍒涘缓",
+                    onClick = { showScanDialog = true }
+                )
+                // 鍗犱綅淇濇寔瀵归綈
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            // 鎵弿鍟嗗搧鏉＄爜鎸夐挳
+            ActionButton(
+                modifier = Modifier.fillMaxWidth(),
+                icon = Icons.Default.QrCodeScanner,
+                label = "鎵弿鍟嗗搧鏉＄爜",
+                onClick = { showScanDialog = true }
+            )
+
+            // 鎵弿鍒涘缓鎸夐挳
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵弿鍒涘缓",
+                    onClick = { showScanDialog = true }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.QrCodeScanner,
+                    label = "鎵弿鏉＄爜",
+                    onClick = { showScanDialog = true }
+                )
+            }
+
+            // Saved Labels Section
+            if (uiState.recentLabels.isNotEmpty()) {
+                Text(
+                    text = "宸蹭繚瀛樻爣绛?,
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    uiState.recentLabels.take(5).forEach { label ->
+                        SavedLabelCard(
+                            label = label,
+                            onClick = { onEditLabel(label) },
+                            onDelete = { viewModel.deleteLabel(label) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Templates
+            Text(
+                text = "鏍囩妯℃澘",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                uiState.templates.forEach { template ->
+                    TemplateCard(
+                        name = template.name,
+                        description = template.description,
+                        icon = when (template.id) {
+                            "express" -> Icons.Default.LocalShipping
+                            "product" -> Icons.Default.Inventory
+                            "price" -> Icons.Default.AttachMoney
+                            else -> Icons.Default.Label
+                        },
+                        onClick = { onNavigateToEditor(template.id, null, null) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Settings Button
+            OutlinedButton(
+                onClick = onNavigateToSettings,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("璁剧疆")
+            }
+        }
+    }
+    
+    // 鏂板缓鏍囩瀵硅瘽妗?    if (showNewLabelDialog) {
+        AlertDialog(
+            onDismissRequest = { showNewLabelDialog = false },
+            title = { Text("鏂板缓鏍囩") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text("璇疯缃爣绛惧昂瀵革紙姣背锛?)
+                    
+                    // 瀹藉害杈撳叆
+                    OutlinedTextField(
+                        value = labelWidth,
+                        onValueChange = { labelWidth = it.filter { c -> c.isDigit() } },
+                        label = { Text("瀹藉害 (mm)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        suffix = { Text("mm") }
+                    )
+                    
+                    // 楂樺害杈撳叆
+                    OutlinedTextField(
+                        value = labelHeight,
+                        onValueChange = { labelHeight = it.filter { c -> c.isDigit() } },
+                        label = { Text("楂樺害 (mm)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        suffix = { Text("mm") }
+                    )
+                    
+                    // 甯哥敤灏哄蹇嵎閫夋嫨
+                    Text(
+                        text = "甯哥敤灏哄锛?,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SuggestionChip(
+                            onClick = { 
+                                labelWidth = "30"
+                                labelHeight = "20"
+                            },
+                            label = { Text("30脳20") }
+                        )
+                        SuggestionChip(
+                            onClick = { 
+                                labelWidth = "40"
+                                labelHeight = "30"
+                            },
+                            label = { Text("40脳30") }
+                        )
+                        SuggestionChip(
+                            onClick = { 
+                                labelWidth = "50"
+                                labelHeight = "30"
+                            },
+                            label = { Text("50脳30") }
+                        )
+                        SuggestionChip(
+                            onClick = { 
+                                labelWidth = "60"
+                                labelHeight = "40"
+                            },
+                            label = { Text("60脳40") }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val width = labelWidth.toFloatOrNull() ?: 50f
+                        val height = labelHeight.toFloatOrNull() ?: 30f
+                        showNewLabelDialog = false
+                        // 鐩存帴浼犻€掑昂瀵稿弬鏁帮紝涓嶄緷璧朧iewModel鐘舵€?                        onNavigateToEditor("new", width.coerceIn(10f, 100f), height.coerceIn(10f, 100f))
+                    }
+                ) {
+                    Text("鍒涘缓")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showNewLabelDialog = false }
+                ) {
+                    Text("鍙栨秷")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun SavedLabelCard(
+    modifier: Modifier = Modifier,
+    label: Label,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Label,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "鏍囩 ${label.widthMm.toInt()}脳${label.heightMm.toInt()}mm",
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = "${label.elements.size} 涓厓绱?,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "鍒犻櫎",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TemplateCard(
+    modifier: Modifier = Modifier,
+    name: String,
+    description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActionButton(
+    modifier: Modifier = Modifier,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    ElevatedButton(
+        onClick = onClick,
+        modifier = modifier.height(80.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+    }
+}
+
