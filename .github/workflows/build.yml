@@ -7,6 +7,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,19 +45,20 @@ jobs:
         name: debug-apk
         path: app/build/outputs/apk/debug/*.apk
 
-    - name: Build Release APK (unsigned)
+    - name: Build Release APK
       run: ./gradlew assembleRelease --stacktrace
       timeout-minutes: 30
 
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1
       id: sign_release
+      if: success()
       with:
         releaseDirectory: app/build/outputs/apk/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
         alias: ${{ secrets.ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+        keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
       env:
         BUILD_TOOLS_VERSION: "34.0.0"
 
