@@ -7,7 +7,6 @@ import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.PrinterDevice
 import com.gp.q733.domain.print.GpPrinterService
 import com.gp.q733.domain.print.PrintProtocol
-import com.gp.q733.domain.print.PrintService
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +33,6 @@ data class DeviceUiState(
 @HiltViewModel
 class DeviceViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
-    private val printService: PrintService,
     private val gpPrinterService: GpPrinterService,
     private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
@@ -75,7 +73,6 @@ class DeviceViewModel @Inject constructor(
                 errorMessage = null
             )
             bluetoothRepository.startScan()
-
             scanTimeoutJob?.cancel()
             scanTimeoutJob = viewModelScope.launch {
                 delay(12000L)
@@ -99,22 +96,17 @@ class DeviceViewModel @Inject constructor(
 
     fun connect() {
         val device = _uiState.value.selectedDevice ?: return
-
         viewModelScope.launch {
             stopScan()
             _uiState.value = _uiState.value.copy(errorMessage = null)
-
             val btDevice = device.device
             connectedDevice = btDevice
 
-            // Try GpPrinterService first (official SDK)
             val gpResult = gpPrinterService.connect(btDevice)
             if (gpResult.isSuccess) {
-                // SDK connected successfully — also update repository state for UI
                 bluetoothRepository.connect(device)
                 android.util.Log.d("PrintDebug", "Connected via GpPrinterService (SDK)")
             } else {
-                // SDK failed, try legacy connection
                 val legacyResult = bluetoothRepository.connect(device)
                 if (legacyResult.isFailure) {
                     _uiState.value = _uiState.value.copy(
@@ -146,49 +138,37 @@ class DeviceViewModel @Inject constructor(
 
     fun printTestPage() {
         val device = _uiState.value.selectedDevice ?: return
-
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isPrinting = true,
                 printResult = null
             )
 
-            val settings = settingsDataStore.settingsFlow.first()
-            android.util.Log.d("PrintDebug", "Current protocol from settings: ${settings.printProtocol}")
-            android.util.Log.d("PrintDebug", "Density: ${settings.printDensity}, Speed: ${settings.printSpeed}, Gap: ${settings.gapMm}")
-
-            // Always reconnect before printing - SDK connection is not persistent
             val btDevice = connectedDevice ?: bluetoothRepository.getConnectedDevice()
-            android.util.Log.d("PrintDebug", "BT Device: $btDevice, local connectedDevice: $connectedDevice")
-
             val result = if (btDevice != null) {
                 android.util.Log.d("PrintDebug", "Connecting GpPrinterService for test print")
-                // Disconnect first to ensure clean state
                 gpPrinterService.disconnect()
-                // Connect and print
                 val connectResult = gpPrinterService.connect(btDevice)
                 if (connectResult.isSuccess) {
                     val printResult = gpPrinterService.printTestPage(device.name)
-                    // Disconnect after printing
                     gpPrinterService.disconnect()
                     printResult
                 } else {
                     Result.failure(connectResult.exceptionOrNull() ?: Exception("Connection failed"))
                 }
             } else {
-                android.util.Log.d("PrintDebug", "No device available, using legacy PrintService")
-                printService.printTestPage(device.name)
+                Result.failure(Exception("No Bluetooth device connected"))
             }
 
             result.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "测试页打印成功"
+                    printResult = "Test page printed successfully"
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "打印失败: ${error.message}"
+                    printResult = "Print failed: ${error.message}"
                 )
             }
         }

@@ -524,18 +524,20 @@ class GpPrinterService @Inject constructor(
         cmd.append(cmd.headerCmd)
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        var yPos = 40
-        val lineHeight = 40
+        // Use mm-based positioning consistent with label editor
+        var yPosMm = 5f // Start 5mm from top
+        val lineHeightMm = 5f // 5mm line height
+        val leftMarginMm = 10f // 10mm left margin
 
         // Title
         val titleSetting = TextSetting()
         titleSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
-        titleSetting.txtPrintPosition = Position(80, yPos)
+        titleSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         titleSetting.printRotation = PrintRotation.Rotate0
         titleSetting.setxMultiplication(1)
         titleSetting.setyMultiplication(1)
         cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 测试页", "GBK"))
-        yPos += lineHeight + 20
+        yPosMm += lineHeightMm + 3f
 
         // Device info
         val normalSetting = TextSetting()
@@ -544,42 +546,42 @@ class GpPrinterService @Inject constructor(
         normalSetting.setxMultiplication(1)
         normalSetting.setyMultiplication(1)
 
-        normalSetting.txtPrintPosition = Position(80, yPos)
+        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         cmd.append(cmd.getTextCmd(normalSetting, "设备: $deviceName", "GBK"))
-        yPos += lineHeight
+        yPosMm += lineHeightMm
 
-        normalSetting.txtPrintPosition = Position(80, yPos)
+        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         cmd.append(cmd.getTextCmd(normalSetting, "协议: TSPL", "GBK"))
-        yPos += lineHeight
+        yPosMm += lineHeightMm
 
-        normalSetting.txtPrintPosition = Position(80, yPos)
+        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         cmd.append(cmd.getTextCmd(normalSetting, "标签: ${width}x${height}mm", "GBK"))
-        yPos += lineHeight
+        yPosMm += lineHeightMm
 
-        normalSetting.txtPrintPosition = Position(80, yPos)
+        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         cmd.append(cmd.getTextCmd(normalSetting, "密度: ${settings.printDensity} 速度: ${settings.printSpeed}", "GBK"))
-        yPos += lineHeight + 20
+        yPosMm += lineHeightMm + 3f
 
         // Test barcode
         val barcodeSetting = BarcodeSetting()
         barcodeSetting.narrowInDot = 2
         barcodeSetting.wideInDot = 4
-        barcodeSetting.heightInDot = 60
+        barcodeSetting.heightInDot = mmToDots(10f) // 10mm height
         barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
         barcodeSetting.printRotation = PrintRotation.Rotate0
-        barcodeSetting.position = Position(80, yPos)
+        barcodeSetting.position = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         try {
             cmd.append(cmd.getBarcodeCmd(BarcodeType.CODE128, barcodeSetting, "TEST123456"))
         } catch (e: SdkException) {
             android.util.Log.e("PrintDebug", "TSPL test barcode error: ${e.message}")
         }
-        yPos += 80
+        yPosMm += 15f
 
         // Test QR
         val qrSetting = BarcodeSetting()
         qrSetting.qrcodeDotSize = 6
         qrSetting.printRotation = PrintRotation.Rotate0
-        qrSetting.position = Position(80, yPos)
+        qrSetting.position = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         try {
             cmd.append(cmd.getBarcodeCmd(BarcodeType.QR_CODE, qrSetting, "https://www.example.com"))
         } catch (e: SdkException) {
@@ -588,7 +590,7 @@ class GpPrinterService @Inject constructor(
 
         // Timestamp
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        normalSetting.txtPrintPosition = Position(80, yPos + 100)
+        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm + 15f))
         cmd.append(cmd.getTextCmd(normalSetting, "时间: $timestamp", "GBK"))
 
         try {
