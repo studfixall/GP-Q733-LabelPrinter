@@ -22,10 +22,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * 扫码商品打印 ViewModel
- * 处理扫码 → 查询商品 → 填充模板 → 打印的流程
- */
 data class ScanProductUiState(
     val barcode: String = "",
     val product: ProductInfo? = null,
@@ -36,12 +32,7 @@ data class ScanProductUiState(
     val printStatus: PrintStatus = PrintStatus.Idle
 )
 
-enum class PrintStatus {
-    Idle,
-    Printing,
-    Success,
-    Failed
-}
+enum class PrintStatus { Idle, Printing, Success, Failed }
 
 @HiltViewModel
 class ScanProductViewModel @Inject constructor(
@@ -62,9 +53,6 @@ class ScanProductViewModel @Inject constructor(
             initialValue = ConnectionState.Disconnected
         )
 
-    /**
-     * 处理扫码结果
-     */
     fun onBarcodeScanned(barcode: String) {
         _uiState.value = _uiState.value.copy(
             barcode = barcode,
@@ -73,19 +61,13 @@ class ScanProductViewModel @Inject constructor(
             product = null,
             filledLabel = null
         )
-        
-        // 查询商品信息
         queryProduct(barcode)
     }
 
-    /**
-     * 查询商品信息
-     */
     private fun queryProduct(barcode: String) {
         viewModelScope.launch {
             try {
                 val product = productRepository.getProductByBarcode(barcode)
-                
                 if (product != null) {
                     _uiState.value = _uiState.value.copy(
                         product = product,
@@ -95,27 +77,21 @@ class ScanProductViewModel @Inject constructor(
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "未找到商品信息，请检查条码是否正确"
+                        error = "\u672a\u627e\u5230\u5546\u54c1\u4fe1\u606f\uff0c\u8bf7\u68c0\u67e5\u6761\u7801\u662f\u5426\u6b63\u786e"
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "查询失败: ${e.message}"
+                    error = "\u67e5\u8be2\u5931\u8d25: ${e.message}"
                 )
             }
         }
     }
 
-    /**
-     * 填充模板并预览
-     */
     fun fillTemplateAndPreview(template: LabelTemplate) {
         val product = _uiState.value.product ?: return
-        
-        // 使用模板填充器填充标签
         val filledLabel = LabelTemplateFiller.fillTemplate(template.label, product)
-        
         _uiState.value = _uiState.value.copy(
             filledLabel = filledLabel,
             showFillPreview = true
@@ -123,105 +99,69 @@ class ScanProductViewModel @Inject constructor(
     }
 
     /**
-     * 打印填充后的标签
+     * Print filled label - GpPrinterService handles reconnection internally
+     * FIX: No longer checks isConnected() + getConnectedDevice() separately
+     * GpPrinterService.print() now auto-reconnects using lastConnectedMac
      */
     fun printFilledLabel() {
         val filledLabel = _uiState.value.filledLabel ?: return
-        
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Printing)
-            
             try {
-                // 保存打印记录
                 labelDataStore.saveLabel(filledLabel)
-                
-                // 检查打印机连接状态
-                if (!gpPrinterService.isConnected()) {
-                    // 尝试获取已连接设备并重新连接
-                    val btDevice = bluetoothRepository.getConnectedDevice()
-                    if (btDevice != null) {
-                        val connectResult = gpPrinterService.connect(btDevice)
-                        if (connectResult.isFailure) {
-                            _uiState.value = _uiState.value.copy(
-                                printStatus = PrintStatus.Failed,
-                                error = "打印机连接失败: ${connectResult.exceptionOrNull()?.message}"
-                            )
-                            return@launch
-                        }
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            printStatus = PrintStatus.Failed,
-                            error = "打印机未连接"
-                        )
-                        return@launch
-                    }
-                }
-                
-                // 执行打印
+
+                // GpPrinterService.print() handles reconnection internally
                 val result = gpPrinterService.print(filledLabel)
-                
                 result.onSuccess {
                     _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Success)
                 }.onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         printStatus = PrintStatus.Failed,
-                        error = "打印失败: ${error.message}"
+                        error = "\u6253\u5370\u5931\u8d25: ${error.message}"
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     printStatus = PrintStatus.Failed,
-                    error = "打印异常: ${e.message}"
+                    error = "\u6253\u5370\u5f02\u5e38: ${e.message}"
                 )
             }
         }
     }
 
-    /**
-     * 重置状态，准备下一次扫码
-     */
     fun reset() {
         _uiState.value = ScanProductUiState()
     }
 
-    /**
-     * 手动输入条码
-     */
     fun onManualBarcodeEntered(barcode: String) {
         onBarcodeScanned(barcode)
     }
 
-    /**
-     * 设置错误信息
-     */
     fun setError(message: String) {
         _uiState.value = _uiState.value.copy(error = message)
     }
 
-    /**
-     * 获取可用的商品模板
-     */
     fun getProductTemplates(): List<LabelTemplate> {
         return listOf(
             LabelTemplate(
                 id = "product_scan",
-                name = "商品标签",
-                description = "扫码商品标签模板",
+                name = "\u5546\u54c1\u6807\u7b7e",
+                description = "\u626b\u7801\u5546\u54c1\u6807\u7b7e\u6a21\u677f",
                 label = Label(
                     id = "template_product_scan",
                     widthMm = 50f,
                     heightMm = 30f,
                     elements = listOf(
                         LabelElement.Text(x = 2f, y = 2f, text = TemplateFields.PRODUCT_NAME, fontSize = 10f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 10f, text = "价格: ${TemplateFields.PRICE}", fontSize = 8f, isBold = false),
+                        LabelElement.Text(x = 2f, y = 10f, text = "\u4ef7\u683c: ${TemplateFields.PRICE}", fontSize = 8f, isBold = false),
                         LabelElement.Barcode(x = 2f, y = 18f, content = TemplateFields.BARCODE, format = BarcodeFormat.CODE128, height = 8f)
                     )
                 )
             ),
             LabelTemplate(
                 id = "price_scan",
-                name = "价格标签",
-                description = "扫码价格标签模板",
+                name = "\u4ef7\u683c\u6807\u7b7e",
+                description = "\u626b\u7801\u4ef7\u683c\u6807\u7b7e\u6a21\u677f",
                 label = Label(
                     id = "template_price_scan",
                     widthMm = 40f,

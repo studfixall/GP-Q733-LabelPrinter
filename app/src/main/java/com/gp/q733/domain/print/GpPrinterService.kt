@@ -43,12 +43,12 @@ class GpPrinterService @Inject constructor(
     companion object {
         private const val DPI = 203
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
-        // CPCL left margin offset in dots (some printers have printable area offset)
-        private const val CPCL_LEFT_MARGIN_DOTS = 0
     }
 
     private var rtPrinter: RTPrinter<*>? = null
     private var currentDevice: BluetoothDevice? = null
+    /** Last connected device MAC address - survives disconnect for reconnection */
+    private var lastConnectedMac: String? = null
 
     /**
      * Connect to Bluetooth printer using official SDK
@@ -63,7 +63,9 @@ class GpPrinterService @Inject constructor(
 
             // Disconnect if connected to different device
             disconnect()
+
             currentDevice = device
+            lastConnectedMac = device.address
 
             // Get current protocol type
             val settings = settingsDataStore.settingsFlow.first()
@@ -86,73 +88,101 @@ class GpPrinterService @Inject constructor(
             val printerInterface = bluetoothFactory.create()
             printerInterface.setConfigObject(bluetoothEdrConfigBean)
 
-            // Connect (async - need to wait)
+            // Connect
             rtPrinter?.setPrinterInterface(printerInterface)
             rtPrinter?.connect(bluetoothEdrConfigBean)
 
             android.util.Log.d("PrintDebug", "GpPrinterService.connect() - device: ${device.name}, address: ${device.address}")
 
-            // Wait for connection (SDK connect is async, poll until connected or timeout)
+            // Wait for connection
             var retries = 0
-            val maxRetries = 20 // 20 * 200ms = 4 seconds max
+            val maxRetries = 20
             while (!isConnected() && retries < maxRetries) {
                 delay(200)
                 retries++
             }
+
             val connected = isConnected()
             android.util.Log.d("PrintDebug", "GpPrinterService - connected: $connected (waited ${retries * 200}ms)")
 
             if (connected) {
                 Result.success(Unit)
             } else {
+                // Connection failed, clear state but keep lastConnectedMac for retry
+                currentDevice = null
+                rtPrinter = null
                 Result.failure(Exception("Connection timeout - printer did not connect within 4 seconds"))
             }
         } catch (e: Exception) {
             android.util.Log.d("PrintDebug", "GpPrinterService.connect() - error: ${e.message}")
+            currentDevice = null
+            rtPrinter = null
             Result.failure(e)
         }
     }
 
     /**
-     * Disconnect from printer
+     * Reconnect using last connected device MAC address
+     * Returns failure if no last MAC or device not available
+     */
+    suspend fun reconnect(): Result<Unit> {
+        val mac = lastConnectedMac ?: return Result.failure(Exception("No previous device to reconnect"))
+        val device = currentDevice ?: run {
+            // Try to get BluetoothDevice from adapter using MAC
+            try {
+                val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                adapter?.getRemoteDevice(mac)
+            } catch (e: Exception) {
+                null
+            }
+        } ?: return Result.failure(Exception("Cannot get BluetoothDevice for MAC: $mac"))
+        return connect(device)
+    }
+
+    /**
+     * Disconnect from printer - clears current session but keeps lastConnectedMac
      */
     fun disconnect() {
         try {
             rtPrinter?.let { printer ->
-                // Close connection if needed
+                // SDK may have its own close
             }
         } catch (e: Exception) {
             // Ignore close errors
         }
         rtPrinter = null
         currentDevice = null
+        // NOTE: DO NOT clear lastConnectedMac - it's needed for reconnection
     }
 
-    /**
-     * Check if printer is connected
-     */
     fun isConnected(): Boolean {
-        val printer = rtPrinter
-        val interface_ = printer?.printerInterface
-        val state = interface_?.connectState
+        val printer = rtPrinter ?: return false
+        val interface_ = printer.printerInterface ?: return false
+        val state = interface_.connectState
         val connected = state == com.rt.printerlibrary.enumerate.ConnectStateEnum.Connected
-        android.util.Log.d("PrintDebug", "GpPrinterService.isConnected() - printer=${printer != null}, state=$state, connected=$connected")
         return connected
     }
 
-    /**
-     * Get current connected device
-     */
     fun getCurrentDevice(): BluetoothDevice? = currentDevice
+    fun getLastConnectedMac(): String? = lastConnectedMac
 
     /**
-     * Print a label using official SDK
+     * Print a label - auto-reconnect if needed, then print and wait for delivery
      */
     suspend fun print(label: Label): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
-            val settings = settingsDataStore.settingsFlow.first()
+            // Ensure connected
+            if (!isConnected()) {
+                android.util.Log.d("PrintDebug", "GpPrinterService.print() - not connected, reconnecting...")
+                val reconnectResult = reconnect()
+                if (reconnectResult.isFailure) {
+                    return@withContext Result.failure(Exception("Printer not connected and reconnection failed: ${reconnectResult.exceptionOrNull()?.message}"))
+                }
+            }
 
+            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
+
+            val settings = settingsDataStore.settingsFlow.first()
             val cmdType = when (settings.printProtocol) {
                 PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
                 PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
@@ -160,7 +190,15 @@ class GpPrinterService @Inject constructor(
             }
 
             val cmd = createPrintCommand(cmdType, label, settings)
+
+            // Send data
             printer.writeMsg(cmd.getAppendCmds())
+
+            // Wait for data to be fully transmitted before disconnecting
+            // This prevents blank prints caused by disconnecting too early
+            delay(500)
+
+            android.util.Log.d("PrintDebug", "GpPrinterService.print() - data sent, waiting for delivery")
             Result.success(Unit)
         } catch (e: Exception) {
             android.util.Log.d("PrintDebug", "GpPrinterService.print() - error: ${e.message}")
@@ -169,13 +207,22 @@ class GpPrinterService @Inject constructor(
     }
 
     /**
-     * Print test page using official SDK
+     * Print test page - auto-reconnect if needed
      */
     suspend fun printTestPage(deviceName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
-            val settings = settingsDataStore.settingsFlow.first()
+            // Ensure connected
+            if (!isConnected()) {
+                android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - not connected, reconnecting...")
+                val reconnectResult = reconnect()
+                if (reconnectResult.isFailure) {
+                    return@withContext Result.failure(Exception("Printer not connected and reconnection failed: ${reconnectResult.exceptionOrNull()?.message}"))
+                }
+            }
 
+            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
+
+            val settings = settingsDataStore.settingsFlow.first()
             val cmdType = when (settings.printProtocol) {
                 PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
                 PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
@@ -192,7 +239,12 @@ class GpPrinterService @Inject constructor(
             }
 
             android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - protocol: ${settings.printProtocol}, size: ${labelWidth}x${labelHeight}mm")
+
             printer.writeMsg(cmd.getAppendCmds())
+
+            // Wait for data delivery
+            delay(500)
+
             Result.success(Unit)
         } catch (e: Exception) {
             android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - error: ${e.message}")
@@ -209,9 +261,8 @@ class GpPrinterService @Inject constructor(
     }
 
     /**
-     * CPCL label print - fully aligned with SDK example usage
-     * Key: getCpclHeaderCmd takes mm values, Position takes dots values
-     * NOTE: CPCL coordinates start from 0,0 (left-top corner of printable area)
+     * CPCL label print
+     * getCpclHeaderCmd takes mm values, Position takes dots values
      */
     private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = CpclFactory()
@@ -221,24 +272,18 @@ class GpPrinterService @Inject constructor(
         val height = settings.labelHeight.toInt()
         val offset = 0
 
-        // Header: width/height in mm (SDK internally converts to dots)
         cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
 
-        // Common settings
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        // Add elements using SDK methods
         label.elements.forEach { element ->
             when (element) {
                 is LabelElement.Text -> {
                     val textSetting = TextSetting()
                     textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-                    // Position in dots - convert from mm (element.x/y are already in mm from editor)
-                    val xPos = mmToDots(element.x)
-                    val yPos = mmToDots(element.y)
-                    textSetting.txtPrintPosition = Position(xPos, yPos)
+                    textSetting.txtPrintPosition = Position(mmToDots(element.x), mmToDots(element.y))
                     textSetting.printRotation = PrintRotation.Rotate0
                     textSetting.setxMultiplication(1)
                     textSetting.setyMultiplication(1)
@@ -246,18 +291,13 @@ class GpPrinterService @Inject constructor(
                     cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
                 }
                 is LabelElement.Barcode -> {
-                    // Use SDK getBarcodeCmd() instead of manual string assembly
                     val barcodeSetting = BarcodeSetting()
                     barcodeSetting.printRotation = PrintRotation.Rotate0
                     barcodeSetting.narrowInDot = 2
                     barcodeSetting.wideInDot = 4
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
                     barcodeSetting.heightInDot = mmToDots(element.height)
-                    // Position in dots - convert from mm
-                    val xPos = mmToDots(element.x)
-                    val yPos = mmToDots(element.y)
-                    barcodeSetting.position = Position(xPos, yPos)
-
+                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
                     val barcodeType = when (element.format) {
                         com.gp.q733.domain.model.BarcodeFormat.CODE128 -> BarcodeType.CODE128
                         com.gp.q733.domain.model.BarcodeFormat.CODE39 -> BarcodeType.CODE39
@@ -270,15 +310,11 @@ class GpPrinterService @Inject constructor(
                     }
                 }
                 is LabelElement.QRCode -> {
-                    // Use SDK getBarcodeCmd() for QR
                     val barcodeSetting = BarcodeSetting()
                     barcodeSetting.printRotation = PrintRotation.Rotate0
                     val qrSize = (element.size / 4).toInt().coerceIn(1, 15)
                     barcodeSetting.qrcodeDotSize = qrSize
-                    // Position in dots - convert from mm
-                    val xPos = mmToDots(element.x)
-                    val yPos = mmToDots(element.y)
-                    barcodeSetting.position = Position(xPos, yPos)
+                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
                     try {
                         cmd.append(cmd.getBarcodeCmd(BarcodeType.QR_CODE, barcodeSetting, element.content))
                     } catch (e: SdkException) {
@@ -290,20 +326,17 @@ class GpPrinterService @Inject constructor(
                     val y1 = mmToDots(element.y)
                     val x2 = mmToDots(element.x + element.width)
                     val y2 = mmToDots(element.y + element.height)
-                    // BOX: x1 y1 x2 y2 thickness
                     cmd.append("BOX $x1 $y1 $x2 $y2 1\r\n".toByteArray(Charsets.UTF_8))
                 }
             }
         }
 
-        // End command (SDK handles FORM/PRINT internally)
         cmd.append(cmd.getEndCmd())
         return cmd
     }
 
     /**
-     * TSPL label print - fully aligned with SDK example usage
-     * Key: Position takes dots values, LableSizeBean takes mm values
+     * TSPL label print
      */
     private fun createTsplCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = TsplFactory()
@@ -312,17 +345,14 @@ class GpPrinterService @Inject constructor(
         val width = settings.labelWidth.toInt()
         val height = settings.labelHeight.toInt()
 
-        // Header and common settings
         val commonSetting = CommonSetting()
-        commonSetting.lableSizeBean = LableSizeBean(width, height) // mm values
+        commonSetting.lableSizeBean = LableSizeBean(width, height)
         commonSetting.labelGap = settings.gapMm.toInt()
         commonSetting.printDirection = PrintDirection.NORMAL
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
-
         cmd.append(cmd.headerCmd)
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        // Add elements
         label.elements.forEach { element ->
             when (element) {
                 is LabelElement.Text -> {
@@ -342,7 +372,6 @@ class GpPrinterService @Inject constructor(
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
                     barcodeSetting.printRotation = PrintRotation.Rotate0
                     barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
-
                     val barcodeType = when (element.format) {
                         com.gp.q733.domain.model.BarcodeFormat.CODE128 -> BarcodeType.CODE128
                         com.gp.q733.domain.model.BarcodeFormat.CODE39 -> BarcodeType.CODE39
@@ -391,7 +420,6 @@ class GpPrinterService @Inject constructor(
         cmd.append(cmd.headerCmd)
         cmd.setChartsetName("GBK")
 
-        // ESC/POS doesn't support label format directly, print as receipt
         label.elements.forEach { element ->
             when (element) {
                 is LabelElement.Text -> {
@@ -401,12 +429,9 @@ class GpPrinterService @Inject constructor(
                     cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
                     cmd.append(cmd.getLFCRCmd())
                 }
-                else -> {
-                    // ESC/POS has limited support for barcodes/QR in this context
-                }
+                else -> { /* ESC/POS limited support */ }
             }
         }
-
         cmd.append(cmd.getLFCRCmd())
         cmd.append(cmd.getLFCRCmd())
         cmd.append(cmd.headerCmd)
@@ -414,28 +439,22 @@ class GpPrinterService @Inject constructor(
     }
 
     /**
-     * CPCL test page - aligned with SDK cpclPrint3() example
-     * Uses SDK's TextSetting/BarcodeSetting/Position correctly
-     * NOTE: CPCL coordinates: Position uses dots, getCpclHeaderCmd uses mm
-     * CPCL printable area may have offset from physical label edge
+     * CPCL test page
      */
     private fun createCpclTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = CpclFactory()
         val cmd = factory.create()
         val offset = 0
 
-        // Header: width/height in mm
         cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
 
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        // Use mm-based positioning for consistency with label editor
-        // Convert mm to dots for Position constructor
-        var yPosMm = 2f  // Start 2mm from top
-        val lineHeightMm = 5f  // 5mm line height
-        val leftMarginMm = 2f  // 2mm left margin
+        var yPosMm = 2f
+        val lineHeightMm = 5f
+        val leftMarginMm = 2f
 
         // Title
         val titleSetting = TextSetting()
@@ -444,11 +463,10 @@ class GpPrinterService @Inject constructor(
         titleSetting.printRotation = PrintRotation.Rotate0
         titleSetting.setxMultiplication(1)
         titleSetting.setyMultiplication(1)
-        cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 测试页", "GBK"))
-
+        cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 \u6d4b\u8bd5\u9875", "GBK"))
         yPosMm += lineHeightMm
 
-        // Device info lines
+        // Device info
         val normalSetting = TextSetting()
         normalSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
         normalSetting.printRotation = PrintRotation.Rotate0
@@ -456,27 +474,27 @@ class GpPrinterService @Inject constructor(
         normalSetting.setyMultiplication(1)
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "设备: $deviceName", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u8bbe\u5907: $deviceName", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "协议: CPCL", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u534f\u8bae: CPCL", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "标签: ${width}x${height}mm", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u6807\u7b7e: ${width}x${height}mm", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "密度: ${settings.printDensity} 速度: ${settings.printSpeed}", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u5bc6\u5ea6: ${settings.printDensity} \u901f\u5ea6: ${settings.printSpeed}", "GBK"))
         yPosMm += lineHeightMm + 2f
 
-        // Test barcode using SDK method
+        // Test barcode
         val barcodeSetting = BarcodeSetting()
         barcodeSetting.printRotation = PrintRotation.Rotate0
         barcodeSetting.narrowInDot = 2
         barcodeSetting.wideInDot = 4
-        barcodeSetting.heightInDot = mmToDots(8f)  // 8mm height
+        barcodeSetting.heightInDot = mmToDots(8f)
         barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
         barcodeSetting.position = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         try {
@@ -484,9 +502,9 @@ class GpPrinterService @Inject constructor(
         } catch (e: SdkException) {
             android.util.Log.e("PrintDebug", "CPCL test barcode error: ${e.message}")
         }
-        yPosMm += 12f  // Barcode + text height
+        yPosMm += 12f
 
-        // Test QR using SDK method
+        // Test QR
         val qrSetting = BarcodeSetting()
         qrSetting.printRotation = PrintRotation.Rotate0
         qrSetting.qrcodeDotSize = 6
@@ -496,50 +514,45 @@ class GpPrinterService @Inject constructor(
         } catch (e: SdkException) {
             android.util.Log.e("PrintDebug", "CPCL test QR error: ${e.message}")
         }
-        yPosMm += 15f  // QR code height
+        yPosMm += 15f
 
         // Timestamp
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "时间: $timestamp", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u65f6\u95f4: $timestamp", "GBK"))
 
-        // End command (SDK handles FORM/PRINT)
         cmd.append(cmd.getEndCmd())
         return cmd
     }
 
     /**
-     * TSPL test page - aligned with SDK tsplPrint() example
+     * TSPL test page
      */
     private fun createTsplTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = TsplFactory()
         val cmd = factory.create()
 
         val commonSetting = CommonSetting()
-        commonSetting.lableSizeBean = LableSizeBean(width, height) // mm values
+        commonSetting.lableSizeBean = LableSizeBean(width, height)
         commonSetting.labelGap = settings.gapMm.toInt()
         commonSetting.printDirection = PrintDirection.NORMAL
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
-
         cmd.append(cmd.headerCmd)
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-        // Use mm-based positioning consistent with label editor
-        var yPosMm = 5f // Start 5mm from top
-        val lineHeightMm = 5f // 5mm line height
-        val leftMarginMm = 10f // 10mm left margin
+        var yPosMm = 5f
+        val lineHeightMm = 5f
+        val leftMarginMm = 10f
 
-        // Title
         val titleSetting = TextSetting()
         titleSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
         titleSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
         titleSetting.printRotation = PrintRotation.Rotate0
         titleSetting.setxMultiplication(1)
         titleSetting.setyMultiplication(1)
-        cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 测试页", "GBK"))
+        cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 \u6d4b\u8bd5\u9875", "GBK"))
         yPosMm += lineHeightMm + 3f
 
-        // Device info
         val normalSetting = TextSetting()
         normalSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
         normalSetting.printRotation = PrintRotation.Rotate0
@@ -547,26 +560,25 @@ class GpPrinterService @Inject constructor(
         normalSetting.setyMultiplication(1)
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "设备: $deviceName", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u8bbe\u5907: $deviceName", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "协议: TSPL", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u534f\u8bae: TSPL", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "标签: ${width}x${height}mm", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u6807\u7b7e: ${width}x${height}mm", "GBK"))
         yPosMm += lineHeightMm
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "密度: ${settings.printDensity} 速度: ${settings.printSpeed}", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u5bc6\u5ea6: ${settings.printDensity} \u901f\u5ea6: ${settings.printSpeed}", "GBK"))
         yPosMm += lineHeightMm + 3f
 
-        // Test barcode
         val barcodeSetting = BarcodeSetting()
         barcodeSetting.narrowInDot = 2
         barcodeSetting.wideInDot = 4
-        barcodeSetting.heightInDot = mmToDots(10f) // 10mm height
+        barcodeSetting.heightInDot = mmToDots(10f)
         barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
         barcodeSetting.printRotation = PrintRotation.Rotate0
         barcodeSetting.position = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
@@ -577,7 +589,6 @@ class GpPrinterService @Inject constructor(
         }
         yPosMm += 15f
 
-        // Test QR
         val qrSetting = BarcodeSetting()
         qrSetting.qrcodeDotSize = 6
         qrSetting.printRotation = PrintRotation.Rotate0
@@ -588,16 +599,13 @@ class GpPrinterService @Inject constructor(
             android.util.Log.e("PrintDebug", "TSPL test QR error: ${e.message}")
         }
 
-        // Timestamp
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm + 15f))
-        cmd.append(cmd.getTextCmd(normalSetting, "时间: $timestamp", "GBK"))
+        cmd.append(cmd.getTextCmd(normalSetting, "\u65f6\u95f4: $timestamp", "GBK"))
 
         try {
             cmd.append(cmd.getPrintCopies(1))
-        } catch (e: SdkException) {
-            // Ignore
-        }
+        } catch (e: SdkException) { }
         cmd.append(cmd.endCmd)
         return cmd
     }

@@ -95,8 +95,7 @@ class DeviceViewModel @Inject constructor(
 
     /**
      * Connect to a specific device directly.
-     * FIX: Accept device as parameter instead of reading from _uiState.value.selectedDevice
-     * to avoid StateFlow race condition (first click reads null, second click reads value).
+     * FIX: Accept device as parameter to avoid StateFlow race condition.
      */
     fun connect(device: PrinterDevice) {
         viewModelScope.launch {
@@ -128,8 +127,7 @@ class DeviceViewModel @Inject constructor(
     }
 
     /**
-     * Legacy connect() that uses selectedDevice from UI state.
-     * Kept for backward compatibility but prefer connect(device) overload.
+     * Legacy connect() using selectedDevice from UI state.
      */
     fun connect() {
         val device = _uiState.value.selectedDevice ?: return
@@ -151,6 +149,10 @@ class DeviceViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
+    /**
+     * Print test page - GpPrinterService handles reconnection internally
+     * FIX: No longer manually disconnect/reconnect, let GpPrinterService handle it
+     */
     fun printTestPage() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -158,37 +160,20 @@ class DeviceViewModel @Inject constructor(
                 printResult = null
             )
 
-            // FIX: Get device from gpPrinterService first (SDK path),
-            // then fallback to BluetoothRepository (legacy path)
-            val btDevice = gpPrinterService.getCurrentDevice()
-                ?: bluetoothRepository.getConnectedDevice()
-
             val deviceName = _uiState.value.selectedDevice?.name ?: "Unknown"
 
-            val result = if (btDevice != null) {
-                android.util.Log.d("PrintDebug", "Connecting GpPrinterService for test print")
-                gpPrinterService.disconnect()
-                val connectResult = gpPrinterService.connect(btDevice)
-                if (connectResult.isSuccess) {
-                    val printResult = gpPrinterService.printTestPage(deviceName)
-                    gpPrinterService.disconnect()
-                    printResult
-                } else {
-                    Result.failure(connectResult.exceptionOrNull() ?: Exception("Connection failed"))
-                }
-            } else {
-                Result.failure(Exception("No Bluetooth device connected"))
-            }
+            // GpPrinterService.printTestPage() auto-reconnects if needed
+            val result = gpPrinterService.printTestPage(deviceName)
 
             result.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "测试页打印成功"
+                    printResult = "\u6d4b\u8bd5\u9875\u6253\u5370\u6210\u529f"
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "打印失败: ${error.message}"
+                    printResult = "\u6253\u5370\u5931\u8d25: ${error.message}"
                 )
             }
         }

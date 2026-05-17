@@ -19,12 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class ElementType {
-    Text,
-    Barcode,
-    QRCode,
-    Line
-}
+enum class ElementType { Text, Barcode, QRCode, Line }
 
 data class EditorUiState(
     val label: Label = Label(
@@ -112,7 +107,6 @@ class EditorViewModel @Inject constructor(
 
             elements.add(newElement)
             val updatedLabel = currentLabel.copy(elements = elements)
-
             _uiState.value = _uiState.value.copy(
                 label = updatedLabel,
                 showAddElementDialog = false,
@@ -132,7 +126,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             if (index in elements.indices) {
                 val element = elements[index]
                 elements[index] = when (element) {
@@ -141,7 +134,6 @@ class EditorViewModel @Inject constructor(
                     is LabelElement.QRCode -> element.copy(content = newContent)
                     is LabelElement.Line -> element
                 }
-
                 _uiState.value = _uiState.value.copy(
                     label = currentLabel.copy(elements = elements)
                 )
@@ -153,7 +145,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             if (index in elements.indices) {
                 val element = elements[index]
                 elements[index] = when (element) {
@@ -162,7 +153,6 @@ class EditorViewModel @Inject constructor(
                     is LabelElement.QRCode -> element.copy(x = x, y = y)
                     is LabelElement.Line -> element.copy(x = x, y = y)
                 }
-
                 _uiState.value = _uiState.value.copy(
                     label = currentLabel.copy(elements = elements)
                 )
@@ -174,7 +164,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             if (index in elements.indices) {
                 elements.removeAt(index)
                 _uiState.value = _uiState.value.copy(
@@ -198,73 +187,48 @@ class EditorViewModel @Inject constructor(
     fun saveLabel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, saveSuccess = false)
-
             val label = _uiState.value.label
             labelDataStore.saveLabel(label)
-
             _uiState.value = _uiState.value.copy(isSaving = false, saveSuccess = true)
-
             kotlinx.coroutines.delay(2000)
             _uiState.value = _uiState.value.copy(saveSuccess = false)
         }
     }
 
+    /**
+     * Print label - GpPrinterService handles reconnection internally
+     * FIX: No longer manually disconnect/reconnect, let GpPrinterService handle it
+     */
     fun printLabel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isPrinting = true, errorMessage = null)
-
             try {
                 val label = _uiState.value.label
 
-                // Check if label has elements
                 if (label.elements.isEmpty()) {
                     _uiState.value = _uiState.value.copy(
-                        errorMessage = "标签内容为空，请先添加元素"
+                        errorMessage = "\u6807\u7b7e\u5185\u5bb9\u4e3a\u7a7a\uff0c\u8bf7\u5148\u6dfb\u52a0\u5143\u7d20",
+                        isPrinting = false
                     )
-                    _uiState.value = _uiState.value.copy(isPrinting = false)
                     return@launch
                 }
 
-                // Always reconnect before printing - SDK connection is not persistent
-                val btDevice = connectedDevice ?: gpPrinterService.getCurrentDevice() ?: bluetoothRepository.getConnectedDevice()
+                // GpPrinterService.print() handles reconnection internally
+                // via lastConnectedMac - no need to manually disconnect/reconnect
+                android.util.Log.d("PrintDebug", "Editor print - using GpPrinterService auto-reconnect")
 
-                android.util.Log.d("PrintDebug", "Editor print - BT device: $btDevice")
-
-                val result = if (btDevice != null) {
-                    // Disconnect first to ensure clean state
-                    gpPrinterService.disconnect()
-                    // Connect and print
-                    android.util.Log.d("PrintDebug", "Connecting GpPrinterService for label print")
-                    val connectResult = gpPrinterService.connect(btDevice)
-                    if (connectResult.isSuccess) {
-                        val printResult = gpPrinterService.print(label)
-                        // Disconnect after printing
-                        gpPrinterService.disconnect()
-                        printResult
-                    } else {
-                        Result.failure(connectResult.exceptionOrNull() ?: Exception("连接失败"))
-                    }
-                } else {
-                    // No device available
-                    android.util.Log.d("PrintDebug", "No BT device available for printing")
-                    _uiState.value = _uiState.value.copy(
-                        errorMessage = "请先连接蓝牙打印机"
-                    )
-                    _uiState.value = _uiState.value.copy(isPrinting = false)
-                    return@launch
-                }
+                val result = gpPrinterService.print(label)
 
                 result.onFailure { error ->
                     _uiState.value = _uiState.value.copy(
-                        errorMessage = error.message ?: "打印失败"
+                        errorMessage = error.message ?: "\u6253\u5370\u5931\u8d25"
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    errorMessage = "打印错误：${e.message}"
+                    errorMessage = "\u6253\u5370\u9519\u8bef\uff1a${e.message}"
                 )
             }
-
             _uiState.value = _uiState.value.copy(isPrinting = false)
         }
     }
@@ -295,9 +259,9 @@ class EditorViewModel @Inject constructor(
                 widthMm = 50f,
                 heightMm = 30f,
                 elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "收件人:张三", fontSize = 8f, isBold = true),
-                    LabelElement.Text(x = 2f, y = 10f, text = "电话:138****8888", fontSize = 7f, isBold = false),
-                    LabelElement.Text(x = 2f, y = 17f, text = "北京市朝阳区xxx街道", fontSize = 7f, isBold = false),
+                    LabelElement.Text(x = 2f, y = 2f, text = "\u6536\u4ef6\u4eba:\u5f20\u4e09", fontSize = 8f, isBold = true),
+                    LabelElement.Text(x = 2f, y = 10f, text = "\u7535\u8bdd:138****8888", fontSize = 7f, isBold = false),
+                    LabelElement.Text(x = 2f, y = 17f, text = "\u5317\u4eac\u5e02\u671d\u9633\u533axxx\u8857\u9053", fontSize = 7f, isBold = false),
                     LabelElement.Barcode(x = 2f, y = 24f, content = "SF1234567890", format = BarcodeFormat.CODE128, height = 5f)
                 )
             )
@@ -306,10 +270,10 @@ class EditorViewModel @Inject constructor(
                 widthMm = 40f,
                 heightMm = 30f,
                 elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "商品名称", fontSize = 9f, isBold = true),
-                    LabelElement.Text(x = 2f, y = 10f, text = "型号:ABC-001", fontSize = 7f, isBold = false),
+                    LabelElement.Text(x = 2f, y = 2f, text = "\u5546\u54c1\u540d\u79f0", fontSize = 9f, isBold = true),
+                    LabelElement.Text(x = 2f, y = 10f, text = "\u578b\u53f7:ABC-001", fontSize = 7f, isBold = false),
                     LabelElement.QRCode(x = 25f, y = 2f, content = "https://item.example.com/123", size = 12f),
-                    LabelElement.Text(x = 2f, y = 20f, text = "¥99.00", fontSize = 10f, isBold = true)
+                    LabelElement.Text(x = 2f, y = 20f, text = "\u00a599.00", fontSize = 10f, isBold = true)
                 )
             )
             "price" -> Label(
@@ -317,14 +281,13 @@ class EditorViewModel @Inject constructor(
                 widthMm = 30f,
                 heightMm = 20f,
                 elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "特价", fontSize = 7f, isBold = false),
-                    LabelElement.Text(x = 2f, y = 8f, text = "¥9.9", fontSize = 12f, isBold = true),
+                    LabelElement.Text(x = 2f, y = 2f, text = "\u7279\u4ef7", fontSize = 7f, isBold = false),
+                    LabelElement.Text(x = 2f, y = 8f, text = "\u00a59.9", fontSize = 12f, isBold = true),
                     LabelElement.Barcode(x = 2f, y = 16f, content = "690123456789", format = BarcodeFormat.EAN13, height = 3f)
                 )
             )
             else -> null
         }
-
         template?.let {
             _uiState.value = _uiState.value.copy(
                 label = it,
@@ -352,7 +315,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             if (index in elements.indices) {
                 val element = elements[index]
                 if (element is LabelElement.Barcode) {
@@ -369,7 +331,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             if (index in elements.indices) {
                 val element = elements[index]
                 if (element is LabelElement.Barcode) {
