@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.gp.q733.domain.print.PaperType
 import com.gp.q733.domain.print.PrintProtocol
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +22,6 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class SettingsDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-
     private val dataStore = context.dataStore
 
     companion object {
@@ -32,6 +32,8 @@ class SettingsDataStore @Inject constructor(
         val PRINT_DENSITY = intPreferencesKey("print_density")
         val PRINT_SPEED = intPreferencesKey("print_speed")
         val GAP_MM = floatPreferencesKey("gap_mm")
+        val PAPER_TYPE = stringPreferencesKey("paper_type")
+        val BLACK_MARK_OFFSET = floatPreferencesKey("black_mark_offset")
         val AUTO_RECONNECT = stringPreferencesKey("auto_reconnect")
         val RECONNECT_INTERVAL = intPreferencesKey("reconnect_interval")
     }
@@ -52,6 +54,15 @@ class SettingsDataStore @Inject constructor(
             printDensity = prefs[PRINT_DENSITY] ?: 8,
             printSpeed = prefs[PRINT_SPEED] ?: 4,
             gapMm = prefs[GAP_MM] ?: 2f,
+            paperType = prefs[PAPER_TYPE]?.let { typeName ->
+                when (typeName) {
+                    "LABEL" -> PaperType.LABEL
+                    "BLACK_MARK" -> PaperType.BLACK_MARK
+                    "RECEIPT" -> PaperType.RECEIPT
+                    else -> PaperType.LABEL
+                }
+            } ?: PaperType.LABEL,
+            blackMarkOffset = prefs[BLACK_MARK_OFFSET] ?: 0f,
             autoReconnect = prefs[AUTO_RECONNECT]?.toBoolean() ?: true,
             reconnectInterval = prefs[RECONNECT_INTERVAL] ?: 5
         )
@@ -90,6 +101,19 @@ class SettingsDataStore @Inject constructor(
         dataStore.edit { it[GAP_MM] = gapMm }
     }
 
+    suspend fun savePaperType(paperType: PaperType) {
+        val typeName = when (paperType) {
+            PaperType.LABEL -> "LABEL"
+            PaperType.BLACK_MARK -> "BLACK_MARK"
+            PaperType.RECEIPT -> "RECEIPT"
+        }
+        dataStore.edit { it[PAPER_TYPE] = typeName }
+    }
+
+    suspend fun saveBlackMarkOffset(offset: Float) {
+        dataStore.edit { it[BLACK_MARK_OFFSET] = offset }
+    }
+
     suspend fun saveAutoReconnect(enabled: Boolean) {
         dataStore.edit { it[AUTO_RECONNECT] = enabled.toString() }
     }
@@ -111,6 +135,12 @@ class SettingsDataStore @Inject constructor(
             prefs[PRINT_DENSITY] = settings.printDensity
             prefs[PRINT_SPEED] = settings.printSpeed
             prefs[GAP_MM] = settings.gapMm
+            prefs[PAPER_TYPE] = when (settings.paperType) {
+                PaperType.LABEL -> "LABEL"
+                PaperType.BLACK_MARK -> "BLACK_MARK"
+                PaperType.RECEIPT -> "RECEIPT"
+            }
+            prefs[BLACK_MARK_OFFSET] = settings.blackMarkOffset
             prefs[AUTO_RECONNECT] = settings.autoReconnect.toString()
             prefs[RECONNECT_INTERVAL] = settings.reconnectInterval
         }
@@ -125,6 +155,8 @@ data class AppSettings(
     val printDensity: Int = 8,
     val printSpeed: Int = 4,
     val gapMm: Float = 2f,
+    val paperType: PaperType = PaperType.LABEL,
+    val blackMarkOffset: Float = 0f,
     val autoReconnect: Boolean = true,
     val reconnectInterval: Int = 5
 )
