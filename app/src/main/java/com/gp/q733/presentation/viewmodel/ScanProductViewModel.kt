@@ -2,45 +2,46 @@ package com.gp.q733.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gp.q733.data.local.LabelDataStore
 import com.gp.q733.data.local.SettingsDataStore
-import com.gp.q733.domain.model.BarcodeFormat
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
-import com.gp.q733.domain.model.ProductInfo
-import com.gp.q733.domain.model.TemplateFields
+import com.gp.q733.domain.print.GpPrinterService
+import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
-import com.gp.q733.domain.repository.ProductRepository
-import com.gp.q733.domain.util.LabelTemplateFiller
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class ScanProductUiState(
+data class ProductInfo(
     val barcode: String = "",
-    val product: ProductInfo? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val filledLabel: Label? = null,
-    val showFillPreview: Boolean = false,
-    val printStatus: PrintStatus = PrintStatus.Idle
+    val name: String = "",
+    val price: String = "",
+    val spec: String = "",
+    val unit: String = "",
+    val origin: String = ""
 )
 
-enum class PrintStatus { Idle, Printing, Success, Failed }
+data class ScanProductUiState(
+    val productInfo: ProductInfo = ProductInfo(),
+    val isLoading: Boolean = false,
+    val isPrinting: Boolean = false,
+    val errorMessage: String? = null,
+    val successMessage: String? = null,
+    val lastScannedCode: String? = null
+)
 
 @HiltViewModel
 class ScanProductViewModel @Inject constructor(
-    private val productRepository: ProductRepository,
-    private val labelDataStore: LabelDataStore,
-    private val settingsDataStore: SettingsDataStore,
     private val bluetoothRepository: BluetoothRepository,
-    private val gpPrinterService: com.gp.q733.domain.print.GpPrinterService
+    private val gpPrinterService: GpPrinterService,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScanProductUiState())
@@ -55,124 +56,166 @@ class ScanProductViewModel @Inject constructor(
 
     fun onBarcodeScanned(barcode: String) {
         _uiState.value = _uiState.value.copy(
-            barcode = barcode,
+            lastScannedCode = barcode,
             isLoading = true,
-            error = null,
-            product = null,
-            filledLabel = null
+            errorMessage = null
         )
-        queryProduct(barcode)
-    }
-
-    private fun queryProduct(barcode: String) {
         viewModelScope.launch {
-            try {
-                val product = productRepository.getProductByBarcode(barcode)
-                if (product != null) {
-                    _uiState.value = _uiState.value.copy(
-                        product = product,
-                        isLoading = false,
-                        showFillPreview = true
-                    )
-                } else {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = "\u672a\u627e\u5230\u5546\u54c1\u4fe1\u606f\uff0c\u8bf7\u68c0\u67e5\u6761\u7801\u662f\u5426\u6b63\u786e"
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "\u67e5\u8be2\u5931\u8d25: ${e.message}"
-                )
-            }
+            // TODO: Replace with actual API call to SQL Server
+            // For now, use mock data
+            val product = lookupProduct(barcode)
+            _uiState.value = _uiState.value.copy(
+                productInfo = product,
+                isLoading = false
+            )
         }
     }
 
-    fun fillTemplateAndPreview(template: LabelTemplate) {
-        val product = _uiState.value.product ?: return
-        val filledLabel = LabelTemplateFiller.fillTemplate(template.label, product)
-        _uiState.value = _uiState.value.copy(
-            filledLabel = filledLabel,
-            showFillPreview = true
+    private fun lookupProduct(barcode: String): ProductInfo {
+        // Mock implementation - replace with SQL Server API
+        return ProductInfo(
+            barcode = barcode,
+            name = "\u5546\u54c1$barcode",
+            price = "0.00",
+            spec = "",
+            unit = "\u4e2a",
+            origin = ""
         )
+    }
+
+    fun updateProductInfo(info: ProductInfo) {
+        _uiState.value = _uiState.value.copy(productInfo = info)
     }
 
     /**
-     * Print filled label - GpPrinterService handles reconnection internally
-     * FIX: No longer checks isConnected() + getConnectedDevice() separately
-     * GpPrinterService.print() now auto-reconnects using lastConnectedMac
+     * Print a filled label - GpPrinterService handles reconnection internally.
+     * FIX: No longer depends on bluetoothRepository.getConnectedDevice() which
+     * returns null after short-connection disconnect. Instead, GpPrinterService
+     * uses lastConnectedMac to auto-reconnect.
      */
     fun printFilledLabel() {
-        val filledLabel = _uiState.value.filledLabel ?: return
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Printing)
-            try {
-                labelDataStore.saveLabel(filledLabel)
-
-                // GpPrinterService.print() handles reconnection internally
-                val result = gpPrinterService.print(filledLabel)
-                result.onSuccess {
-                    _uiState.value = _uiState.value.copy(printStatus = PrintStatus.Success)
-                }.onFailure { error ->
-                    _uiState.value = _uiState.value.copy(
-                        printStatus = PrintStatus.Failed,
-                        error = "\u6253\u5370\u5931\u8d25: ${error.message}"
-                    )
-                }
-            } catch (e: Exception) {
+            val info = _uiState.value.productInfo
+            if (info.barcode.isBlank()) {
                 _uiState.value = _uiState.value.copy(
-                    printStatus = PrintStatus.Failed,
-                    error = "\u6253\u5370\u5f02\u5e38: ${e.message}"
+                    errorMessage = "\u8bf7\u5148\u626b\u7801\u83b7\u53d6\u5546\u54c1\u4fe1\u606f"
                 )
+                return@launch
+            }
+
+            _uiState.value = _uiState.value.copy(isPrinting = true, errorMessage = null)
+
+            // Notify repository: we're about to reconnect
+            val currentDevice = gpPrinterService.getCurrentDevice()
+            if (currentDevice != null) {
+                bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connecting, currentDevice)
+            }
+
+            // Build label from product info
+            val settings = settingsDataStore.settingsFlow.first()
+            val label = Label(
+                id = "scan_${System.currentTimeMillis()}",
+                elements = buildProductElements(info),
+                widthMm = settings.labelWidthMm,
+                heightMm = settings.labelHeightMm
+            )
+
+            // GpPrinterService.print() handles reconnection internally
+            val result = gpPrinterService.print(label)
+
+            // Update repository state based on result
+            if (gpPrinterService.isConnected()) {
+                val device = gpPrinterService.getCurrentDevice()
+                bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connected, device)
+            }
+
+            result.onSuccess {
+                _uiState.value = _uiState.value.copy(
+                    isPrinting = false,
+                    successMessage = "\u6253\u5370\u6210\u529f"
+                )
+            }.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isPrinting = false,
+                    errorMessage = "\u6253\u5370\u5931\u8d25: ${error.message}"
+                )
+                // If print failed, check if we're still connected
+                if (!gpPrinterService.isConnected()) {
+                    bluetoothRepository.notifyDisconnected()
+                }
             }
         }
     }
 
-    fun reset() {
-        _uiState.value = ScanProductUiState()
+    private fun buildProductElements(info: ProductInfo): List<LabelElement> {
+        val elements = mutableListOf<LabelElement>()
+        var yOffset = 3f
+
+        // Product name
+        if (info.name.isNotBlank()) {
+            elements.add(LabelElement.Text(
+                x = 3f, y = yOffset,
+                text = info.name,
+                fontSize = 6f,
+                isBold = true
+            ))
+            yOffset += 7f
+        }
+
+        // Price
+        if (info.price.isNotBlank()) {
+            elements.add(LabelElement.Text(
+                x = 3f, y = yOffset,
+                text = "\u00a5${info.price}/${info.unit}",
+                fontSize = 5f,
+                isBold = false
+            ))
+            yOffset += 6f
+        }
+
+        // Specification
+        if (info.spec.isNotBlank()) {
+            elements.add(LabelElement.Text(
+                x = 3f, y = yOffset,
+                text = "\u89c4\u683c: ${info.spec}",
+                fontSize = 4f,
+                isBold = false
+            ))
+            yOffset += 5f
+        }
+
+        // Origin
+        if (info.origin.isNotBlank()) {
+            elements.add(LabelElement.Text(
+                x = 3f, y = yOffset,
+                text = "\u4ea7\u5730: ${info.origin}",
+                fontSize = 4f,
+                isBold = false
+            ))
+            yOffset += 5f
+        }
+
+        // Barcode
+        if (info.barcode.isNotBlank()) {
+            elements.add(LabelElement.Barcode(
+                x = 3f, y = yOffset,
+                content = info.barcode,
+                format = com.gp.q733.domain.model.BarcodeFormat.CODE128,
+                height = 8f
+            ))
+        }
+
+        return elements
     }
 
-    fun onManualBarcodeEntered(barcode: String) {
-        onBarcodeScanned(barcode)
+    fun clearMessages() {
+        _uiState.value = _uiState.value.copy(
+            errorMessage = null,
+            successMessage = null
+        )
     }
 
     fun setError(message: String) {
-        _uiState.value = _uiState.value.copy(error = message)
-    }
-
-    fun getProductTemplates(): List<LabelTemplate> {
-        return listOf(
-            LabelTemplate(
-                id = "product_scan",
-                name = "\u5546\u54c1\u6807\u7b7e",
-                description = "\u626b\u7801\u5546\u54c1\u6807\u7b7e\u6a21\u677f",
-                label = Label(
-                    id = "template_product_scan",
-                    widthMm = 50f,
-                    heightMm = 30f,
-                    elements = listOf(
-                        LabelElement.Text(x = 2f, y = 2f, text = TemplateFields.PRODUCT_NAME, fontSize = 10f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 10f, text = "\u4ef7\u683c: ${TemplateFields.PRICE}", fontSize = 8f, isBold = false),
-                        LabelElement.Barcode(x = 2f, y = 18f, content = TemplateFields.BARCODE, format = BarcodeFormat.CODE128, height = 8f)
-                    )
-                )
-            ),
-            LabelTemplate(
-                id = "price_scan",
-                name = "\u4ef7\u683c\u6807\u7b7e",
-                description = "\u626b\u7801\u4ef7\u683c\u6807\u7b7e\u6a21\u677f",
-                label = Label(
-                    id = "template_price_scan",
-                    widthMm = 40f,
-                    heightMm = 20f,
-                    elements = listOf(
-                        LabelElement.Text(x = 2f, y = 2f, text = TemplateFields.PRODUCT_NAME, fontSize = 8f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 10f, text = TemplateFields.PRICE, fontSize = 12f, isBold = true),
-                        LabelElement.Barcode(x = 2f, y = 16f, content = TemplateFields.BARCODE, format = BarcodeFormat.EAN13, height = 3f)
-                    )
-                )
-            )
-        )
+        _uiState.value = _uiState.value.copy(errorMessage = message)
     }
 }
