@@ -95,10 +95,8 @@ class DeviceViewModel @Inject constructor(
     }
 
     /**
-     * Connect to a specific device directly.
-     * FIX: Use SDK (GpPrinterService) as primary connection method.
-     * After SDK connects successfully, notify repository to update UI state
-     * WITHOUT creating a second socket connection.
+     * 连接打印机 - 统一走 BluetoothRepository socket 直连
+     * 不再使用 SDK 的 RTPrinter 连接（日志证实 SDK 连接 2-3 秒后自动断开）
      */
     fun connect(device: PrinterDevice) {
         viewModelScope.launch {
@@ -108,51 +106,29 @@ class DeviceViewModel @Inject constructor(
                 errorMessage = null,
                 isConnecting = true
             )
+            // 保存 MAC 用于重连
+            gpPrinterService.setLastConnectedMac(device.address)
 
-            // Notify repository: connecting state
-            bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connecting, device.device)
-
-            // Connect via SDK
-            val gpResult = gpPrinterService.connect(device.device)
-            if (gpResult.isSuccess) {
-                // SDK connected successfully — notify repository WITHOUT creating another socket
-                bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connected, device.device)
-                android.util.Log.d("PrintDebug", "Connected via GpPrinterService (SDK) — state synced to repository")
+            val result = bluetoothRepository.connect(device)
+            if (result.isFailure) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = result.exceptionOrNull()?.message ?: "\u8fde\u63a5\u5931\u8d25"
+                )
             } else {
-                // SDK failed — try legacy BluetoothRepository (creates its own socket)
-                android.util.Log.d("PrintDebug", "SDK connection failed: ${gpResult.exceptionOrNull()?.message}, trying legacy...")
-                val legacyResult = bluetoothRepository.connect(device)
-                if (legacyResult.isFailure) {
-                    _uiState.value = _uiState.value.copy(
-                        errorMessage = legacyResult.exceptionOrNull()?.message ?: "Connection failed"
-                    )
-                } else {
-                    android.util.Log.d("PrintDebug", "Connected via legacy BluetoothRepository")
-                }
+                android.util.Log.d("PrintDebug", "Connected via BluetoothRepository (socket)")
             }
-
             _uiState.value = _uiState.value.copy(isConnecting = false)
         }
     }
 
-    /**
-     * Legacy connect() using selectedDevice from UI state.
-     */
     fun connect() {
         val device = _uiState.value.selectedDevice ?: return
         connect(device)
     }
 
-    /**
-     * Disconnect from printer.
-     * FIX: Keep selectedDevice so printTestPage() can still get device name.
-     * Only clear the connection state.
-     */
     fun disconnect() {
         viewModelScope.launch {
-            gpPrinterService.disconnect()
-            bluetoothRepository.notifyDisconnected()
-            // NOTE: Do NOT clear selectedDevice — needed for test print device name
+            bluetoothRepository.disconnect()
             _uiState.value = _uiState.value.copy(
                 errorMessage = null
             )
@@ -164,8 +140,8 @@ class DeviceViewModel @Inject constructor(
     }
 
     /**
-     * Print test page - GpPrinterService handles reconnection internally.
-     * FIX: Use selectedDevice.name (preserved across disconnect) as fallback for device name.
+     * 打印测试页 - 生成命令 + 通过 socket 发送
+     * 架构：GpPrinterService 只生成命令，BluetoothRepository.write() 发送
      */
     fun printTestPage() {
         viewModelScope.launch {
@@ -174,38 +150,61 @@ class DeviceViewModel @Inject constructor(
                 printResult = null
             )
 
-            // Get device name from selectedDevice (preserved across disconnect)
             val deviceName = _uiState.value.selectedDevice?.name ?: "Unknown"
 
-            // Update repository state to Connecting during reconnection
-            val btDevice = gpPrinterService.getCurrentDevice()
-            if (btDevice != null && !gpPrinterService.isConnected()) {
-                bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connecting, btDevice)
-            }
-
-            // GpPrinterService.printTestPage() auto-reconnects if needed
-            val result = gpPrinterService.printTestPage(deviceName)
-
-            // Update repository state based on result
-            if (gpPrinterService.isConnected()) {
-                val currentDevice = gpPrinterService.getCurrentDevice()
-                bluetoothRepository.notifyConnectionStateChanged(ConnectionState.Connected, currentDevice)
-            }
-
-            result.onSuccess {
-                _uiState.value = _uiState.value.copy(
-                    isPrinting = false,
-                    printResult = "\u6d4b\u8bd5\u9875\u6253\u5370\u6210\u529f"
-                )
-            }.onFailure { error ->
-                _uiState.value = _uiState.value.copy(
-                    isPrinting = false,
-                    printResult = "\u6253\u5370\u5931\u8d25: ${error.message}"
-                )
-                // If print failed, check if we're still connected
-                if (!gpPrinterService.isConnected()) {
-                    bluetoothRepository.notifyDisconnected()
+            // 检查是否已连接
+            val connectionState = bluetoothRepository.getConnectionState().first()
+            if (connectionState != ConnectionState.Connected) {
+                // 尝试重连
+                val mac = gpPrinterService.getLastConnectedMac()
+                if (mac != null) {
+                    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                    val btDevice = adapter?.getRemoteDevice(mac)
+                    if (btDevice != null) {
+                        val printerDevice = PrinterDevice(
+                            device = btDevice,
+                            name = btDevice.name ?: "Unknown",
+                            address = mac
+                        )
+                        val connectResult = bluetoothRepository.connect(printerDevice)
+                        if (connectResult.isFailure) {
+                            _uiState.value = _uiState.value.copy(
+                                isPrinting = false,
+                                printResult = "\u6253\u5370\u5931\u8d25: \u91cd\u8fde\u5931\u8d25 - ${connectResult.exceptionOrNull()?.message}"
+                            )
+                            return@launch
+                        }
+                    }
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isPrinting = false,
+                        printResult = "\u6253\u5370\u5931\u8d25: \u6253\u5370\u673a\u672a\u8fde\u63a5"
+                    )
+                    return@launch
                 }
+            }
+
+            try {
+                val cmdBytes = gpPrinterService.generateTestPageCommands(deviceName)
+                val writeResult = bluetoothRepository.write(cmdBytes)
+                writeResult.onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isPrinting = false,
+                        printResult = "\u6d4b\u8bd5\u9875\u6253\u5370\u6210\u529f"
+                    )
+                    android.util.Log.d("PrintDebug", "Test page sent via socket, ${cmdBytes.size} bytes")
+                }.onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isPrinting = false,
+                        printResult = "\u6253\u5370\u5931\u8d25: ${error.message}"
+                    )
+                    bluetoothRepository.disconnect()
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isPrinting = false,
+                    printResult = "\u6253\u5370\u9519\u8bef: ${e.message}"
+                )
             }
         }
     }
@@ -218,6 +217,5 @@ class DeviceViewModel @Inject constructor(
         super.onCleared()
         scanTimeoutJob?.cancel()
         bluetoothRepository.stopScan()
-        gpPrinterService.disconnect()
     }
 }

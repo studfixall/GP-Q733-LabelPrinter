@@ -31,7 +31,6 @@ class BluetoothRepositoryImpl @Inject constructor(
 ) : BluetoothRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     private val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
     private val _connectionState = MutableStateFlow(ConnectionState.Disconnected)
@@ -51,21 +50,12 @@ class BluetoothRepositoryImpl @Inject constructor(
             try {
                 val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
                 bluetoothAdapter = manager?.adapter
-            } catch (e: Exception) {
-                // Ignore
-            }
+            } catch (e: Exception) { /* Ignore */ }
         }
         return bluetoothAdapter
     }
 
     private var connectedSocket: BluetoothSocket? = null
-
-    /**
-     * Track whether connection is managed externally (by SDK).
-     * When true, disconnect() should NOT close the socket (SDK manages its own).
-     */
-    @Volatile
-    private var isExternalConnection: Boolean = false
 
     private val discoveryReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
@@ -87,19 +77,15 @@ class BluetoothRepositoryImpl @Inject constructor(
                         }
                     }
                 }
-                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    // Scan completed
-                }
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> { /* Scan completed */ }
             }
         }
     }
-
     private var isReceiverRegistered = false
 
     @SuppressLint("MissingPermission")
     override fun startScan() {
         val adapter = getBluetoothAdapter() ?: return
-
         if (!isReceiverRegistered) {
             val filter = IntentFilter().apply {
                 addAction(BluetoothDevice.ACTION_FOUND)
@@ -108,28 +94,21 @@ class BluetoothRepositoryImpl @Inject constructor(
             context.registerReceiver(discoveryReceiver, filter)
             isReceiverRegistered = true
         }
-
         _discoveredDevices.value = emptyList()
-
-        if (adapter.isDiscovering) {
-            adapter.cancelDiscovery()
-        }
+        if (adapter.isDiscovering) { adapter.cancelDiscovery() }
         adapter.startDiscovery()
     }
 
     @SuppressLint("MissingPermission")
     override fun stopScan() {
-        val adapter = getBluetoothAdapter() ?: return
-        adapter.cancelDiscovery()
+        getBluetoothAdapter()?.cancelDiscovery()
     }
 
     @SuppressLint("MissingPermission")
     override suspend fun connect(device: PrinterDevice): Result<Unit> {
         return try {
             val adapter = getBluetoothAdapter()
-            if (adapter == null) {
-                return Result.failure(Exception("Bluetooth not available"))
-            }
+                ?: return Result.failure(Exception("Bluetooth not available"))
 
             _connectionState.value = ConnectionState.Connecting
             adapter.cancelDiscovery()
@@ -137,51 +116,21 @@ class BluetoothRepositoryImpl @Inject constructor(
             val btDevice: BluetoothDevice = adapter.getRemoteDevice(device.address)
             val socket = btDevice.createRfcommSocketToServiceRecord(SPP_UUID)
             socket.connect()
+
             connectedSocket = socket
             _connectedDevice.value = btDevice
             _connectionState.value = ConnectionState.Connected
-            isExternalConnection = false
             Result.success(Unit)
         } catch (e: IOException) {
-            val errorMsg = e.message ?: "Connection failed"
             _connectionState.value = ConnectionState.Error
             _connectedDevice.value = null
-            Result.failure(Exception(errorMsg))
+            Result.failure(Exception(e.message ?: "Connection failed"))
         }
     }
 
     override suspend fun disconnect() {
-        if (!isExternalConnection) {
-            try {
-                connectedSocket?.close()
-            } catch (_: IOException) {
-                // Ignore close errors
-            }
-            connectedSocket = null
-        }
-        // If external connection, SDK manages its own socket - just clear state
-        isExternalConnection = false
-        _connectedDevice.value = null
-        _connectionState.value = ConnectionState.Disconnected
-    }
-
-    /**
-     * Notify that SDK (GpPrinterService) has connected externally.
-     * Updates connection state and device without creating a new socket.
-     */
-    override fun notifyConnectionStateChanged(state: ConnectionState, device: BluetoothDevice?) {
-        _connectionState.value = state
-        if (device != null) {
-            _connectedDevice.value = device
-        }
-        isExternalConnection = (state == ConnectionState.Connected)
-    }
-
-    /**
-     * Notify that SDK (GpPrinterService) has disconnected externally.
-     */
-    override fun notifyDisconnected() {
-        isExternalConnection = false
+        try { connectedSocket?.close() } catch (_: IOException) { }
+        connectedSocket = null
         _connectedDevice.value = null
         _connectionState.value = ConnectionState.Disconnected
     }
@@ -210,16 +159,10 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     fun cleanup() {
         if (isReceiverRegistered) {
-            try {
-                context.unregisterReceiver(discoveryReceiver)
-            } catch (_: Exception) {
-            }
+            try { context.unregisterReceiver(discoveryReceiver) } catch (_: Exception) { }
             isReceiverRegistered = false
         }
-        try {
-            connectedSocket?.close()
-        } catch (_: IOException) {
-        }
+        try { connectedSocket?.close() } catch (_: IOException) { }
         connectedSocket = null
     }
 }

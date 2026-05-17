@@ -1,6 +1,5 @@
 package com.gp.q733.domain.print
 
-import android.bluetooth.BluetoothDevice
 import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
@@ -21,21 +20,23 @@ import com.rt.printerlibrary.enumerate.SettingEnum
 import com.rt.printerlibrary.enumerate.SpeedEnum
 import com.rt.printerlibrary.enumerate.TsplFontTypeEnum
 import com.rt.printerlibrary.exception.SdkException
-import com.rt.printerlibrary.factory.connect.BluetoothFactory
-import com.rt.printerlibrary.factory.printer.LabelPrinterFactory
-import com.rt.printerlibrary.factory.printer.PrinterFactory
-import com.rt.printerlibrary.factory.printer.ThermalPrinterFactory
-import com.rt.printerlibrary.printer.RTPrinter
 import com.rt.printerlibrary.setting.BarcodeSetting
 import com.rt.printerlibrary.setting.CommonSetting
 import com.rt.printerlibrary.setting.TextSetting
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * 打印命令生成服务
+ * 
+ * 架构变更：此服务只负责生成打印命令字节数组，不再管理蓝牙连接。
+ * 蓝牙连接统一由 BluetoothRepository 管理（socket 直连，稳定可靠）。
+ * 
+ * 日志分析结论：SDK 的 RTPrinter 连接 2-3 秒后自动断开，
+ * 导致每次打印都要重连（1.6-4s），且第一次经常超时。
+ * 改为 socket 直连 + SDK 命令生成，彻底解决连接不稳定问题。
+ */
 @Singleton
 class GpPrinterService @Inject constructor(
     private val settingsDataStore: SettingsDataStore
@@ -45,211 +46,50 @@ class GpPrinterService @Inject constructor(
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
     }
 
-    private var rtPrinter: RTPrinter<*>? = null
-    private var currentDevice: BluetoothDevice? = null
-    /** Last connected device MAC address - survives disconnect for reconnection */
+    /** Last connected device MAC address - for reconnection tracking */
     private var lastConnectedMac: String? = null
 
-    /**
-     * Connect to Bluetooth printer using official SDK
-     */
-    suspend fun connect(device: BluetoothDevice): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            // If already connected to same device, skip
-            if (currentDevice?.address == device.address && isConnected()) {
-                android.util.Log.d("PrintDebug", "GpPrinterService - already connected to ${device.name}")
-                return@withContext Result.success(Unit)
-            }
-
-            // Disconnect if connected to different device
-            disconnect()
-
-            currentDevice = device
-            lastConnectedMac = device.address
-
-            // Get current protocol type
-            val settings = settingsDataStore.settingsFlow.first()
-            val cmdType = when (settings.printProtocol) {
-                PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
-                PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
-                PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
-            }
-
-            // Create printer factory based on protocol
-            val printerFactory: PrinterFactory = when (cmdType) {
-                BaseEnum.CMD_ESC -> ThermalPrinterFactory()
-                else -> LabelPrinterFactory()
-            }
-            rtPrinter = printerFactory.create()
-
-            // Create Bluetooth connection
-            val bluetoothFactory = BluetoothFactory()
-            val bluetoothEdrConfigBean = com.rt.printerlibrary.bean.BluetoothEdrConfigBean(device)
-            val printerInterface = bluetoothFactory.create()
-            printerInterface.setConfigObject(bluetoothEdrConfigBean)
-
-            // Connect
-            rtPrinter?.setPrinterInterface(printerInterface)
-            rtPrinter?.connect(bluetoothEdrConfigBean)
-
-            android.util.Log.d("PrintDebug", "GpPrinterService.connect() - device: ${device.name}, address: ${device.address}")
-
-            // Wait for connection
-            var retries = 0
-            val maxRetries = 20
-            while (!isConnected() && retries < maxRetries) {
-                delay(200)
-                retries++
-            }
-
-            val connected = isConnected()
-            android.util.Log.d("PrintDebug", "GpPrinterService - connected: $connected (waited ${retries * 200}ms)")
-
-            if (connected) {
-                Result.success(Unit)
-            } else {
-                // Connection failed, clear state but keep lastConnectedMac for retry
-                currentDevice = null
-                rtPrinter = null
-                Result.failure(Exception("Connection timeout - printer did not connect within 4 seconds"))
-            }
-        } catch (e: Exception) {
-            android.util.Log.d("PrintDebug", "GpPrinterService.connect() - error: ${e.message}")
-            currentDevice = null
-            rtPrinter = null
-            Result.failure(e)
-        }
+    fun setLastConnectedMac(mac: String?) {
+        lastConnectedMac = mac
     }
 
-    /**
-     * Reconnect using last connected device MAC address
-     * Returns failure if no last MAC or device not available
-     */
-    suspend fun reconnect(): Result<Unit> {
-        val mac = lastConnectedMac ?: return Result.failure(Exception("No previous device to reconnect"))
-        val device = currentDevice ?: run {
-            // Try to get BluetoothDevice from adapter using MAC
-            try {
-                val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-                adapter?.getRemoteDevice(mac)
-            } catch (e: Exception) {
-                null
-            }
-        } ?: return Result.failure(Exception("Cannot get BluetoothDevice for MAC: $mac"))
-        return connect(device)
-    }
-
-    /**
-     * Disconnect from printer - clears current session but keeps lastConnectedMac
-     */
-    fun disconnect() {
-        try {
-            rtPrinter?.let { printer ->
-                // SDK may have its own close
-            }
-        } catch (e: Exception) {
-            // Ignore close errors
-        }
-        rtPrinter = null
-        currentDevice = null
-        // NOTE: DO NOT clear lastConnectedMac - it's needed for reconnection
-    }
-
-    fun isConnected(): Boolean {
-        val printer = rtPrinter ?: return false
-        val interface_ = printer.printerInterface ?: return false
-        val state = interface_.connectState
-        val connected = state == com.rt.printerlibrary.enumerate.ConnectStateEnum.Connected
-        return connected
-    }
-
-    fun getCurrentDevice(): BluetoothDevice? = currentDevice
     fun getLastConnectedMac(): String? = lastConnectedMac
 
     /**
-     * Print a label - auto-reconnect if needed, then print and wait for delivery
+     * 生成标签打印命令字节数组
+     * 调用方负责通过 BluetoothRepository.write() 发送
      */
-    suspend fun print(label: Label): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            // Ensure connected
-            if (!isConnected()) {
-                android.util.Log.d("PrintDebug", "GpPrinterService.print() - not connected, reconnecting...")
-                val reconnectResult = reconnect()
-                if (reconnectResult.isFailure) {
-                    return@withContext Result.failure(Exception("Printer not connected and reconnection failed: ${reconnectResult.exceptionOrNull()?.message}"))
-                }
-            }
-
-            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
-
-            val settings = settingsDataStore.settingsFlow.first()
-            val cmdType = when (settings.printProtocol) {
-                PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
-                PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
-                PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
-            }
-
-            val cmd = createPrintCommand(cmdType, label, settings)
-
-            // Send data
-            printer.writeMsg(cmd.getAppendCmds())
-
-            // Wait for data to be fully transmitted before disconnecting
-            // This prevents blank prints caused by disconnecting too early
-            delay(500)
-
-            android.util.Log.d("PrintDebug", "GpPrinterService.print() - data sent, waiting for delivery")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            android.util.Log.d("PrintDebug", "GpPrinterService.print() - error: ${e.message}")
-            Result.failure(e)
+    suspend fun generatePrintCommands(label: Label): ByteArray {
+        val settings = settingsDataStore.settingsFlow.first()
+        val cmdType = when (settings.printProtocol) {
+            PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
+            PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
+            PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
         }
+        val cmd = createPrintCommand(cmdType, label, settings)
+        return cmd.appendCmds
     }
 
     /**
-     * Print test page - auto-reconnect if needed
+     * 生成测试页打印命令字节数组
+     * 调用方负责通过 BluetoothRepository.write() 发送
      */
-    suspend fun printTestPage(deviceName: String): Result<Unit> = withContext(Dispatchers.IO) {
-        try {
-            // Ensure connected
-            if (!isConnected()) {
-                android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - not connected, reconnecting...")
-                val reconnectResult = reconnect()
-                if (reconnectResult.isFailure) {
-                    return@withContext Result.failure(Exception("Printer not connected and reconnection failed: ${reconnectResult.exceptionOrNull()?.message}"))
-                }
-            }
-
-            val printer = rtPrinter ?: return@withContext Result.failure(Exception("Printer not connected"))
-
-            val settings = settingsDataStore.settingsFlow.first()
-            val cmdType = when (settings.printProtocol) {
-                PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
-                PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
-                PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
-            }
-
-            val labelWidth = settings.labelWidth.toInt()
-            val labelHeight = settings.labelHeight.toInt()
-
-            val cmd = when (cmdType) {
-                BaseEnum.CMD_CPCL -> createCpclTestCommand(deviceName, labelWidth, labelHeight, settings)
-                BaseEnum.CMD_TSPL -> createTsplTestCommand(deviceName, labelWidth, labelHeight, settings)
-                else -> createEscTestCommand(deviceName, settings)
-            }
-
-            android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - protocol: ${settings.printProtocol}, size: ${labelWidth}x${labelHeight}mm")
-
-            printer.writeMsg(cmd.getAppendCmds())
-
-            // Wait for data delivery
-            delay(500)
-
-            Result.success(Unit)
-        } catch (e: Exception) {
-            android.util.Log.d("PrintDebug", "GpPrinterService.printTestPage() - error: ${e.message}")
-            Result.failure(e)
+    suspend fun generateTestPageCommands(deviceName: String): ByteArray {
+        val settings = settingsDataStore.settingsFlow.first()
+        val cmdType = when (settings.printProtocol) {
+            PrintProtocol.CPCL -> BaseEnum.CMD_CPCL
+            PrintProtocol.TSPL -> BaseEnum.CMD_TSPL
+            PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
         }
+        val labelWidth = settings.labelWidth.toInt()
+        val labelHeight = settings.labelHeight.toInt()
+        val cmd = when (cmdType) {
+            BaseEnum.CMD_CPCL -> createCpclTestCommand(deviceName, labelWidth, labelHeight, settings)
+            BaseEnum.CMD_TSPL -> createTsplTestCommand(deviceName, labelWidth, labelHeight, settings)
+            else -> createEscTestCommand(deviceName, settings)
+        }
+        android.util.Log.d("PrintDebug", "GpPrinterService.generateTestPageCommands() - protocol: ${settings.printProtocol}, size: ${labelWidth}x${labelHeight}mm")
+        return cmd.appendCmds
     }
 
     private fun createPrintCommand(cmdType: Int, label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
@@ -267,13 +107,10 @@ class GpPrinterService @Inject constructor(
     private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = CpclFactory()
         val cmd = factory.create()
-
         val width = settings.labelWidth.toInt()
         val height = settings.labelHeight.toInt()
         val offset = 0
-
         cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
-
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
@@ -330,7 +167,6 @@ class GpPrinterService @Inject constructor(
                 }
             }
         }
-
         cmd.append(cmd.getEndCmd())
         return cmd
     }
@@ -341,10 +177,8 @@ class GpPrinterService @Inject constructor(
     private fun createTsplCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = TsplFactory()
         val cmd = factory.create()
-
         val width = settings.labelWidth.toInt()
         val height = settings.labelHeight.toInt()
-
         val commonSetting = CommonSetting()
         commonSetting.lableSizeBean = LableSizeBean(width, height)
         commonSetting.labelGap = settings.gapMm.toInt()
@@ -404,7 +238,6 @@ class GpPrinterService @Inject constructor(
                 }
             }
         }
-
         try {
             cmd.append(cmd.getPrintCopies(1))
         } catch (e: SdkException) {
@@ -419,7 +252,6 @@ class GpPrinterService @Inject constructor(
         val cmd = factory.create()
         cmd.append(cmd.headerCmd)
         cmd.setChartsetName("GBK")
-
         label.elements.forEach { element ->
             when (element) {
                 is LabelElement.Text -> {
@@ -445,9 +277,7 @@ class GpPrinterService @Inject constructor(
         val factory = CpclFactory()
         val cmd = factory.create()
         val offset = 0
-
         cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
-
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
@@ -531,7 +361,6 @@ class GpPrinterService @Inject constructor(
     private fun createTsplTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
         val factory = TsplFactory()
         val cmd = factory.create()
-
         val commonSetting = CommonSetting()
         commonSetting.lableSizeBean = LableSizeBean(width, height)
         commonSetting.labelGap = settings.gapMm.toInt()

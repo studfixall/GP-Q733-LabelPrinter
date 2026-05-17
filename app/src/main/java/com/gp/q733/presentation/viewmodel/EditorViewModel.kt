@@ -8,9 +8,11 @@ import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.BarcodeFormat
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
+import com.gp.q733.domain.model.PrinterDevice
 import com.gp.q733.domain.print.GpPrinterService
 import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.domain.repository.BluetoothRepository
+import com.gp.q733.domain.repository.ConnectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,7 +53,6 @@ class EditorViewModel @Inject constructor(
     private var connectedDevice: BluetoothDevice? = null
 
     init {
-        // Sync connected device from repository flow
         viewModelScope.launch {
             bluetoothRepository.getConnectedDeviceFlow().collect { device ->
                 connectedDevice = device
@@ -75,36 +76,24 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
             val elements = currentLabel.elements.toMutableList()
-
             val newElement = when (type) {
                 ElementType.Text -> LabelElement.Text(
-                    x = 5f,
-                    y = 5f + (elements.size * 8f),
-                    text = textContent,
-                    fontSize = 8f,
-                    isBold = false
+                    x = 5f, y = 5f + (elements.size * 8f),
+                    text = textContent, fontSize = 8f, isBold = false
                 )
                 ElementType.Barcode -> LabelElement.Barcode(
-                    x = 5f,
-                    y = 5f + (elements.size * 10f),
-                    content = textContent,
-                    format = format ?: BarcodeFormat.CODE128,
-                    height = 8f
+                    x = 5f, y = 5f + (elements.size * 10f),
+                    content = textContent, format = format ?: BarcodeFormat.CODE128, height = 8f
                 )
                 ElementType.QRCode -> LabelElement.QRCode(
-                    x = 5f,
-                    y = 5f + (elements.size * 10f),
-                    content = textContent,
-                    size = 12f
+                    x = 5f, y = 5f + (elements.size * 10f),
+                    content = textContent, size = 12f
                 )
                 ElementType.Line -> LabelElement.Line(
-                    x = 5f,
-                    y = 5f + (elements.size * 8f),
-                    width = currentLabel.widthMm - 10f,
-                    height = 0.5f
+                    x = 5f, y = 5f + (elements.size * 8f),
+                    width = currentLabel.widthMm - 10f, height = 0.5f
                 )
             }
-
             elements.add(newElement)
             val updatedLabel = currentLabel.copy(elements = elements)
             _uiState.value = _uiState.value.copy(
@@ -196,15 +185,14 @@ class EditorViewModel @Inject constructor(
     }
 
     /**
-     * Print label - GpPrinterService handles reconnection internally
-     * FIX: No longer manually disconnect/reconnect, let GpPrinterService handle it
+     * Print label - generate commands via GpPrinterService, send via BluetoothRepository socket
+     * FIX: No longer use SDK RTPrinter connection (unstable, disconnects after 2-3s)
      */
     fun printLabel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isPrinting = true, errorMessage = null)
             try {
                 val label = _uiState.value.label
-
                 if (label.elements.isEmpty()) {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "\u6807\u7b7e\u5185\u5bb9\u4e3a\u7a7a\uff0c\u8bf7\u5148\u6dfb\u52a0\u5143\u7d20",
@@ -213,16 +201,53 @@ class EditorViewModel @Inject constructor(
                     return@launch
                 }
 
-                // GpPrinterService.print() handles reconnection internally
-                // via lastConnectedMac - no need to manually disconnect/reconnect
-                android.util.Log.d("PrintDebug", "Editor print - using GpPrinterService auto-reconnect")
+                // Check connection state
+                val connectionState = bluetoothRepository.getConnectionState().first()
+                if (connectionState != ConnectionState.Connected) {
+                    // Try to reconnect using saved MAC
+                    val mac = gpPrinterService.getLastConnectedMac()
+                    if (mac != null) {
+                        val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                        val btDevice = adapter?.getRemoteDevice(mac)
+                        if (btDevice != null) {
+                            val printerDevice = PrinterDevice(
+                                device = btDevice,
+                                name = btDevice.name ?: "Unknown",
+                                address = mac
+                            )
+                            val connectResult = bluetoothRepository.connect(printerDevice)
+                            if (connectResult.isFailure) {
+                                _uiState.value = _uiState.value.copy(
+                                    isPrinting = false,
+                                    errorMessage = "\u91cd\u8fde\u5931\u8d25: ${connectResult.exceptionOrNull()?.message}"
+                                )
+                                return@launch
+                            }
+                        } else {
+                            _uiState.value = _uiState.value.copy(
+                                isPrinting = false,
+                                errorMessage = "\u6253\u5370\u673a\u672a\u8fde\u63a5"
+                            )
+                            return@launch
+                        }
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isPrinting = false,
+                            errorMessage = "\u6253\u5370\u673a\u672a\u8fde\u63a5"
+                        )
+                        return@launch
+                    }
+                }
 
-                val result = gpPrinterService.print(label)
-
-                result.onFailure { error ->
+                // Generate commands via SDK, send via socket
+                android.util.Log.d("PrintDebug", "Editor print - generate commands, send via socket")
+                val cmdBytes = gpPrinterService.generatePrintCommands(label)
+                val writeResult = bluetoothRepository.write(cmdBytes)
+                writeResult.onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         errorMessage = error.message ?: "\u6253\u5370\u5931\u8d25"
                     )
+                    bluetoothRepository.disconnect()
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -247,17 +272,14 @@ class EditorViewModel @Inject constructor(
     }
 
     fun loadTemplate(templateId: String) {
-        viewModelScope.launch {
-            loadTemplateSync(templateId)
-        }
+        viewModelScope.launch { loadTemplateSync(templateId) }
     }
 
     fun loadTemplateSync(templateId: String) {
         val template = when (templateId) {
             "express" -> Label(
                 id = "template_express_${System.currentTimeMillis()}",
-                widthMm = 50f,
-                heightMm = 30f,
+                widthMm = 50f, heightMm = 30f,
                 elements = listOf(
                     LabelElement.Text(x = 2f, y = 2f, text = "\u6536\u4ef6\u4eba:\u5f20\u4e09", fontSize = 8f, isBold = true),
                     LabelElement.Text(x = 2f, y = 10f, text = "\u7535\u8bdd:138****8888", fontSize = 7f, isBold = false),
@@ -267,8 +289,7 @@ class EditorViewModel @Inject constructor(
             )
             "product" -> Label(
                 id = "template_product_${System.currentTimeMillis()}",
-                widthMm = 40f,
-                heightMm = 30f,
+                widthMm = 40f, heightMm = 30f,
                 elements = listOf(
                     LabelElement.Text(x = 2f, y = 2f, text = "\u5546\u54c1\u540d\u79f0", fontSize = 9f, isBold = true),
                     LabelElement.Text(x = 2f, y = 10f, text = "\u578b\u53f7:ABC-001", fontSize = 7f, isBold = false),
@@ -278,8 +299,7 @@ class EditorViewModel @Inject constructor(
             )
             "price" -> Label(
                 id = "template_price_${System.currentTimeMillis()}",
-                widthMm = 30f,
-                heightMm = 20f,
+                widthMm = 30f, heightMm = 20f,
                 elements = listOf(
                     LabelElement.Text(x = 2f, y = 2f, text = "\u7279\u4ef7", fontSize = 7f, isBold = false),
                     LabelElement.Text(x = 2f, y = 8f, text = "\u00a59.9", fontSize = 12f, isBold = true),
