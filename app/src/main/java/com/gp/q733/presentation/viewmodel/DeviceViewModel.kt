@@ -57,7 +57,6 @@ class DeviceViewModel @Inject constructor(
         )
 
     private var scanTimeoutJob: Job? = null
-    private var connectedDevice: BluetoothDevice? = null
 
     init {
         viewModelScope.launch {
@@ -94,25 +93,33 @@ class DeviceViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedDevice = device)
     }
 
-    fun connect() {
-        val device = _uiState.value.selectedDevice ?: return
+    /**
+     * Connect to a specific device directly.
+     * FIX: Accept device as parameter instead of reading from _uiState.value.selectedDevice
+     * to avoid StateFlow race condition (first click reads null, second click reads value).
+     */
+    fun connect(device: PrinterDevice) {
         viewModelScope.launch {
             stopScan()
-            _uiState.value = _uiState.value.copy(errorMessage = null)
+            _uiState.value = _uiState.value.copy(
+                selectedDevice = device,
+                errorMessage = null
+            )
             val btDevice = device.device
-            connectedDevice = btDevice
 
+            // Try SDK connection first
             val gpResult = gpPrinterService.connect(btDevice)
             if (gpResult.isSuccess) {
+                // Also update BluetoothRepository state for UI consistency
                 bluetoothRepository.connect(device)
                 android.util.Log.d("PrintDebug", "Connected via GpPrinterService (SDK)")
             } else {
+                // Fallback to legacy BluetoothRepository
                 val legacyResult = bluetoothRepository.connect(device)
                 if (legacyResult.isFailure) {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = legacyResult.exceptionOrNull()?.message ?: "Connection failed"
                     )
-                    connectedDevice = null
                 } else {
                     android.util.Log.d("PrintDebug", "Connected via legacy BluetoothRepository")
                 }
@@ -120,11 +127,19 @@ class DeviceViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Legacy connect() that uses selectedDevice from UI state.
+     * Kept for backward compatibility but prefer connect(device) overload.
+     */
+    fun connect() {
+        val device = _uiState.value.selectedDevice ?: return
+        connect(device)
+    }
+
     fun disconnect() {
         viewModelScope.launch {
             gpPrinterService.disconnect()
             bluetoothRepository.disconnect()
-            connectedDevice = null
             _uiState.value = _uiState.value.copy(
                 selectedDevice = null,
                 errorMessage = null
@@ -137,20 +152,25 @@ class DeviceViewModel @Inject constructor(
     }
 
     fun printTestPage() {
-        val device = _uiState.value.selectedDevice ?: return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isPrinting = true,
                 printResult = null
             )
 
-            val btDevice = connectedDevice ?: bluetoothRepository.getConnectedDevice()
+            // FIX: Get device from gpPrinterService first (SDK path),
+            // then fallback to BluetoothRepository (legacy path)
+            val btDevice = gpPrinterService.getCurrentDevice()
+                ?: bluetoothRepository.getConnectedDevice()
+
+            val deviceName = _uiState.value.selectedDevice?.name ?: "Unknown"
+
             val result = if (btDevice != null) {
                 android.util.Log.d("PrintDebug", "Connecting GpPrinterService for test print")
                 gpPrinterService.disconnect()
                 val connectResult = gpPrinterService.connect(btDevice)
                 if (connectResult.isSuccess) {
-                    val printResult = gpPrinterService.printTestPage(device.name)
+                    val printResult = gpPrinterService.printTestPage(deviceName)
                     gpPrinterService.disconnect()
                     printResult
                 } else {
@@ -163,12 +183,12 @@ class DeviceViewModel @Inject constructor(
             result.onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "Test page printed successfully"
+                    printResult = "测试页打印成功"
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
-                    printResult = "Print failed: ${error.message}"
+                    printResult = "打印失败: ${error.message}"
                 )
             }
         }

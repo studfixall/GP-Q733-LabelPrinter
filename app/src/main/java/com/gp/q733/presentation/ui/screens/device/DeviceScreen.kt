@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.gp.q733.domain.model.PrinterDevice
 import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.presentation.viewmodel.DeviceViewModel
 
@@ -178,7 +179,6 @@ fun DeviceScreen(
                 text = "可用设备",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Spacer(modifier = Modifier.height(8.dp))
 
             if (discoveredDevices.isEmpty()) {
@@ -211,7 +211,6 @@ fun DeviceScreen(
                 ) {
                     items(discoveredDevices) { device ->
                         val isSelected = uiState.selectedDevice?.address == device.address
-
                         Card(
                             onClick = { viewModel.selectDevice(device) },
                             modifier = Modifier.fillMaxWidth(),
@@ -250,12 +249,12 @@ fun DeviceScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-
                                 if (connectionState != ConnectionState.Connecting) {
                                     Button(
                                         onClick = {
-                                            viewModel.selectDevice(device)
-                                            viewModel.connect()
+                                            // FIX: Pass device directly to connect() instead of
+                                            // selectDevice + connect (which causes StateFlow race condition)
+                                            viewModel.connect(device)
                                         }
                                     ) {
                                         Text("连接")
