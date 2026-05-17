@@ -1,4 +1,4 @@
-package com.gp.q733.domain.print
+﻿package com.gp.q733.domain.print
 
 import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.Label
@@ -76,12 +76,14 @@ class GpPrinterService @Inject constructor(
         }
         val cmd = createPrintCommand(cmdType, label, settings)
         val bytes = cmd.appendCmds
-        // Log hex dump for debugging blank print
-        val hexDump = bytes.take(200).joinToString(" ") { String.format("%02X", it) }
-        android.util.Log.d("PrintDebug", "generatePrintCommands: ${bytes.size} bytes, hex: $hexDump")
-        val asciiPreview = String(bytes, 0, minOf(bytes.size, 300), Charsets.US_ASCII)
-            .replace('\r', '↵').replace('\n', '↓')
-        android.util.Log.d("PrintDebug", "generatePrintCommands ASCII: $asciiPreview")
+        // Log full command content for debugging
+        android.util.Log.d("PrintDebug", "generatePrintCommands: ${bytes.size} bytes")
+        // Split into chunks for logcat (max ~4000 chars per log entry)
+        val fullText = try { String(bytes, Charsets.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
+        val readable = fullText.replace("\r", "↵").replace("\n", "↓")
+        readable.chunked(3000).forEachIndexed { idx, chunk ->
+            android.util.Log.d("PrintDebug", "generatePrintCommands[${idx}]: $chunk")
+        }
         return bytes
     }
 
@@ -105,12 +107,13 @@ class GpPrinterService @Inject constructor(
         }
         android.util.Log.d("PrintDebug", "GpPrinterService.generateTestPageCommands() - protocol: ${settings.printProtocol}, size: ${labelWidth}x${labelHeight}mm")
         val bytes = cmd.appendCmds
-        // Log hex dump for debugging blank print
-        val hexDump = bytes.take(200).joinToString(" ") { String.format("%02X", it) }
-        android.util.Log.d("PrintDebug", "generateTestPageCommands: ${bytes.size} bytes, hex: $hexDump")
-        val asciiPreview = String(bytes, 0, minOf(bytes.size, 500), Charsets.US_ASCII)
-            .replace('\r', '↵').replace('\n', '↓')
-        android.util.Log.d("PrintDebug", "generateTestPageCommands ASCII: $asciiPreview")
+        // Log full command content for debugging
+        android.util.Log.d("PrintDebug", "generateTestPageCommands: ${bytes.size} bytes")
+        val fullText = try { String(bytes, Charsets.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
+        val readable = fullText.replace("\r", "↵").replace("\n", "↓")
+        readable.chunked(3000).forEachIndexed { idx, chunk ->
+            android.util.Log.d("PrintDebug", "generateTestPageCommands[${idx}]: $chunk")
+        }
         return bytes
     }
 
@@ -296,52 +299,62 @@ class GpPrinterService @Inject constructor(
     /**
      * CPCL test page
      */
-    private fun createCpclTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
+        private fun createCpclTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
         setCpclResolution()
         val factory = CpclFactory()
         val cmd = factory.create()
         val offset = 0
         cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
+
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
         var yPosMm = 2f
-        val lineHeightMm = 5f
         val leftMarginMm = 2f
 
-        // Title
-        val titleSetting = TextSetting()
-        titleSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-        titleSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        titleSetting.printRotation = PrintRotation.Rotate0
-        titleSetting.setxMultiplication(1)
-        titleSetting.setyMultiplication(1)
-        cmd.append(cmd.getTextCmd(titleSetting, "GP-Q733 \u6d4b\u8bd5\u9875", "GBK"))
-        yPosMm += lineHeightMm
+        // === ASCII font test (Font_4) - should always work ===
+        val asciiSetting = TextSetting()
+        asciiSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_4
+        asciiSetting.printRotation = PrintRotation.Rotate0
+        asciiSetting.setxMultiplication(2)
+        asciiSetting.setyMultiplication(2)
 
-        // Device info
-        val normalSetting = TextSetting()
-        normalSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-        normalSetting.printRotation = PrintRotation.Rotate0
-        normalSetting.setxMultiplication(1)
-        normalSetting.setyMultiplication(1)
+        asciiSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(asciiSetting, "GP-Q733 TEST PAGE", Charsets.US_ASCII.name()))
+        yPosMm += 6f
 
-        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "\u8bbe\u5907: $deviceName", "GBK"))
-        yPosMm += lineHeightMm
+        val smallAscii = TextSetting()
+        smallAscii.cpclFontTypeEnum = CpclFontTypeEnum.Font_4
+        smallAscii.printRotation = PrintRotation.Rotate0
+        smallAscii.setxMultiplication(1)
+        smallAscii.setyMultiplication(1)
 
-        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "\u534f\u8bae: CPCL", "GBK"))
-        yPosMm += lineHeightMm
+        smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(smallAscii, "Device: $deviceName", Charsets.US_ASCII.name()))
+        yPosMm += 4f
 
-        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "\u6807\u7b7e: ${width}x${height}mm", "GBK"))
-        yPosMm += lineHeightMm
+        smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(smallAscii, "Protocol: CPCL", Charsets.US_ASCII.name()))
+        yPosMm += 4f
 
-        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "\u5bc6\u5ea6: ${settings.printDensity} \u901f\u5ea6: ${settings.printSpeed}", "GBK"))
-        yPosMm += lineHeightMm + 2f
+        smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(smallAscii, "Label: ${width}x${height}mm", Charsets.US_ASCII.name()))
+        yPosMm += 4f
+
+        smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(smallAscii, "DPI:203 D:${settings.printDensity} S:${settings.printSpeed}", Charsets.US_ASCII.name()))
+        yPosMm += 6f
+
+        // === Chinese font test (Font 24) ===
+        val cnSetting = TextSetting()
+        cnSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+        cnSetting.printRotation = PrintRotation.Rotate0
+        cnSetting.setxMultiplication(1)
+        cnSetting.setyMultiplication(1)
+        cnSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
+        cmd.append(cmd.getTextCmd(cnSetting, "\u6d4b\u8bd5\u4e2d\u6587", "GBK"))
+        yPosMm += 5f
 
         // Test barcode
         val barcodeSetting = BarcodeSetting()
@@ -368,18 +381,11 @@ class GpPrinterService @Inject constructor(
         } catch (e: SdkException) {
             android.util.Log.e("PrintDebug", "CPCL test QR error: ${e.message}")
         }
-        yPosMm += 15f
-
-        // Timestamp
-        val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
-        cmd.append(cmd.getTextCmd(normalSetting, "\u65f6\u95f4: $timestamp", "GBK"))
 
         cmd.append(cmd.getEndCmd())
         return cmd
     }
-
-    /**
+/**
      * TSPL test page
      */
     private fun createTsplTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
