@@ -6,6 +6,7 @@ import com.gp.q733.domain.model.LabelElement
 import com.rt.printerlibrary.bean.LableSizeBean
 import com.rt.printerlibrary.bean.Position
 import com.rt.printerlibrary.cmd.Cmd
+import com.rt.printerlibrary.cmd.CpclCmd
 import com.rt.printerlibrary.cmd.CpclFactory
 import com.rt.printerlibrary.cmd.EscFactory
 import com.rt.printerlibrary.cmd.TsplFactory
@@ -79,7 +80,7 @@ class GpPrinterService @Inject constructor(
         // Log full command content for debugging
         android.util.Log.d("PrintDebug", "generatePrintCommands: ${bytes.size} bytes")
         // Split into chunks for logcat (max ~4000 chars per log entry)
-        val fullText = try { String(bytes, Charsets.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
+        val fullText = try { String(bytes, java.nio.charset.Charset.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
         val readable = fullText.replace("\r", "↵").replace("\n", "↓")
         readable.chunked(3000).forEachIndexed { idx, chunk ->
             android.util.Log.d("PrintDebug", "generatePrintCommands[${idx}]: $chunk")
@@ -109,7 +110,7 @@ class GpPrinterService @Inject constructor(
         val bytes = cmd.appendCmds
         // Log full command content for debugging
         android.util.Log.d("PrintDebug", "generateTestPageCommands: ${bytes.size} bytes")
-        val fullText = try { String(bytes, Charsets.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
+        val fullText = try { String(bytes, java.nio.charset.Charset.forName("GBK")) } catch (_: Exception) { String(bytes, Charsets.US_ASCII) }
         val readable = fullText.replace("\r", "↵").replace("\n", "↓")
         readable.chunked(3000).forEachIndexed { idx, chunk ->
             android.util.Log.d("PrintDebug", "generateTestPageCommands[${idx}]: $chunk")
