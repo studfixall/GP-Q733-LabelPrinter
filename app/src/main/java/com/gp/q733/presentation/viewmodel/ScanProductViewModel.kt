@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.viewmodel
+﻿package com.gp.q733.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -108,8 +108,8 @@ class ScanProductViewModel @Inject constructor(
             val label = Label(
                 id = "scan_${System.currentTimeMillis()}",
                 elements = buildProductElements(info),
-                widthMm = settings.labelWidthMm,
-                heightMm = settings.labelHeightMm
+                widthMm = settings.labelWidth,
+                heightMm = settings.labelHeight
             )
 
             // GpPrinterService.print() handles reconnection internally

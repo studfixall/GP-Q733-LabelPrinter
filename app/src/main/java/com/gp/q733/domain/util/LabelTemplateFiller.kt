@@ -14,7 +14,7 @@ object LabelTemplateFiller {
     /**
      * 填充标签模板
      * 将模板中所有占位符替换为实际商品数据
-     * 
+     *
      * @param template 包含占位符的标签模板
      * @param product 商品信息
      * @return 填充后的标签
@@ -47,16 +47,16 @@ object LabelTemplateFiller {
         return text
             .replace(TemplateFields.PRODUCT_NAME, product.name)
             .replace(TemplateFields.BARCODE, product.barcode)
-            .replace(TemplateFields.PRICE, "¥${String.format("%.2f", product.price)}")
+            .replace(TemplateFields.PRICE, "\u00a5${product.price}")
     }
 
     /**
      * 检查文本是否包含占位符
      */
     fun hasPlaceholders(text: String): Boolean {
-        return text.contains(TemplateFields.PRODUCT_NAME) ||
-               text.contains(TemplateFields.BARCODE) ||
-               text.contains(TemplateFields.PRICE)
+        return text.contains(TemplateFields.PRODUCT_NAME)
+                || text.contains(TemplateFields.BARCODE)
+                || text.contains(TemplateFields.PRICE)
     }
 
     /**
