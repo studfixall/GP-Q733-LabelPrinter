@@ -11,13 +11,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.gp.q733.domain.model.LabelElement
-import com.gp.q733.domain.model.ProductInfo
 import com.gp.q733.domain.repository.ConnectionState
-import com.gp.q733.presentation.viewmodel.LabelTemplate
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
 import com.journeyapps.barcodescanner.ScanContract
@@ -28,56 +24,46 @@ import com.journeyapps.barcodescanner.ScanOptions
 fun ScanProductScreen(
     viewModel: ScanProductViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToEditor: (labelId: String, width: Float?, height: Float?) -> Unit
+    onNavigateToEditor: (labelId: String, width: Float?, height: Float?) -> Unit = { _, _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
-    val context = LocalContext.current
-    
-    // 扫码对话框状态
-    var showScanDialog by remember { mutableStateOf(false) }
+
     var manualBarcode by remember { mutableStateOf("") }
-    var showTemplateSelector by remember { mutableStateOf(false) }
-    
-    // 获取可用的商品模板
-    val productTemplates = viewModel.getProductTemplates()
-    
+
     // ZXing 扫码启动器
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract()
     ) { result ->
         if (result.contents != null) {
-            // 扫码成功，查询商品
-            viewModel.onManualBarcodeEntered(result.contents)
+            viewModel.onBarcodeScanned(result.contents)
         }
     }
-    
+
     // 相机权限请求启动器
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // 权限 granted，启动扫码
             val options = ScanOptions()
                 .setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
-                .setPrompt("将条码对准扫描框")
+                .setPrompt("\u5c06\u6761\u7801\u5bf9\u51c6\u626b\u63cf\u6846")
                 .setCameraId(0)
                 .setBeepEnabled(true)
                 .setBarcodeImageEnabled(false)
             scanLauncher.launch(options)
         } else {
-            // 权限被拒绝
-            viewModel.setError("需要相机权限才能扫码")
+            viewModel.setError("\u9700\u8981\u76f8\u673a\u6743\u9650\u624d\u80fd\u626b\u7801")
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("扫码商品打印") },
+                title = { Text("\u626b\u7801\u5546\u54c1\u6253\u5370") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "\u8fd4\u56de")
                     }
                 }
             )
@@ -102,47 +88,47 @@ fun ScanProductScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "扫描或输入商品条码",
+                        text = "\u626b\u63cf\u6216\u8f93\u5165\u5546\u54c1\u6761\u7801",
                         style = MaterialTheme.typography.titleMedium
                     )
-                    
+
                     // 手动输入条码
                     OutlinedTextField(
                         value = manualBarcode,
                         onValueChange = { manualBarcode = it },
-                        label = { Text("商品条码") },
-                        placeholder = { Text("例如: 6901234567890") },
+                        label = { Text("\u5546\u54c1\u6761\u7801") },
+                        placeholder = { Text("\u4f8b\u5982: 6901234567890") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(
                             onSearch = {
                                 if (manualBarcode.isNotBlank()) {
-                                    viewModel.onManualBarcodeEntered(manualBarcode)
+                                    viewModel.onBarcodeScanned(manualBarcode)
+                                    manualBarcode = ""
                                 }
                             }
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Button(
                             onClick = {
-                                // 请求相机权限并启动扫码
                                 cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                             },
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.QrCodeScanner, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("扫码")
+                            Text("\u626b\u7801")
                         }
-                        
                         Button(
                             onClick = {
                                 if (manualBarcode.isNotBlank()) {
-                                    viewModel.onManualBarcodeEntered(manualBarcode)
+                                    viewModel.onBarcodeScanned(manualBarcode)
+                                    manualBarcode = ""
                                 }
                             },
                             enabled = manualBarcode.isNotBlank(),
@@ -150,17 +136,15 @@ fun ScanProductScreen(
                         ) {
                             Icon(Icons.Default.Search, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("查询")
+                            Text("\u67e5\u8be2")
                         }
                     }
                 }
             }
-            
+
             // 加载状态
             if (uiState.isLoading) {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Card(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -170,13 +154,13 @@ fun ScanProductScreen(
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         Spacer(Modifier.width(16.dp))
-                        Text("查询商品信息中...")
+                        Text("\u67e5\u8be2\u5546\u54c1\u4fe1\u606f\u4e2d...")
                     }
                 }
             }
-            
+
             // 错误信息
-            uiState.error?.let { error ->
+            uiState.errorMessage?.let { error ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -191,39 +175,47 @@ fun ScanProductScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.Error, contentDescription = null)
-                        Text(error)
+                        Text(error, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { viewModel.clearMessages() }) {
+                            Icon(Icons.Default.Close, contentDescription = "\u5173\u95ed")
+                        }
                     }
                 }
             }
-            
-            // 商品信息显示
-            uiState.product?.let { product ->
-                ProductInfoCard(product)
-                
-                // 模板选择
-                if (uiState.showFillPreview) {
-                    Text(
-                        text = "选择标签模板",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    
-                    productTemplates.forEach { template ->
-                        TemplateCard(
-                            template = template,
-                            onClick = {
-                                viewModel.fillTemplateAndPreview(template)
-                            }
-                        )
-                    }
-                }
-            }
-            
-            // 填充后的预览
-            uiState.filledLabel?.let { label ->
+
+            // 成功信息
+            uiState.successMessage?.let { msg ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary)
+                        Text(msg, color = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = { viewModel.clearMessages() }) {
+                            Icon(Icons.Default.Close, contentDescription = "\u5173\u95ed")
+                        }
+                    }
+                }
+            }
+
+            // 商品信息显示
+            val info = uiState.productInfo
+            if (info.barcode.isNotBlank()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
                     )
                 ) {
                     Column(
@@ -231,56 +223,60 @@ fun ScanProductScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "预览",
+                            text = "\u5546\u54c1\u4fe1\u606f",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        
-                        // 简单的预览信息
-                        val textElements = label.elements.filterIsInstance<LabelElement.Text>()
-                        textElements.forEach { element ->
-                            val style = if (element.isBold) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge
-                            Text(
-                                text = element.text,
-                                style = style
-                            )
+                        if (info.name.isNotBlank()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("\u540d\u79f0:", style = MaterialTheme.typography.bodyMedium)
+                                Text(info.name, style = MaterialTheme.typography.bodyLarge)
+                            }
                         }
-                        
-                        val barcodeElements = label.elements.filterIsInstance<LabelElement.Barcode>()
-                        barcodeElements.forEach { element ->
-                            Text(
-                                text = "条码: ${element.content}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Button(
-                                onClick = { viewModel.reset() },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.outline
-                                )
+                            Text("\u6761\u7801:", style = MaterialTheme.typography.bodyMedium)
+                            Text(info.barcode, style = MaterialTheme.typography.bodyLarge)
+                        }
+                        if (info.price.isNotBlank()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("重新扫码")
+                                Text("\u4ef7\u683c:", style = MaterialTheme.typography.bodyMedium)
+                                Text("\u00a5${info.price}", style = MaterialTheme.typography.titleLarge)
                             }
-                            
-                            Button(
-                                onClick = { viewModel.printFilledLabel() },
-                                modifier = Modifier.weight(1f),
-                                enabled = connectionState == ConnectionState.Connected
-                            ) {
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+
+                        // 打印按钮
+                        Button(
+                            onClick = { viewModel.printFilledLabel() },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !uiState.isPrinting
+                        ) {
+                            if (uiState.isPrinting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text("\u6253\u5370\u4e2d...")
+                            } else {
                                 Icon(Icons.Default.Print, contentDescription = null)
                                 Spacer(Modifier.width(8.dp))
-                                Text("打印")
+                                Text("\u6253\u5370\u6807\u7b7e")
                             }
                         }
                     }
                 }
             }
-            
+
             // 连接状态提示
             if (connectionState == ConnectionState.Disconnected) {
                 Card(
@@ -297,89 +293,10 @@ fun ScanProductScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.BluetoothDisabled, contentDescription = null)
-                        Text("请先连接蓝牙打印机")
+                        Text("\u8bf7\u5148\u8fde\u63a5\u84dd\u7259\u6253\u5370\u673a")
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun ProductInfoCard(product: ProductInfo) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "商品信息",
-                style = MaterialTheme.typography.titleMedium
-            )
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("名称:", style = MaterialTheme.typography.bodyMedium)
-                Text(product.name, style = MaterialTheme.typography.bodyLarge)
-            }
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("条码:", style = MaterialTheme.typography.bodyMedium)
-                Text(product.barcode, style = MaterialTheme.typography.bodyLarge)
-            }
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("价格:", style = MaterialTheme.typography.bodyMedium)
-                Text("¥${String.format("%.2f", product.price)}", style = MaterialTheme.typography.titleLarge)
-            }
-        }
-    }
-}
-
-@Composable
-private fun TemplateCard(template: LabelTemplate, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = template.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = template.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = "选择"
-            )
         }
     }
 }

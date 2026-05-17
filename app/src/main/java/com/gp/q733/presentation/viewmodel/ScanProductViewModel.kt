@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
+import com.gp.q733.domain.model.ProductInfo
 import com.gp.q733.domain.print.GpPrinterService
 import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.domain.repository.BluetoothRepository
@@ -18,15 +19,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class ProductInfo(
-    val barcode: String = "",
-    val name: String = "",
-    val price: String = "",
-    val spec: String = "",
-    val unit: String = "",
-    val origin: String = ""
-)
 
 data class ScanProductUiState(
     val productInfo: ProductInfo = ProductInfo(),
