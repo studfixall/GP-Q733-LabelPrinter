@@ -86,3 +86,5 @@ __pycache__/
 # Analysis reports
 *.md
 task-summary_*.txt
+
+keystore-base64.txt
