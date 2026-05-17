@@ -56,6 +56,14 @@ class GpPrinterService @Inject constructor(
     fun getLastConnectedMac(): String? = lastConnectedMac
 
     /**
+     * 设置 CPCL 分辨率 — SDK 默认 200，GP-Q733 是 203 DPI
+     */
+    private fun setCpclResolution() {
+        CpclCmd.Lateral_Resolution = DPI.toString()
+        CpclCmd.Vertical_Resolution = DPI.toString()
+    }
+
+    /**
      * 生成标签打印命令字节数组
      * 调用方负责通过 BluetoothRepository.write() 发送
      */
@@ -119,6 +127,7 @@ class GpPrinterService @Inject constructor(
      * getCpclHeaderCmd takes mm values, Position takes dots values
      */
     private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
+        setCpclResolution()
         val factory = CpclFactory()
         val cmd = factory.create()
         val width = settings.labelWidth.toInt()
@@ -288,6 +297,7 @@ class GpPrinterService @Inject constructor(
      * CPCL test page
      */
     private fun createCpclTestCommand(deviceName: String, width: Int, height: Int, settings: com.gp.q733.data.local.AppSettings): Cmd {
+        setCpclResolution()
         val factory = CpclFactory()
         val cmd = factory.create()
         val offset = 0
