@@ -137,7 +137,11 @@ class GpPrinterService @Inject constructor(
         val width = settings.labelWidth.toInt()
         val height = settings.labelHeight.toInt()
         val offset = 0
-        cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
+    // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
+    val widthDots = width * 8
+    val heightDots = height * 8
+    val header = "! $offset $DPI $DPI ${heightDots} 1\r\nPW ${widthDots}\r\n"
+    cmd.append(header.toByteArray(Charsets.US_ASCII))
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
@@ -194,7 +198,8 @@ class GpPrinterService @Inject constructor(
                 }
             }
         }
-        cmd.append(cmd.getEndCmd())
+    // 手动构建 CPCL footer（不含 !U1 END-PAGE）
+    cmd.append("FORM\r\nPRINT\r\n".toByteArray(Charsets.US_ASCII))
         return cmd
     }
 
@@ -305,7 +310,11 @@ class GpPrinterService @Inject constructor(
         val factory = CpclFactory()
         val cmd = factory.create()
         val offset = 0
-        cmd.append(cmd.getCpclHeaderCmd(width, height, 1, offset))
+        // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
+    val testWidthDots = width * 8
+    val testHeightDots = height * 8
+    val testHeader = "! $offset $DPI $DPI ${testHeightDots} 1\r\nPW ${testWidthDots}\r\n"
+    cmd.append(testHeader.toByteArray(Charsets.US_ASCII))
 
         val commonSetting = CommonSetting()
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
@@ -383,7 +392,8 @@ class GpPrinterService @Inject constructor(
             android.util.Log.e("PrintDebug", "CPCL test QR error: ${e.message}")
         }
 
-        cmd.append(cmd.getEndCmd())
+    // 手动构建 CPCL footer（不含 !U1 END-PAGE）
+    cmd.append("FORM\r\nPRINT\r\n".toByteArray(Charsets.US_ASCII))
         return cmd
     }
 /**
