@@ -67,7 +67,14 @@ class GpPrinterService @Inject constructor(
             PrintProtocol.ESCPOS -> BaseEnum.CMD_ESC
         }
         val cmd = createPrintCommand(cmdType, label, settings)
-        return cmd.appendCmds
+        val bytes = cmd.appendCmds
+        // Log hex dump for debugging blank print
+        val hexDump = bytes.take(200).joinToString(" ") { String.format("%02X", it) }
+        android.util.Log.d("PrintDebug", "generatePrintCommands: ${bytes.size} bytes, hex: $hexDump")
+        val asciiPreview = String(bytes, 0, minOf(bytes.size, 300), Charsets.US_ASCII)
+            .replace('\r', '↵').replace('\n', '↓')
+        android.util.Log.d("PrintDebug", "generatePrintCommands ASCII: $asciiPreview")
+        return bytes
     }
 
     /**
@@ -89,7 +96,14 @@ class GpPrinterService @Inject constructor(
             else -> createEscTestCommand(deviceName, settings)
         }
         android.util.Log.d("PrintDebug", "GpPrinterService.generateTestPageCommands() - protocol: ${settings.printProtocol}, size: ${labelWidth}x${labelHeight}mm")
-        return cmd.appendCmds
+        val bytes = cmd.appendCmds
+        // Log hex dump for debugging blank print
+        val hexDump = bytes.take(200).joinToString(" ") { String.format("%02X", it) }
+        android.util.Log.d("PrintDebug", "generateTestPageCommands: ${bytes.size} bytes, hex: $hexDump")
+        val asciiPreview = String(bytes, 0, minOf(bytes.size, 500), Charsets.US_ASCII)
+            .replace('\r', '↵').replace('\n', '↓')
+        android.util.Log.d("PrintDebug", "generateTestPageCommands ASCII: $asciiPreview")
+        return bytes
     }
 
     private fun createPrintCommand(cmdType: Int, label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {

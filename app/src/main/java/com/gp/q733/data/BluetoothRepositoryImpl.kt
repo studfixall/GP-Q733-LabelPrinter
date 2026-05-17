@@ -140,6 +140,7 @@ class BluetoothRepositoryImpl @Inject constructor(
         if (socket == null || !socket.isConnected) {
             return Result.failure(Exception("Not connected"))
         }
+        android.util.Log.d("PrintDebug", "BluetoothRepository.write() - ${data.size} bytes to ${_connectedDevice.value?.name}")
         return try {
             val chunkSize = 1024
             var offset = 0
