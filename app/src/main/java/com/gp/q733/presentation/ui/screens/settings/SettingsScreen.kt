@@ -10,7 +10,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.gp.q733.domain.print.PaperType
 import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.presentation.viewmodel.SettingsViewModel
 
@@ -21,19 +23,21 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
     var labelWidthText by remember { mutableStateOf("50") }
     var labelHeightText by remember { mutableStateOf("30") }
+    var gapMmText by remember { mutableStateOf("2") }
+    var blackMarkOffsetText by remember { mutableStateOf("0") }
     var showProtocolMenu by remember { mutableStateOf(false) }
+    var showPaperTypeMenu by remember { mutableStateOf(false) }
     var showDensityMenu by remember { mutableStateOf(false) }
     var showSpeedMenu by remember { mutableStateOf(false) }
 
     // Sync initial values
-    LaunchedEffect(uiState.labelWidth) {
-        labelWidthText = uiState.labelWidth.toInt().toString()
-    }
-    LaunchedEffect(uiState.labelHeight) {
-        labelHeightText = uiState.labelHeight.toInt().toString()
-    }
+    LaunchedEffect(uiState.labelWidth) { labelWidthText = uiState.labelWidth.toInt().toString() }
+    LaunchedEffect(uiState.labelHeight) { labelHeightText = uiState.labelHeight.toInt().toString() }
+    LaunchedEffect(uiState.gapMm) { gapMmText = uiState.gapMm.toInt().toString() }
+    LaunchedEffect(uiState.blackMarkOffset) { blackMarkOffsetText = uiState.blackMarkOffset.toInt().toString() }
 
     // Show save success snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -73,7 +77,6 @@ fun SettingsScreen(
                 text = "标签设置",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -90,9 +93,7 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     OutlinedTextField(
                         value = labelHeightText,
                         onValueChange = { text ->
@@ -108,12 +109,132 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Paper Type Settings
+            Text(
+                text = "纸张设置",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // Paper Type Selection
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "纸张类型",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Box {
+                            Button(
+                                onClick = { showPaperTypeMenu = true }
+                            ) {
+                                Text(
+                                    when (uiState.paperType) {
+                                        PaperType.LABEL -> "标签纸"
+                                        PaperType.BLACK_MARK -> "黑标纸"
+                                        PaperType.RECEIPT -> "票据纸"
+                                    }
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showPaperTypeMenu,
+                                onDismissRequest = { showPaperTypeMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("标签纸（带间隙）") },
+                                    onClick = {
+                                        viewModel.updatePaperType(PaperType.LABEL)
+                                        showPaperTypeMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("黑标纸（带黑色标记）") },
+                                    onClick = {
+                                        viewModel.updatePaperType(PaperType.BLACK_MARK)
+                                        showPaperTypeMenu = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("票据纸（连续纸）") },
+                                    onClick = {
+                                        viewModel.updatePaperType(PaperType.RECEIPT)
+                                        showPaperTypeMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Paper type description
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = when (uiState.paperType) {
+                            PaperType.LABEL -> "间隙传感器检纸，需要设置标签间距"
+                            PaperType.BLACK_MARK -> "黑标传感器检纸，需要设置黑标偏移"
+                            PaperType.RECEIPT -> "连续走纸，无间隙无标记"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Gap setting (only for LABEL)
+                    if (uiState.paperType == PaperType.LABEL) {
+                        OutlinedTextField(
+                            value = gapMmText,
+                            onValueChange = { text ->
+                                gapMmText = text
+                                text.toFloatOrNull()?.let { viewModel.updateGapMm(it) }
+                            },
+                            label = { Text("标签间距 (mm)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+
+                    // Black mark offset (only for BLACK_MARK)
+                    if (uiState.paperType == PaperType.BLACK_MARK) {
+                        OutlinedTextField(
+                            value = blackMarkOffsetText,
+                            onValueChange = { text ->
+                                blackMarkOffsetText = text
+                                text.toFloatOrNull()?.let { viewModel.updateBlackMarkOffset(it) }
+                            },
+                            label = { Text("黑标偏移 (mm)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = gapMmText,
+                            onValueChange = { text ->
+                                gapMmText = text
+                                text.toFloatOrNull()?.let { viewModel.updateGapMm(it) }
+                            },
+                            label = { Text("黑标间距 (mm)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Print Protocol Settings
             Text(
                 text = "打印协议",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -172,7 +293,7 @@ fun SettingsScreen(
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
-                    Divider()
+                    HorizontalDivider()
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Print Density
@@ -193,14 +314,12 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printDensity > 0
-                            ) {
-                                Icon(Icons.Default.Remove, contentDescription = "减少")
-                            }
+                            ) { Icon(Icons.Default.Remove, contentDescription = "减少") }
                             Text(
                                 text = uiState.printDensity.toString(),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.width(32.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                textAlign = TextAlign.Center
                             )
                             IconButton(
                                 onClick = {
@@ -209,9 +328,7 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printDensity < 15
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "增加")
-                            }
+                            ) { Icon(Icons.Default.Add, contentDescription = "增加") }
                         }
                     }
 
@@ -235,14 +352,12 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printSpeed > 1
-                            ) {
-                                Icon(Icons.Default.Remove, contentDescription = "减少")
-                            }
+                            ) { Icon(Icons.Default.Remove, contentDescription = "减少") }
                             Text(
                                 text = uiState.printSpeed.toString(),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.width(32.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                textAlign = TextAlign.Center
                             )
                             IconButton(
                                 onClick = {
@@ -251,9 +366,7 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printSpeed < 10
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "增加")
-                            }
+                            ) { Icon(Icons.Default.Add, contentDescription = "增加") }
                         }
                     }
                 }
@@ -266,7 +379,6 @@ fun SettingsScreen(
                 text = "打印设置",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -282,9 +394,7 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f)
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 onClick = {
                                     if (uiState.printCopies > 1) {
@@ -292,14 +402,12 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printCopies > 1
-                            ) {
-                                Icon(Icons.Default.Remove, contentDescription = "减少")
-                            }
+                            ) { Icon(Icons.Default.Remove, contentDescription = "减少") }
                             Text(
                                 text = uiState.printCopies.toString(),
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.width(32.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                textAlign = TextAlign.Center
                             )
                             IconButton(
                                 onClick = {
@@ -308,9 +416,7 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.printCopies < 99
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "增加")
-                            }
+                            ) { Icon(Icons.Default.Add, contentDescription = "增加") }
                         }
                     }
                 }
@@ -323,7 +429,6 @@ fun SettingsScreen(
                 text = "连接设置",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -367,9 +472,7 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f)
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(
                                 onClick = {
                                     if (uiState.reconnectInterval > 1) {
@@ -377,14 +480,12 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.reconnectInterval > 1
-                            ) {
-                                Icon(Icons.Default.Remove, contentDescription = "减少")
-                            }
+                            ) { Icon(Icons.Default.Remove, contentDescription = "减少") }
                             Text(
                                 text = "${uiState.reconnectInterval}s",
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.width(48.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                textAlign = TextAlign.Center
                             )
                             IconButton(
                                 onClick = {
@@ -393,58 +494,8 @@ fun SettingsScreen(
                                     }
                                 },
                                 enabled = uiState.reconnectInterval < 60
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "增加")
-                            }
+                            ) { Icon(Icons.Default.Add, contentDescription = "增加") }
                         }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 命令预览 - 当前TSPL指令
-            Text(
-                text = "命令预览",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                val cmdPreview = buildString {
-                    appendLine("SIZE ${uiState.labelWidth.toInt()} mm,${uiState.labelHeight.toInt()} mm")
-                    appendLine("GAP 2 mm,0")
-                    appendLine("DIRECTION 1")
-                    appendLine("REFERENCE 0,0")
-                    appendLine("CODEPAGE 936")
-                    appendLine("DENSITY ${uiState.printDensity}")
-                    appendLine("SPEED ${uiState.printSpeed}")
-                    appendLine("CLS")
-                    appendLine("...标签元素...")
-                    appendLine("PRINT 1,1")
-                    appendLine("END")
-                }
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "当前设置的TSPL指令预览（GP-Q733）",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = cmdPreview,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                            modifier = Modifier.padding(12.dp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
@@ -456,7 +507,6 @@ fun SettingsScreen(
                 text = "关于",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -495,6 +545,21 @@ fun SettingsScreen(
                                 PrintProtocol.TSPL -> "TSPL"
                                 PrintProtocol.CPCL -> "CPCL"
                                 PrintProtocol.ESCPOS -> "ESC/POS"
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("纸张类型")
+                        Text(
+                            text = when (uiState.paperType) {
+                                PaperType.LABEL -> "标签纸"
+                                PaperType.BLACK_MARK -> "黑标纸"
+                                PaperType.RECEIPT -> "票据纸"
                             },
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -1,4 +1,4 @@
-﻿package com.gp.q733.domain.print
+package com.gp.q733.domain.print
 
 
 
