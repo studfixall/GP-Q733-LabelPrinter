@@ -67,6 +67,8 @@ gradle-extract/
 *.apk
 *.aab
 *.jar
+# Keep printer SDK
+!app/libs/printer_library.jar
 *.aar
 
 # Keep Gradle wrapper
