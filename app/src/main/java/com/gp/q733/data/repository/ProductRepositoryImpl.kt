@@ -1,39 +1,106 @@
 package com.gp.q733.data.repository
 
+import android.content.Context
+import com.gp.q733.data.local.db.ProductDao
+import com.gp.q733.data.local.db.ProductDatabase
+import com.gp.q733.data.local.db.toDomain
+import com.gp.q733.data.local.db.toEntity
+import com.gp.q733.data.util.CsvParser
 import com.gp.q733.domain.model.ProductInfo
 import com.gp.q733.domain.repository.ProductRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * 商品数据仓库实现（模拟数据）
- * 
- * TODO: 实际项目中需要替换为真实的 API 或数据库查询
- * 当前使用模拟数据用于功能演示，后续需要：
- * 1. 配置 SQL Server 连接（通过 REST API 中转）
- * 2. 或实现真实的 API 客户端调用远程服务
+ * 商品数据仓库实现
+ * 基于Room本地数据库，支持CRUD + 模糊搜索 + 批量导入
+ * 首次启动自动从assets预加载示例数据
  */
 @Singleton
-class ProductRepositoryImpl @Inject constructor() : ProductRepository {
+class ProductRepositoryImpl @Inject constructor(
+    private val productDatabase: ProductDatabase.Provider,
+    @ApplicationContext private val context: Context
+) : ProductRepository {
 
-    // 模拟商品数据库（测试用）
-    private val mockProducts = mapOf(
-        "6901234567890" to ProductInfo("6901234567890", "可口可乐 330ml", 3.5),
-        "6901234567891" to ProductInfo("6901234567891", "雪碧 330ml", 3.5),
-        "6901234567892" to ProductInfo("6901234567892", "芬达 330ml", 3.5),
-        "6901234567893" to ProductInfo("6901234567893", "冰红茶 500ml", 4.0),
-        "6901234567894" to ProductInfo("6901234567894", "矿泉水 550ml", 2.0),
-        "6901234567895" to ProductInfo("6901234567895", "牛奶 250ml", 5.5),
-        "6901234567896" to ProductInfo("6901234567896", "面包 100g", 6.0),
-        "6901234567897" to ProductInfo("6901234567897", "饼干 200g", 8.5),
-        "6901234567898" to ProductInfo("6901234567898", "薯片 150g", 7.0),
-        "6901234567899" to ProductInfo("6901234567899", "巧克力 100g", 12.0)
-    )
+    private val dao: ProductDao by lazy { productDatabase.get().productDao() }
+
+    @Volatile
+    private var preloaded = false
+
+    /**
+     * 首次访问时检查是否需要预加载示例数据
+     */
+    private suspend fun ensurePreloaded() {
+        if (preloaded) return
+        if (dao.getCount() > 0) {
+            preloaded = true
+            return
+        }
+        // 数据库为空，从assets导入示例数据
+        try {
+            val inputStream = context.assets.open("sample_products.csv")
+            val result = CsvParser.parse(inputStream)
+            if (result.products.isNotEmpty()) {
+                val entities = result.products.map { it.toEntity() }
+                dao.insertAll(entities)
+            }
+        } catch (e: Exception) {
+            // 预加载失败不影响功能
+        }
+        preloaded = true
+    }
 
     override suspend fun getProductByBarcode(barcode: String): ProductInfo? {
-        // TODO: 替换为真实的 API 调用或数据库查询
-        // 示例：return apiService.getProduct(barcode)
-        
-        return mockProducts[barcode]
+        ensurePreloaded()
+        return dao.getProductByBarcode(barcode)?.toDomain()
+    }
+
+    override fun getAllProducts(): Flow<List<ProductInfo>> {
+        // Flow是惰性的，首次collect时触发预加载
+        return dao.getAllProducts().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun searchProducts(keyword: String): Flow<List<ProductInfo>> {
+        return dao.searchProducts(keyword).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun addProduct(product: ProductInfo): Long {
+        ensurePreloaded()
+        return dao.insert(product.toEntity())
+    }
+
+    override suspend fun updateProduct(product: ProductInfo) {
+        ensurePreloaded()
+        val existing = dao.getProductByBarcode(product.barcode)
+        if (existing != null) {
+            dao.update(product.toEntity(id = existing.id, createdAt = existing.createdAt))
+        } else {
+            dao.insert(product.toEntity())
+        }
+    }
+
+    override suspend fun deleteProduct(product: ProductInfo) {
+        val existing = dao.getProductByBarcode(product.barcode)
+        if (existing != null) {
+            dao.delete(existing)
+        }
+    }
+
+    override suspend fun importProducts(products: List<ProductInfo>): Int {
+        ensurePreloaded()
+        val entities = products.map { it.toEntity() }
+        dao.insertAll(entities)
+        return products.size
+    }
+
+    override suspend fun getProductCount(): Int {
+        return dao.getCount()
     }
 }

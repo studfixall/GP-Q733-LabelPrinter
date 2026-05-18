@@ -3,6 +3,7 @@ package com.gp.q733.data.di
 import com.gp.q733.data.BluetoothRepositoryImpl
 import com.gp.q733.data.local.LabelDataStore
 import com.gp.q733.data.local.SettingsDataStore
+import com.gp.q733.data.local.db.ProductDatabase
 import com.gp.q733.data.repository.ProductRepositoryImpl
 import com.gp.q733.domain.print.PrintService
 import com.gp.q733.domain.repository.BluetoothRepository

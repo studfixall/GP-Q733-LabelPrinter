@@ -14,7 +14,7 @@ object LabelTemplateFiller {
     /**
      * 填充标签模板
      * 将模板中所有占位符替换为实际商品数据
-     * 
+     *
      * @param template 包含占位符的标签模板
      * @param product 商品信息
      * @return 填充后的标签
@@ -27,11 +27,9 @@ object LabelTemplateFiller {
                     element.copy(text = filledText)
                 }
                 is LabelElement.Barcode -> {
-                    // 条码内容替换为实际条码
                     element.copy(content = product.barcode)
                 }
                 is LabelElement.QRCode -> {
-                    // 二维码内容替换为实际条码
                     element.copy(content = product.barcode)
                 }
                 is LabelElement.Line -> element
@@ -47,16 +45,18 @@ object LabelTemplateFiller {
         return text
             .replace(TemplateFields.PRODUCT_NAME, product.name)
             .replace(TemplateFields.BARCODE, product.barcode)
-            .replace(TemplateFields.PRICE, "¥${String.format("%.2f", product.price)}")
+            .replace(TemplateFields.PRICE, String.format("%.2f", product.price))
+            .replace(TemplateFields.SPEC, product.spec)
     }
 
     /**
      * 检查文本是否包含占位符
      */
     fun hasPlaceholders(text: String): Boolean {
-        return text.contains(TemplateFields.PRODUCT_NAME) ||
-               text.contains(TemplateFields.BARCODE) ||
-               text.contains(TemplateFields.PRICE)
+        return text.contains(TemplateFields.PRODUCT_NAME)
+            || text.contains(TemplateFields.BARCODE)
+            || text.contains(TemplateFields.PRICE)
+            || text.contains(TemplateFields.SPEC)
     }
 
     /**

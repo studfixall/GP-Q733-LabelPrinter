@@ -98,6 +98,11 @@ class SettingsDataStore @Inject constructor(
         dataStore.edit { it[RECONNECT_INTERVAL] = seconds }
     }
 
+    suspend fun updateLabelSize(width: Float, height: Float) {
+        saveLabelWidth(width)
+        saveLabelHeight(height)
+    }
+
     suspend fun saveAllSettings(settings: AppSettings) {
         dataStore.edit { prefs ->
             prefs[LABEL_WIDTH] = settings.labelWidth

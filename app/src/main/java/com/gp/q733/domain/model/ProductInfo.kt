@@ -2,12 +2,15 @@ package com.gp.q733.domain.model
 
 /**
  * 商品信息数据模型
- * 用于扫码后从数据库/API获取的商品数据
+ * 用于扫码后从本地数据库查询的商品数据
  */
 data class ProductInfo(
-    val barcode: String,      // 商品条码（扫描得到）
-    val name: String,         // 商品名称
-    val price: Double         // 商品价格
+    val barcode: String,     // 商品条码（扫描得到）
+    val name: String,        // 商品名称
+    val price: Double,       // 商品价格
+    val spec: String = "",   // 规格（如：330ml、500g）
+    val unit: String = "",   // 单位（如：个、瓶、箱）
+    val category: String = "" // 分类
 )
 
 /**
@@ -15,7 +18,8 @@ data class ProductInfo(
  * 用于标识模板中需要动态填充的位置
  */
 object TemplateFields {
-    const val PRODUCT_NAME = "{productName}"  // 商品名称占位符
-    const val BARCODE = "{barcode}"           // 条码占位符
-    const val PRICE = "{price}"               // 价格占位符
+    const val PRODUCT_NAME = "{productName}" // 商品名称占位符
+    const val BARCODE = "{barcode}"          // 条码占位符
+    const val PRICE = "{price}"              // 价格占位符
+    const val SPEC = "{spec}"                // 规格占位符
 }

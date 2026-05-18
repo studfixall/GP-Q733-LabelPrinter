@@ -43,6 +43,12 @@ class GpPrinterService @Inject constructor(
     companion object {
         private const val DPI = 203
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
+
+        /**
+         * Last connected printer MAC address (set by connect(), used by ScanProductViewModel for auto-reconnect)
+         */
+        var lastConnectedMac: String? = null
+            private set
     }
 
     private var rtPrinter: RTPrinter<*>? = null
@@ -101,6 +107,7 @@ class GpPrinterService @Inject constructor(
             android.util.Log.d("PrintDebug", "GpPrinterService - connected: $connected (waited ${retries * 200}ms)")
 
             if (connected) {
+                lastConnectedMac = device.address
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("Connection timeout - printer did not connect within 4 seconds"))

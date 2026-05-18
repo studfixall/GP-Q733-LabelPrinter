@@ -183,6 +183,15 @@ class BluetoothRepositoryImpl @Inject constructor(
         }
     }
 
+    @SuppressLint("MissingPermission")
+    override fun getRemoteDevice(macAddress: String): BluetoothDevice? {
+        return try {
+            getBluetoothAdapter()?.getRemoteDevice(macAddress)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun cleanup() {
         if (isReceiverRegistered) {
             try {

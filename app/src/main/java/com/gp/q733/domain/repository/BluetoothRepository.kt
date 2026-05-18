@@ -46,10 +46,14 @@ interface BluetoothRepository {
      */
     fun getConnectedDevice(): BluetoothDevice?
 
-    /**
-     * Get flow of currently connected BluetoothDevice
-     */
+    /**     * Get flow of currently connected BluetoothDevice     */
     fun getConnectedDeviceFlow(): StateFlow<BluetoothDevice?>
+
+    /**
+     * Get a BluetoothDevice by MAC address
+     * Used for auto-reconnect from scan-print flow
+     */
+    fun getRemoteDevice(macAddress: String): BluetoothDevice?
 }
 
 enum class ConnectionState {

@@ -83,3 +83,11 @@ __pycache__/
 # Analysis reports
 *.md
 task-summary_*.txt
+
+# Decompilation work
+Barsoft-decompiled/
+jadx/
+repo.bundle
+__temp_scan_vm.kt
+/com/
+GP-Q733-LabelPrinter/

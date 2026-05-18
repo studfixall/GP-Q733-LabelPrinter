@@ -6,6 +6,7 @@ import com.gp.q733.data.local.LabelDataStore
 import com.gp.q733.domain.model.BarcodeFormat
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
+import com.gp.q733.domain.model.LabelTemplate
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,13 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class LabelTemplate(
-    val id: String,
-    val name: String,
-    val description: String,
-    val label: Label
-)
 
 data class HomeUiState(
     val recentLabels: List<Label> = emptyList(),

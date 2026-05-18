@@ -6,7 +6,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,15 +22,14 @@ fun HomeScreen(
     onNavigateToDevice: () -> Unit,
     onNavigateToEditor: (templateId: String, width: Float?, height: Float?) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToScanProduct: () -> Unit = {},
+    onNavigateToProductManagement: () -> Unit = {},
     onEditLabel: (Label) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
-    // 新建标签对话框状态
     var showNewLabelDialog by remember { mutableStateOf(false) }
     var labelWidth by remember { mutableStateOf("50") }
     var labelHeight by remember { mutableStateOf("30") }
-    var showScanDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -59,17 +57,13 @@ fun HomeScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "打印机状态",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = when (uiState.printerStatus) {
                                 PrinterStatus.Connected -> Icons.Default.CheckCircle
@@ -104,7 +98,6 @@ fun HomeScreen(
                 text = "快捷操作",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -125,17 +118,30 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.QrCodeScanner,
                     label = "扫码打印",
-                    onClick = { showScanDialog = true }
+                    onClick = onNavigateToScanProduct
                 )
             }
 
-            // Saved Labels Section
+            // Second row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Default.Inventory,
+                    label = "商品管理",
+                    onClick = onNavigateToProductManagement
+                )
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            // Saved Labels
             if (uiState.recentLabels.isNotEmpty()) {
                 Text(
                     text = "已保存标签",
                     style = MaterialTheme.typography.titleMedium
                 )
-
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -148,7 +154,6 @@ fun HomeScreen(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
@@ -157,7 +162,6 @@ fun HomeScreen(
                 text = "标签模板",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -179,22 +183,19 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Settings Button
+            // Settings
             OutlinedButton(
                 onClick = onNavigateToSettings,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null
-                )
+                Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("设置")
             }
         }
     }
-    
-    // 新建标签对话框
+
+    // New label dialog
     if (showNewLabelDialog) {
         AlertDialog(
             onDismissRequest = { showNewLabelDialog = false },
@@ -205,8 +206,6 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text("请设置标签尺寸（毫米）")
-                    
-                    // 宽度输入
                     OutlinedTextField(
                         value = labelWidth,
                         onValueChange = { labelWidth = it.filter { c -> c.isDigit() } },
@@ -215,8 +214,6 @@ fun HomeScreen(
                         singleLine = true,
                         suffix = { Text("mm") }
                     )
-                    
-                    // 高度输入
                     OutlinedTextField(
                         value = labelHeight,
                         onValueChange = { labelHeight = it.filter { c -> c.isDigit() } },
@@ -225,66 +222,28 @@ fun HomeScreen(
                         singleLine = true,
                         suffix = { Text("mm") }
                     )
-                    
-                    // 常用尺寸快捷选择
-                    Text(
-                        text = "常用尺寸：",
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Text(text = "常用尺寸：", style = MaterialTheme.typography.labelMedium)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        SuggestionChip(
-                            onClick = { 
-                                labelWidth = "30"
-                                labelHeight = "20"
-                            },
-                            label = { Text("30×20") }
-                        )
-                        SuggestionChip(
-                            onClick = { 
-                                labelWidth = "40"
-                                labelHeight = "30"
-                            },
-                            label = { Text("40×30") }
-                        )
-                        SuggestionChip(
-                            onClick = { 
-                                labelWidth = "50"
-                                labelHeight = "30"
-                            },
-                            label = { Text("50×30") }
-                        )
-                        SuggestionChip(
-                            onClick = { 
-                                labelWidth = "60"
-                                labelHeight = "40"
-                            },
-                            label = { Text("60×40") }
-                        )
+                        SuggestionChip(onClick = { labelWidth = "30"; labelHeight = "20" }, label = { Text("30x20") })
+                        SuggestionChip(onClick = { labelWidth = "40"; labelHeight = "30" }, label = { Text("40x30") })
+                        SuggestionChip(onClick = { labelWidth = "50"; labelHeight = "30" }, label = { Text("50x30") })
+                        SuggestionChip(onClick = { labelWidth = "60"; labelHeight = "40" }, label = { Text("60x40") })
                     }
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        val width = labelWidth.toFloatOrNull() ?: 50f
-                        val height = labelHeight.toFloatOrNull() ?: 30f
-                        showNewLabelDialog = false
-                        // 直接传递尺寸参数，不依赖ViewModel状态
-                        onNavigateToEditor("new", width.coerceIn(10f, 100f), height.coerceIn(10f, 100f))
-                    }
-                ) {
-                    Text("创建")
-                }
+                TextButton(onClick = {
+                    val width = labelWidth.toFloatOrNull() ?: 50f
+                    val height = labelHeight.toFloatOrNull() ?: 30f
+                    showNewLabelDialog = false
+                    onNavigateToEditor("new", width.coerceIn(10f, 100f), height.coerceIn(10f, 100f))
+                }) { Text("创建") }
             },
             dismissButton = {
-                TextButton(
-                    onClick = { showNewLabelDialog = false }
-                ) {
-                    Text("取消")
-                }
+                TextButton(onClick = { showNewLabelDialog = false }) { Text("取消") }
             }
         )
     }
@@ -297,15 +256,9 @@ private fun SavedLabelCard(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
+    Card(modifier = modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -317,7 +270,7 @@ private fun SavedLabelCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "标签 ${label.widthMm.toInt()}×${label.heightMm.toInt()}mm",
+                    text = "标签 ${label.widthMm.toInt()}x${label.heightMm.toInt()}mm",
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
@@ -345,15 +298,9 @@ private fun TemplateCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
+    Card(modifier = modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -364,10 +311,7 @@ private fun TemplateCard(
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall
-                )
+                Text(text = name, style = MaterialTheme.typography.titleSmall)
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
@@ -394,18 +338,10 @@ private fun ActionButton(
         onClick = onClick,
         modifier = modifier.height(80.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(imageVector = icon, contentDescription = null)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium
-            )
+            Text(text = label, style = MaterialTheme.typography.labelMedium)
         }
     }
 }

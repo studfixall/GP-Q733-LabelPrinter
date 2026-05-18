@@ -93,6 +93,11 @@ dependencies {
     // DataStore for preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    // Room - 本地商品数据库
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
     // JSON serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 

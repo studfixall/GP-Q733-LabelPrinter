@@ -25,6 +25,8 @@ import com.gp.q733.presentation.viewmodel.EditorViewModel
 import com.gp.q733.presentation.viewmodel.HomeViewModel
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
 import com.gp.q733.presentation.viewmodel.SettingsViewModel
+import com.gp.q733.ui.product.ProductManagementScreen
+import com.gp.q733.ui.product.ProductViewModel
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -40,6 +42,7 @@ sealed class Screen(val route: String) {
     }
     object Settings : Screen("settings")
     object ScanProduct : Screen("scan_product")
+    object ProductManagement : Screen("product_management")
 }
 
 @Composable
@@ -64,6 +67,8 @@ fun Q733NavHost(
                     navController.navigate(Screen.Editor.createRoute(templateId, width, height))
                 },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToScanProduct = { navController.navigate(Screen.ScanProduct.route) },
+            onNavigateToProductManagement = { navController.navigate(Screen.ProductManagement.route) },
                 onEditLabel = { label ->
                     // Save to a temporary slot and navigate
                     // For now, we pass a special ID
@@ -147,6 +152,13 @@ fun Q733NavHost(
                 onNavigateToEditor = { labelId, width, height ->
                     navController.navigate(Screen.Editor.createRoute(labelId, width, height))
                 }
+            )
+        }
+        composable(Screen.ProductManagement.route) {
+            val viewModel: ProductViewModel = hiltViewModel()
+            ProductManagementScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }
