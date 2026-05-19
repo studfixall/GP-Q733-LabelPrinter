@@ -33,6 +33,7 @@ android {
             storePassword = System.getenv("SIGNING_STORE_PASSWORD") ?: ""
             keyAlias = System.getenv("SIGNING_ALIAS") ?: "gp733"
             keyPassword = System.getenv("SIGNING_KEY_PASSWORD") ?: ""
+            storeType = "JKS"
         }
     }
 
