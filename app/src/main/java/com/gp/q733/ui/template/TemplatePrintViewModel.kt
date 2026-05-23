@@ -27,6 +27,7 @@ data class TemplatePrintUiState(
     val productUnit: String = "",
     val productOrigin: String = "",
     val productBarcode: String = "",
+    val productMprice: String = "",
     val fieldHints: Map<String, String> = emptyMap(), // textName -> label
     val isPrinting: Boolean = false,
     val printResult: String? = null, // null=未打印, "success"=成功, "error:msg"=失败
@@ -57,7 +58,8 @@ class TemplatePrintViewModel @Inject constructor(
                             BarsoftFieldName.NAME -> "品名"
                             BarsoftFieldName.PRICE -> "价格"
                             BarsoftFieldName.MPRICE -> "会员价"
-                            BarsoftFieldName.SPEC -> "规格"
+                            BarsoftFieldName.MPRICE -> "会员价"
+                    BarsoftFieldName.SPEC -> "规格"
                             BarsoftFieldName.UNIT -> "单位"
                             BarsoftFieldName.AREA -> "产地"
                             BarsoftFieldName.BARCODE -> "条码"
@@ -78,7 +80,8 @@ class TemplatePrintViewModel @Inject constructor(
 
     fun updateProductName(value: String) { _uiState.value = _uiState.value.copy(productName = value); updatePreview() }
     fun updateProductPrice(value: String) { _uiState.value = _uiState.value.copy(productPrice = value); updatePreview() }
-    fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(productSpec = value); updatePreview() }
+    fun updateProductMprice(value: String) { _uiState.value = _uiState.value.copy(productMprice = value); updatePreview() }
+fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(productSpec = value); updatePreview() }
     fun updateProductUnit(value: String) { _uiState.value = _uiState.value.copy(productUnit = value); updatePreview() }
     fun updateProductOrigin(value: String) { _uiState.value = _uiState.value.copy(productOrigin = value); updatePreview() }
     fun updateProductBarcode(value: String) { _uiState.value = _uiState.value.copy(productBarcode = value); updatePreview() }
@@ -87,7 +90,8 @@ class TemplatePrintViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             productName = product.name,
             productPrice = String.format("%.2f", product.price),
-            productSpec = product.spec,
+            productMprice = String.format("%.2f", product.mprice),
+    productSpec = product.spec,
             productUnit = product.unit,
             productOrigin = product.origin,
             productBarcode = product.barcode,
@@ -141,6 +145,7 @@ class TemplatePrintViewModel @Inject constructor(
             barcode = state.productBarcode,
             name = state.productName,
             price = state.productPrice.toDoubleOrNull() ?: 0.0,
+            mprice = state.productMprice.toDoubleOrNull() ?: 0.0,
             spec = state.productSpec,
             unit = state.productUnit,
             origin = state.productOrigin

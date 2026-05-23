@@ -61,7 +61,7 @@ object LabelTemplateFiller {
         return when (BarsoftTemplateParser.mapTextNameToField(textName)) {
             BarsoftFieldName.NAME -> product.name
             BarsoftFieldName.PRICE -> String.format("%.2f", product.price)
-            BarsoftFieldName.MPRICE -> String.format("%.2f", product.price) // 会员价暂用同一价格
+            BarsoftFieldName.MPRICE -> if (product.mprice > 0) String.format("%.2f", product.mprice) else String.format("%.2f", product.price) // 会员价优先，无则用零售价
             BarsoftFieldName.SPEC -> product.spec
             BarsoftFieldName.UNIT -> product.unit
             BarsoftFieldName.AREA -> product.origin

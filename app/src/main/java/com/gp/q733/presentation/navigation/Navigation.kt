@@ -182,7 +182,8 @@ fun Q733NavHost(
             }
             TemplatePrintScreen(
                 viewModel = viewModel,
-                onBack = { navController.popBackStack() }
+                label = SharedTemplateHolder.label,
+                    onBack = { navController.popBackStack() }
             )
         }
     }

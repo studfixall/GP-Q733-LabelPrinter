@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
@@ -28,14 +27,28 @@ import androidx.compose.ui.unit.sp
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
 import com.gp.q733.domain.model.ProductInfo
+import com.gp.q733.domain.util.BarsoftFieldName
+import com.gp.q733.domain.util.BarsoftTemplateParser
 
+/**
+ * 模板打印界面
+ * 选模板后 → 填数据 → 预览 → 打印
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplatePrintScreen(
-    viewModel: TemplatePrintViewModel,
+    viewModel: com.gp.q733.ui.template.TemplatePrintViewModel,
+    label: Label?,
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Set template on first composition
+    LaunchedEffect(label) {
+        if (label != null && uiState.label == null) {
+            viewModel.setTemplate(label)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -45,22 +58,8 @@ fun TemplatePrintScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { viewModel.print() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Icon(Icons.Default.Print, contentDescription = "打印")
-            }
         }
     ) { padding ->
         Column(
@@ -70,146 +69,239 @@ fun TemplatePrintScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 模板信息
-            uiState.label?.let { label ->
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+            // Label Preview
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = "标签预览 (${uiState.label?.widthMm?.toInt() ?: 0}×${uiState.label?.heightMm?.toInt() ?: 0}mm)",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LabelPreview(
+                        label = uiState.filledLabel ?: uiState.label,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 120.dp, max = 250.dp)
+                    )
+                }
+            }
+
+            // Data Input Fields
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("数据填充", style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val fieldHints = uiState.fieldHints
+                    val hasBarcode = fieldHints.containsKey("barcode")
+
+                    // Barcode field first (most important for scanning)
+                    if (hasBarcode) {
+                        OutlinedTextField(
+                            value = uiState.productBarcode,
+                            onValueChange = viewModel::updateProductBarcode,
+                            label = { Text(fieldHints["barcode"] ?: "条码") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Other fields based on template hints
+                    if (fieldHints.containsKey("name")) {
+                        OutlinedTextField(
+                            value = uiState.productName,
+                            onValueChange = viewModel::updateProductName,
+                            label = { Text(fieldHints["name"] ?: "品名") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (fieldHints.containsKey("price")) {
+                        OutlinedTextField(
+                            value = uiState.productPrice,
+                            onValueChange = viewModel::updateProductPrice,
+                            label = { Text(fieldHints["price"] ?: "价格") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (fieldHints.containsKey("mprice")) {
+                        OutlinedTextField(
+                            value = uiState.productMprice,
+                            onValueChange = viewModel::updateProductMprice,
+                            label = { Text(fieldHints["mprice"] ?: "会员价") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (fieldHints.containsKey("spec")) {
+                        OutlinedTextField(
+                            value = uiState.productSpec,
+                            onValueChange = viewModel::updateProductSpec,
+                            label = { Text(fieldHints["spec"] ?: "规格") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (fieldHints.containsKey("unit")) {
+                        OutlinedTextField(
+                            value = uiState.productUnit,
+                            onValueChange = viewModel::updateProductUnit,
+                            label = { Text(fieldHints["unit"] ?: "单位") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    if (fieldHints.containsKey("area")) {
+                        OutlinedTextField(
+                            value = uiState.productOrigin,
+                            onValueChange = viewModel::updateProductOrigin,
+                            label = { Text(fieldHints["area"] ?: "产地") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Product Picker Button
+                    OutlinedButton(
+                        onClick = { viewModel.toggleProductPicker(true) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("从商品库选择")
+                    }
+                }
+            }
+
+            // Print Button
+            Button(
+                onClick = viewModel::print,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(50.dp),
+                enabled = !uiState.isPrinting && uiState.filledLabel != null
+            ) {
+                if (uiState.isPrinting) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("打印中...")
+                } else {
+                    Icon(Icons.Default.Print, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("CPCL 打印")
+                }
+            }
+
+            // Print Result
+            when (uiState.printResult) {
+                "success" -> {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
                     ) {
                         Text(
-                            text = "${label.widthMm.toInt()}×${label.heightMm.toInt()}mm",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            "✅ 打印成功",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color(0xFF2E7D32)
                         )
-                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+                }
+                null -> {}
+                else -> {
+                    val errorMsg = uiState.printResult?.removePrefix("error:") ?: "未知错误"
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                    ) {
                         Text(
-                            text = "${label.elements.size}个元素",
-                            style = MaterialTheme.typography.bodyMedium
+                            "❌ 打印失败: $errorMsg",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color(0xFFC62828)
                         )
-                        Spacer(modifier = Modifier.weight(1f))
-                        OutlinedButton(onClick = { viewModel.toggleProductPicker(true) }) {
-                            Text("从商品库选")
-                        }
                     }
                 }
             }
 
-            // 数据输入区
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("商品数据", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    val fields = uiState.fieldHints
-                    if (fields.containsKey("name") || true) {
-                        FieldInput("品名", uiState.productName) { viewModel.updateProductName(it) }
-                    }
-                    if (fields.containsKey("barcode") || true) {
-                        FieldInput("条码", uiState.productBarcode) { viewModel.updateProductBarcode(it) }
-                    }
-                    if (fields.containsKey("price") || true) {
-                        FieldInput("价格", uiState.productPrice) { viewModel.updateProductPrice(it) }
-                    }
-                    if (fields.containsKey("spec")) {
-                        FieldInput("规格", uiState.productSpec) { viewModel.updateProductSpec(it) }
-                    }
-                    if (fields.containsKey("unit")) {
-                        FieldInput("单位", uiState.productUnit) { viewModel.updateProductUnit(it) }
-                    }
-                    if (fields.containsKey("area") || fields.containsKey("aera")) {
-                        FieldInput("产地", uiState.productOrigin) { viewModel.updateProductOrigin(it) }
-                    }
-                }
-            }
-
-            // 打印预览
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("打印预览", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    uiState.filledLabel?.let { label ->
-                        LabelPreview(
-                            label = label,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 120.dp, max = 300.dp)
-                        )
-                    } ?: run {
-                        Text("填写数据后预览", color = MaterialTheme.colorScheme.outline)
-                    }
-                }
-            }
-
-            // 打印状态
-            uiState.printResult?.let { result ->
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    when (result) {
-                        "success" -> {
-                            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("✅ 打印成功", color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.weight(1f))
-                                TextButton(onClick = { viewModel.clearPrintResult() }) { Text("关闭") }
-                            }
-                        }
-                        else -> {
-                            val msg = result.removePrefix("error:")
-                            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Text("❌ 打印失败: $msg", color = MaterialTheme.colorScheme.error)
-                                Spacer(modifier = Modifier.weight(1f))
-                                TextButton(onClick = { viewModel.clearPrintResult() }) { Text("关闭") }
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(80.dp)) // FAB space
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
-    // 商品选择弹窗
+    // Product Picker Dialog
     if (uiState.showProductPicker) {
         ProductPickerDialog(
             products = uiState.productSearchResults,
             searchQuery = uiState.productSearchQuery,
-            onSearch = { viewModel.searchProducts(it) },
-            onSelect = { viewModel.fillFromProduct(it) },
+            onSearch = viewModel::searchProducts,
+            onSelect = viewModel::fillFromProduct,
             onDismiss = { viewModel.toggleProductPicker(false) }
         )
     }
+
+    // Auto-clear print result after 3 seconds
+    if (uiState.printResult != null) {
+        LaunchedEffect(uiState.printResult) {
+            kotlinx.coroutines.delay(3000)
+            viewModel.clearPrintResult()
+        }
+    }
 }
 
+/**
+ * Label Preview using Canvas
+ * Renders text, barcode, QR code, and line elements scaled to fit
+ */
 @Composable
-private fun FieldInput(label: String, value: String, onValueChange: (String) -> Unit) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        singleLine = true
-    )
-}
+private fun LabelPreview(
+    label: Label?,
+    modifier: Modifier = Modifier
+) {
+    if (label == null) {
+        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+            Text("无预览", color = Color.Gray)
+        }
+        return
+    }
 
-@Composable
-private fun LabelPreview(label: Label, modifier: Modifier = Modifier) {
-    val labelW = label.widthMm
-    val labelH = label.heightMm
-    val aspectRatio = labelW / labelH
+    val aspectRatio = label.widthMm / label.heightMm
 
     BoxWithConstraints(modifier = modifier) {
         val boxWidth = constraints.maxWidth.toFloat()
         val boxHeight = if (constraints.maxHeight > 0) constraints.maxHeight.toFloat() else boxWidth / aspectRatio
         val displayW = boxWidth
         val displayH = minOf(boxHeight, boxWidth / aspectRatio)
-
+        val labelW = label.widthMm
+        val labelH = label.heightMm
         val scaleX = displayW / labelW
         val scaleY = displayH / labelH
 
-        Canvas(modifier = Modifier.size(with(LocalDensity.current) { displayW.toDp() }, with(LocalDensity.current) { displayH.toDp() })) {
+        Canvas(modifier = Modifier.size(
+            with(LocalDensity.current) { displayW.toDp() },
+            with(LocalDensity.current) { displayH.toDp() }
+        )) {
             drawRect(color = Color.White)
             drawRect(color = Color.LightGray, style = Stroke(width = 1f))
 
@@ -221,8 +313,7 @@ private fun LabelPreview(label: Label, modifier: Modifier = Modifier) {
                         val fontSize = (element.fontSize * minOf(scaleX, scaleY) * 0.8f).coerceAtLeast(8f)
                         drawContext.canvas.nativeCanvas.drawText(
                             element.text,
-                            x,
-                            y + fontSize,
+                            x, y + fontSize,
                             android.graphics.Paint().apply {
                                 this.textSize = fontSize
                                 this.color = android.graphics.Color.BLACK
@@ -234,18 +325,23 @@ private fun LabelPreview(label: Label, modifier: Modifier = Modifier) {
                     is LabelElement.Barcode -> {
                         val x = element.x * scaleX
                         val y = element.y * scaleY
-                        val w = if (element.widthMm > 0) element.widthMm * scaleX else labelW * 0.8f * scaleX
+                        val w = if (element.widthMm > 0f) element.widthMm * scaleX else labelW * 0.8f * scaleX
                         val h = element.height * scaleY
-                        // Draw barcode placeholder
-                        drawRect(color = Color.DarkGray, topLeft = Offset(x, y), size = Size(w, h * 0.7f))
-                        // Draw text below barcode
+                        val barcodeH = h * 0.7f  // 70% for bars, 30% for text below
+                        // Draw barcode bars (simplified CODE_128-like visualization)
+                        drawBarcodeBars(
+                            content = element.content,
+                            x = x, y = y,
+                            width = w, height = barcodeH
+                        )
+                        // Draw barcode text below
                         drawContext.canvas.nativeCanvas.drawText(
                             element.content,
-                            x,
-                            y + h * 0.7f + 10f,
+                            x, y + h,
                             android.graphics.Paint().apply {
                                 textSize = 8f * minOf(scaleX, scaleY)
                                 color = android.graphics.Color.BLACK
+                                isAntiAlias = true
                             }
                         )
                     }
@@ -253,7 +349,12 @@ private fun LabelPreview(label: Label, modifier: Modifier = Modifier) {
                         val x = element.x * scaleX
                         val y = element.y * scaleY
                         val size = element.size * minOf(scaleX, scaleY)
-                        drawRect(color = Color.DarkGray, topLeft = Offset(x, y), size = Size(size, size))
+                        // Draw QR code pattern
+                        drawQrPattern(
+                            content = element.content,
+                            x = x, y = y,
+                            size = size
+                        )
                     }
                     is LabelElement.Line -> {
                         val x = element.x * scaleX
@@ -268,6 +369,108 @@ private fun LabelPreview(label: Label, modifier: Modifier = Modifier) {
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Draw simplified barcode bars visualization
+ * Uses content hash to deterministically generate bar pattern
+ */
+private fun DrawScope.drawBarcodeBars(
+    content: String,
+    x: Float,
+    y: Float,
+    width: Float,
+    height: Float
+) {
+    val barCount = 60  // Total bars (simplified)
+    val barWidth = width / barCount
+    val paint = android.graphics.Paint().apply {
+        color = android.graphics.Color.BLACK
+        style = android.graphics.Paint.Style.FILL
+    }
+
+    // Generate deterministic bar pattern from content
+    val chars = content.ifBlank { "0" }
+    var barIndex = 0
+    for (i in 0 until barCount) {
+        val charIndex = i % chars.length
+        val charVal = chars[charIndex].code
+        val isBar = (charVal + i) % 3 != 0  // ~67% bars, 33% spaces
+
+        if (isBar) {
+            val barLeft = x + i * barWidth
+            drawContext.canvas.nativeCanvas.drawRect(
+                barLeft, y, barLeft + barWidth, y + height,
+                paint
+            )
+        }
+    }
+}
+
+/**
+ * Draw simplified QR code pattern
+ */
+private fun DrawScope.drawQrPattern(
+    content: String,
+    x: Float,
+    y: Float,
+    size: Float
+) {
+    val modules = 21  // QR Version 1 = 21x21
+    val cellSize = size / modules
+    val paint = android.graphics.Paint().apply {
+        color = android.graphics.Color.BLACK
+        style = android.graphics.Paint.Style.FILL
+    }
+
+    // Draw finder patterns (3 corners)
+    drawQrFinderPattern(x, y, cellSize, paint)                      // Top-left
+    drawQrFinderPattern(x + (modules - 7) * cellSize, y, cellSize, paint)  // Top-right
+    drawQrFinderPattern(x, y + (modules - 7) * cellSize, cellSize, paint)  // Bottom-left
+
+    // Draw data pattern (deterministic from content)
+    val contentHash = content.hashCode()
+    for (row in 0 until modules) {
+        for (col in 0 until modules) {
+            // Skip finder pattern areas
+            if ((row < 8 && col < 8) || (row < 8 && col >= modules - 8) || (row >= modules - 8 && col < 8)) continue
+
+            val isDark = ((contentHash * 31 + row * 7 + col * 13) and 1) == 0
+            if (isDark) {
+                drawContext.canvas.nativeCanvas.drawRect(
+                    x + col * cellSize,
+                    y + row * cellSize,
+                    x + (col + 1) * cellSize,
+                    y + (row + 1) * cellSize,
+                    paint
+                )
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawQrFinderPattern(
+    x: Float,
+    y: Float,
+    cellSize: Float,
+    paint: android.graphics.Paint
+) {
+    // 7x7 finder pattern: outer border, inner 3x3
+    for (row in 0..6) {
+        for (col in 0..6) {
+            val isOuter = row == 0 || row == 6 || col == 0 || col == 6
+            val isInner = row in 2..4 && col in 2..4
+            if (isOuter || isInner) {
+                drawContext.canvas.nativeCanvas.drawRect(
+                    x + col * cellSize,
+                    y + row * cellSize,
+                    x + (col + 1) * cellSize,
+                    y + (row + 1) * cellSize,
+                    paint
+                )
             }
         }
     }
@@ -304,7 +507,11 @@ private fun ProductPickerDialog(
                                 .padding(vertical = 8.dp)
                         ) {
                             Text(product.name, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                            Text("¥${String.format("%.2f", product.price)} | ${product.spec} | ${product.barcode}", fontSize = 12.sp, color = Color.Gray)
+                            Text(
+                                "¥${String.format("%.2f", product.price)} | ${product.spec} | ${product.barcode}",
+                                fontSize = 12.sp,
+                                color = Color.Gray
+                            )
                         }
                         HorizontalDivider()
                     }
