@@ -30,6 +30,16 @@ import com.gp.q733.ui.product.ProductManagementScreen
 import com.gp.q733.ui.product.ProductViewModel
 import com.gp.q733.ui.template.TemplateBrowserScreen
 import com.gp.q733.ui.template.TemplateBrowserViewModel
+import com.gp.q733.ui.template.TemplatePrintScreen
+import com.gp.q733.ui.template.TemplatePrintViewModel
+
+/**
+ * Temporary shared holder to pass selected template Label between screens
+ * (Avoids complex NavArgs serialization for Label object)
+ */
+object SharedTemplateHolder {
+    var label: com.gp.q733.domain.model.Label? = null
+}
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -47,6 +57,7 @@ sealed class Screen(val route: String) {
     object ScanProduct : Screen("scan_product")
     object ProductManagement : Screen("product_management")
     object TemplateBrowser : Screen("template_browser")
+    object TemplatePrint : Screen("template_print")
 }
 
 @Composable
@@ -156,9 +167,22 @@ fun Q733NavHost(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onTemplateSelected = { label ->
-                    // TODO: Navigate to print preview with selected template
-                    navController.popBackStack()
+                    navController.navigate(Screen.TemplatePrint.route)
                 }
+            )
+        }
+        composable(Screen.TemplatePrint.route) {
+            val viewModel: TemplatePrintViewModel = hiltViewModel()
+            // Receive label from TemplateBrowser via shared state
+            LaunchedEffect(Unit) {
+                SharedTemplateHolder.label?.let {
+                    viewModel.setTemplate(it)
+                    SharedTemplateHolder.label = null
+                }
+            }
+            TemplatePrintScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }

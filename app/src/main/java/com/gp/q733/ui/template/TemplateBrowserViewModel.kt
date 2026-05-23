@@ -1,6 +1,9 @@
 package com.gp.q733.ui.template
 
 import android.content.Context
+import androidx.lifecycle.ViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.util.BarsoftTemplateParser
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +40,8 @@ data class TemplateBrowserUiState(
  * Barsoft 模板浏览器 ViewModel
  * 从 assets/templates/ 加载 97 个 XML 模板
  */
-class TemplateBrowserViewModel(private val context: Context) {
+@dagger.hilt.android.lifecycle.HiltViewModel
+class TemplateBrowserViewModel @Inject constructor(@ApplicationContext private val context: Context) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TemplateBrowserUiState())
     val uiState: StateFlow<TemplateBrowserUiState> = _uiState.asStateFlow()

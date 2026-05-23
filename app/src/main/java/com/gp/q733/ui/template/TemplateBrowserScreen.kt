@@ -113,7 +113,10 @@ fun TemplateBrowserScreen(
                     items(uiState.filteredTemplates) { template ->
                         TemplateCard(
                             template = template,
-                            onClick = { onTemplateSelected(template.label) }
+                            onClick = {
+                    com.gp.q733.presentation.navigation.SharedTemplateHolder.label = template.label
+                    onTemplateSelected(template.label)
+                }
                         )
                     }
                 }

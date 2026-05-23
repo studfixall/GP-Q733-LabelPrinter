@@ -3,6 +3,7 @@ package com.gp.q733.data.di
 import com.gp.q733.data.BluetoothRepositoryImpl
 import com.gp.q733.data.local.LabelDataStore
 import com.gp.q733.data.local.SettingsDataStore
+import com.gp.q733.data.local.db.ProductDao
 import com.gp.q733.data.local.db.ProductDatabase
 import com.gp.q733.data.repository.ProductRepositoryImpl
 import com.gp.q733.domain.print.PrintService
@@ -32,6 +33,18 @@ abstract class DataModule {
     ): ProductRepository
 
     companion object {
+        @Provides
+        @Singleton
+        fun provideProductDao(database: ProductDatabase): ProductDao {
+            return database.productDao()
+        }
+
+        @Provides
+        @Singleton
+        fun provideProductDatabase(provider: ProductDatabase.Provider): ProductDatabase {
+            return provider.get()
+        }
+
         @Provides
         @Singleton
         fun providePrintService(
