@@ -1,4 +1,4 @@
-package com.gp.q733.data.repository
+﻿package com.gp.q733.data.repository
 
 import android.content.Context
 import com.gp.q733.data.local.db.ProductDao
@@ -80,7 +80,7 @@ class ProductRepositoryImpl @Inject constructor(
         ensurePreloaded()
         val existing = dao.getProductByBarcode(product.barcode)
         if (existing != null) {
-            dao.update(product.toEntity(id = existing.id, createdAt = existing.createdAt))
+            dao.update(product.toEntity().copy(id = existing.id, createdAt = existing.createdAt))
         } else {
             dao.insert(product.toEntity())
         }

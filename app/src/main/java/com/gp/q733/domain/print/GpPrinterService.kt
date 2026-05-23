@@ -228,22 +228,35 @@ class GpPrinterService @Inject constructor(
             when (element) {
                 is LabelElement.Text -> {
                     val textSetting = TextSetting()
-                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+                    // Font: Barsoft fontId → SDK CpclFontTypeEnum
+                    textSetting.cpclFontTypeEnum = mapCpclFont(element.fontId)
                     // Position in dots - convert from mm
                     textSetting.txtPrintPosition = Position(mmToDots(element.x), mmToDots(element.y))
-                    textSetting.printRotation = PrintRotation.Rotate0
-                    textSetting.setxMultiplication(1)
-                    textSetting.setyMultiplication(1)
+                    // Rotation from Barsoft template (0/90/180/270)
+                    textSetting.printRotation = mapRotation(element.rotation)
+                    // Scale (x/y multiplication)
+                    val scale = element.scale.coerceIn(1f, 8f).toInt()
+                    textSetting.setxMultiplication(scale)
+                    textSetting.setyMultiplication(scale)
+                    // Bold
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
+                    // Underline
+                    textSetting.underline = if (element.isUnderline) SettingEnum.Enable else SettingEnum.Disable
+                    // Align
+                    when (element.align) {
+                        1 -> textSetting.align = CommonEnum.ALIGN_MIDDLE
+                        2 -> textSetting.align = CommonEnum.ALIGN_RIGHT
+                        else -> textSetting.align = CommonEnum.ALIGN_LEFT
+                    }
                     cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
                 }
                 is LabelElement.Barcode -> {
                     // Use SDK getBarcodeCmd() instead of manual string assembly
                     val barcodeSetting = BarcodeSetting()
                     barcodeSetting.printRotation = PrintRotation.Rotate0
-                    barcodeSetting.narrowInDot = 2
-                    barcodeSetting.wideInDot = 4
-                    barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
+                    barcodeSetting.narrowInDot = element.minBarWidth.coerceIn(1, 7)
+                    barcodeSetting.wideInDot = (element.minBarWidth * 2).coerceIn(2, 14)
+                    barcodeSetting.barcodeStringPosition = if (element.textPosition == 1) BarcodeStringPosition.ABOVE_BARCODE else BarcodeStringPosition.BELOW_BARCODE
                     barcodeSetting.heightInDot = mmToDots(element.height)
                     barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
 
@@ -285,6 +298,36 @@ class GpPrinterService @Inject constructor(
         // End command (SDK handles FORM/PRINT internally)
         cmd.append(cmd.getEndCmd())
         return cmd
+    }
+
+    /**
+     * Map Barsoft fontId to SDK CpclFontTypeEnum
+     */
+    private fun mapCpclFont(fontId: String): CpclFontTypeEnum {
+        return when (fontId) {
+            "0" -> CpclFontTypeEnum.Font_0
+            "1" -> CpclFontTypeEnum.Font_1
+            "2" -> CpclFontTypeEnum.Font_2
+            "3" -> CpclFontTypeEnum.Font_3
+            "4" -> CpclFontTypeEnum.Font_4
+            "5" -> CpclFontTypeEnum.Font_5
+            "6" -> CpclFontTypeEnum.Font_6
+            "7" -> CpclFontTypeEnum.Font_7
+            "24", "8", "9" -> CpclFontTypeEnum.Font_Chinese_24x24
+            else -> CpclFontTypeEnum.Font_Chinese_24x24 // Default to Chinese font for any named font
+        }
+    }
+
+    /**
+     * Map rotation angle to PrintRotation enum
+     */
+    private fun mapRotation(degrees: Int): PrintRotation {
+        return when (degrees) {
+            90 -> PrintRotation.Rotate90
+            180 -> PrintRotation.Rotate180
+            270 -> PrintRotation.Rotate270
+            else -> PrintRotation.Rotate0
+        }
     }
 
     /**

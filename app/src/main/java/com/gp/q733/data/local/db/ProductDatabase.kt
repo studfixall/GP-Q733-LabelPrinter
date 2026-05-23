@@ -14,7 +14,7 @@ import javax.inject.Singleton
  */
 @Database(
     entities = [ProductEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class ProductDatabase : RoomDatabase() {
