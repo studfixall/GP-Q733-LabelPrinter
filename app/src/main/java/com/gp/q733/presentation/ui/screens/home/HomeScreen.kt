@@ -24,6 +24,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToScanProduct: () -> Unit = {},
     onNavigateToProductManagement: () -> Unit = {},
+    onNavigateToTemplateBrowser: () -> Unit = {},
     onEditLabel: (Label) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

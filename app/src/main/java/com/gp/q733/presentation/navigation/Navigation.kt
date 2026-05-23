@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -27,6 +28,8 @@ import com.gp.q733.presentation.viewmodel.ScanProductViewModel
 import com.gp.q733.presentation.viewmodel.SettingsViewModel
 import com.gp.q733.ui.product.ProductManagementScreen
 import com.gp.q733.ui.product.ProductViewModel
+import com.gp.q733.ui.template.TemplateBrowserScreen
+import com.gp.q733.ui.template.TemplateBrowserViewModel
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -43,6 +46,7 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object ScanProduct : Screen("scan_product")
     object ProductManagement : Screen("product_management")
+    object TemplateBrowser : Screen("template_browser")
 }
 
 @Composable
@@ -59,7 +63,6 @@ fun Q733NavHost(
         composable(Screen.Home.route) {
             val viewModel: HomeViewModel = hiltViewModel()
             val homeUiState by viewModel.uiState.collectAsState()
-            
             HomeScreen(
                 viewModel = viewModel,
                 onNavigateToDevice = { navController.navigate(Screen.Device.route) },
@@ -68,15 +71,13 @@ fun Q733NavHost(
                 },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onNavigateToScanProduct = { navController.navigate(Screen.ScanProduct.route) },
-            onNavigateToProductManagement = { navController.navigate(Screen.ProductManagement.route) },
+                onNavigateToProductManagement = { navController.navigate(Screen.ProductManagement.route) },
+                onNavigateToTemplateBrowser = { navController.navigate(Screen.TemplateBrowser.route) },
                 onEditLabel = { label ->
-                    // Save to a temporary slot and navigate
-                    // For now, we pass a special ID
                     navController.navigate(Screen.Editor.createRoute("saved_${label.id}"))
                 }
             )
         }
-
         composable(Screen.Device.route) {
             val viewModel: DeviceViewModel = hiltViewModel()
             DeviceScreen(
@@ -84,19 +85,12 @@ fun Q733NavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
         composable(
             route = Screen.Editor.route,
             arguments = listOf(
                 navArgument("templateId") { type = NavType.StringType },
-                navArgument("width") { 
-                    type = NavType.FloatType
-                    defaultValue = 50f
-                },
-                navArgument("height") { 
-                    type = NavType.FloatType
-                    defaultValue = 30f
-                }
+                navArgument("width") { type = NavType.FloatType; defaultValue = 50f },
+                navArgument("height") { type = NavType.FloatType; defaultValue = 30f }
             )
         ) { backStackEntry ->
             val viewModel: EditorViewModel = hiltViewModel()
@@ -104,15 +98,11 @@ fun Q733NavHost(
             val width = backStackEntry.arguments?.getFloat("width") ?: 50f
             val height = backStackEntry.arguments?.getFloat("height") ?: 30f
 
-            // Track last loaded template to force reload on re-entry
             var lastLoadedTemplate by rememberSaveable { mutableStateOf("") }
             var lastLabelSize by rememberSaveable { mutableStateOf(Pair(0f, 0f)) }
 
             LaunchedEffect(templateId, width, height) {
-                // Always reload when entering the screen, even if templateId is the same
-                // This handles the case where user goes back and re-enters
                 val currentSize = Pair(width, height)
-                
                 when {
                     templateId == "new" && (templateId != lastLoadedTemplate || currentSize != lastLabelSize) -> {
                         viewModel.resetLabel(width, height)
@@ -132,10 +122,9 @@ fun Q733NavHost(
             EditorScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onPrint = { /* Print is handled inside ViewModel */ }
+                onPrint = { }
             )
         }
-
         composable(Screen.Settings.route) {
             val viewModel: SettingsViewModel = hiltViewModel()
             SettingsScreen(
@@ -143,7 +132,6 @@ fun Q733NavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
         composable(Screen.ScanProduct.route) {
             val viewModel: ScanProductViewModel = hiltViewModel()
             ScanProductScreen(
@@ -159,6 +147,18 @@ fun Q733NavHost(
             ProductManagementScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.TemplateBrowser.route) {
+            val context = LocalContext.current
+            val viewModel = TemplateBrowserViewModel(context)
+            TemplateBrowserScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onTemplateSelected = { label ->
+                    // TODO: Navigate to print preview with selected template
+                    navController.popBackStack()
+                }
             )
         }
     }
