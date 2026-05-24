@@ -398,4 +398,98 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateTextFontSize(index: Int, fontSize: Float) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.Text) {
+                    elements[index] = element.copy(fontSize = fontSize)
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateTextBold(index: Int, isBold: Boolean) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.Text) {
+                    elements[index] = element.copy(isBold = isBold)
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateTextUnderline(index: Int, isUnderline: Boolean) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.Text) {
+                    elements[index] = element.copy(isUnderline = isUnderline)
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * 导出为 Barsoft XML 格式字符串
+     */
+    fun exportBarsoftXml(): String {
+        val label = _uiState.value.label
+        val sb = StringBuilder()
+        sb.append(""")<?xml version="1.0" encoding="utf-8"?>
+<Barsoft Version="1.0" width="${label.widthMm.toInt()}" height="${label.heightMm.toInt()}" gap="0" speed="3" density="15">
+  <items>
+""")
+        for (element in label.elements) {
+            when (element) {
+                is LabelElement.Text -> {
+                    val align = when (element.align) {
+                        1 -> "ALIGN_CENTER"
+                        2 -> "ALIGN_RIGHT"
+                        else -> "ALIGN_NORMAL"
+                    }
+                    sb.append(""")    <item viewtype="0" text="${element.text.replace("\"", "&quot;")}" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", if (element.widthMm > 0) element.widthMm else label.widthMm - element.x)}" height="${String.format("%.1f", if (element.heightMm > 0) element.heightMm else 5)}" textsize="${element.fontSize.toInt()}" font="${element.fontId}" align="$align" variable="0" />
+""")
+                }
+                is LabelElement.Barcode -> {
+                    val formatName = when (element.format) {
+                        BarcodeFormat.CODE128 -> "CODE_128"
+                        BarcodeFormat.CODE39 -> "CODE_39"
+                        BarcodeFormat.EAN13 -> "EAN13"
+                    }
+                    sb.append(""")    <item viewtype="1" text="${element.content.replace("\"", "&quot;")}" format="$formatName" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", element.widthMm)}" height="${String.format("%.1f", element.height)}" MinBarWidth="${element.minBarWidth}" textposition="${element.textPosition}" />
+""")
+                }
+                is LabelElement.QRCode -> {
+                    sb.append(""")    <item viewtype="3" text="${element.content.replace("\"", "&quot;")}" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", element.size)}" height="${String.format("%.1f", element.size)}" textsize="8" />
+""")
+                }
+                is LabelElement.Line -> {
+                    sb.append(""")    <item viewtype="2" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", element.width)}" height="${String.format("%.1f", element.height)}" />
+""")
+                }
+            }
+        }
+        sb.append(""">  </items>
+</Barsoft>
+""")
+        return sb.toString()
+    }
 }

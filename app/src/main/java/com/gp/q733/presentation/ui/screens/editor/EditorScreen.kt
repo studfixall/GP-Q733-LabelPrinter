@@ -53,6 +53,39 @@ fun EditorScreen(
             snackbarHostState.showSnackbar("标签已保存")
         }
     }
+
+    // Export XML result dialog
+    var exportedXml by remember { mutableStateOf<String?>(null) }
+    if (exportedXml != null) {
+        AlertDialog(
+            onDismissRequest = { exportedXml = null },
+            title = { Text("Barsoft XML 已生成") },
+            text = {
+                Column {
+                    Text("以下 XML 可保存为 .xml 文件，导入佳博软件使用：", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = exportedXml!!,
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                            overflow = TextOverflow.Visible
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { exportedXml = null }) {
+                    Text("关闭")
+                }
+            }
+        )
+    }
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { error ->
             snackbarHostState.showSnackbar(error)
@@ -85,6 +118,12 @@ fun EditorScreen(
                         }
                         IconButton(onClick = { viewModel.showSaveTemplateDialog() }) {
                             Icon(Icons.Default.AddCircle, contentDescription = "存为模板")
+                        }
+                        IconButton(onClick = {
+                            val xml = viewModel.exportBarsoftXml()
+                            exportedXml = xml
+                        }) {
+                            Icon(Icons.Default.Download, contentDescription = "导出XML")
                         }
                     }
             )
@@ -343,39 +382,72 @@ fun EditorScreen(
                         
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        // 条码宽度和高度调整
+                        // 元素属性编辑（条码 / 文本）
                         uiState.selectedElementIndex?.let { index ->
                             val element = label.elements.getOrNull(index)
-                            if (element is LabelElement.Barcode) {
-                                Text(
-                                    text = "宽度: ${element.widthMm.toInt()}mm",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                                Slider(
-                                    value = element.widthMm,
-                                    onValueChange = { width ->
-                                        viewModel.updateBarcodeWidth(index, width)
-                                    },
-                                    valueRange = 10f..80f,
-                                    steps = 14,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                
-                                Text(
-                                    text = "高度: ${element.height.toInt()}mm",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                                Slider(
-                                    value = element.height,
-                                    onValueChange = { height ->
-                                        viewModel.updateBarcodeHeight(index, height)
-                                    },
-                                    valueRange = 3f..20f,
-                                    steps = 17,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                            when (element) {
+                                is LabelElement.Barcode -> {
+                                    Text(
+                                        text = "宽度: ${element.widthMm.toInt()}mm",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    Slider(
+                                        value = element.widthMm,
+                                        onValueChange = { width -> viewModel.updateBarcodeWidth(index, width) },
+                                        valueRange = 10f..80f,
+                                        steps = 14,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "高度: ${element.height.toInt()}mm",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    Slider(
+                                        value = element.height,
+                                        onValueChange = { height -> viewModel.updateBarcodeHeight(index, height) },
+                                        valueRange = 3f..20f,
+                                        steps = 17,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                                is LabelElement.Text -> {
+                                    Text(
+                                        text = "字号: ${element.fontSize.toInt()}",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    Slider(
+                                        value = element.fontSize,
+                                        onValueChange = { size -> viewModel.updateTextFontSize(index, size) },
+                                        valueRange = 6f..36f,
+                                        steps = 15,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("粗体", style = MaterialTheme.typography.labelMedium)
+                                        Switch(
+                                            checked = element.isBold,
+                                            onCheckedChange = { bold -> viewModel.updateTextBold(index, bold) }
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("下划线", style = MaterialTheme.typography.labelMedium)
+                                        Switch(
+                                            checked = element.isUnderline,
+                                            onCheckedChange = { underline -> viewModel.updateTextUnderline(index, underline) }
+                                        )
+                                    }
+                                }
+                                else -> {}
                             }
                         }
                     }
