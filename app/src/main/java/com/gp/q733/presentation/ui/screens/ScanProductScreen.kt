@@ -16,11 +16,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.gp.q733.domain.model.LabelElement
+import com.gp.q733.domain.model.ProductInfo
+import com.gp.q733.domain.repository.ConnectionState
+import com.gp.q733.presentation.viewmodel.LabelTemplate
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +40,31 @@ fun ScanProductScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
+    val context = LocalContext.current
+
+    // ZXing 扫码启动器
+    val scanLauncher = rememberLauncherForActivityResult(
+        contract = ScanContract()
+    ) { result ->
+        if (result.contents != null) {
+            viewModel.onBarcodeScanned(result.contents)
+        }
+    }
+
+    // 相机权限请求启动器
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val options = ScanOptions()
+                .setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+                .setPrompt("将条码对准扫描框")
+                .setCameraId(0)
+                .setBeepEnabled(true)
+                .setBarcodeImageEnabled(false)
+            scanLauncher.launch(options)
+        } // 权限被拒则静默
+    }
 
     // 自动聚焦到扫码输入框
     LaunchedEffect(Unit) {
@@ -82,6 +116,20 @@ fun ScanProductScreen(
                     }
                 })
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ===== 扫码按钮 =====
+            Button(
+                onClick = {
+                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                },
+                modifier = Modifier.fillMaxWidth().height(50.dp)
+            ) {
+                Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("扫描条码")
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
