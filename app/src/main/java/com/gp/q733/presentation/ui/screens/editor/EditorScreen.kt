@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.ui.screens.editor
+﻿package com.gp.q733.presentation.ui.screens.editor
 
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
@@ -81,9 +81,12 @@ fun EditorScreen(
                         }
                     }
                     IconButton(onClick = { viewModel.saveLabel() }) {
-                        Icon(Icons.Default.Save, contentDescription = "保存")
+                            Icon(Icons.Default.Save, contentDescription = "保存")
+                        }
+                        IconButton(onClick = { viewModel.showSaveTemplateDialog() }) {
+                            Icon(Icons.Default.AddCircle, contentDescription = "存为模板")
+                        }
                     }
-                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

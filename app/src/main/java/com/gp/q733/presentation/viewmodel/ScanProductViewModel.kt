@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.viewmodel
+﻿package com.gp.q733.presentation.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -39,6 +39,9 @@ data class ScanProductUiState(
     val productExistsInDb: Boolean = false,
     val isLoading: Boolean = false,
 
+    // 未找到商品提示
+    val showNotFoundDialog: Boolean = false,
+
     // 维护商品资料弹窗
     val showProductDialog: Boolean = false,
     val dialogName: String = "",
@@ -61,7 +64,8 @@ class ScanProductViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val gpPrinterService: GpPrinterService,
     private val settingsDataStore: SettingsDataStore,
-    private val productDao: ProductDao
+    private val productDao: ProductDao,
+    private val customTemplateDao: com.gp.q733.data.local.db.CustomTemplateDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScanProductUiState())
@@ -222,6 +226,25 @@ class ScanProductViewModel @Inject constructor(
     /**
      * 关闭维护弹窗
      */
+    /**
+     * 未找到提示：用户确认去维护
+     */
+    fun confirmNotFound() {
+        _uiState.value = _uiState.value.copy(
+            showNotFoundDialog = false,
+            showProductDialog = true,
+            dialogName = "",
+            dialogPrice = ""
+        )
+    }
+
+    /**
+     * 未找到提示：用户取消
+     */
+    fun dismissNotFound() {
+        _uiState.value = _uiState.value.copy(showNotFoundDialog = false)
+    }
+
     fun dismissProductDialog() {
         _uiState.value = _uiState.value.copy(showProductDialog = false)
     }
@@ -316,6 +339,36 @@ class ScanProductViewModel @Inject constructor(
                     isPrinting = false,
                     errorMessage = "打印失败: ${e.message}"
                 )
+            }
+        }
+    }
+
+    /**
+     * 将当前选中模板保存为自定义模板
+     */
+    fun saveCurrentAsTemplate(name: String) {
+        val state = _uiState.value
+        val template = state.templates.find { it.id == state.selectedTemplateId } ?: return
+        if (name.isBlank()) {
+            _uiState.value = state.copy(errorMessage = "请输入模板名称")
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val json = com.gp.q733.domain.util.TemplateJsonParser.toJson(template.label.elements)
+                customTemplateDao.insert(
+                    com.gp.q733.data.local.db.CustomTemplateEntity(
+                        name = name,
+                        widthMm = template.label.widthMm,
+                        heightMm = template.label.heightMm,
+                        elementsJson = json
+                    )
+                )
+                // Reload templates
+                loadTemplates()
+                _uiState.value = _uiState.value.copy(successMessage = "模板已保存: $name")
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "保存失败: ${e.message}")
             }
         }
     }

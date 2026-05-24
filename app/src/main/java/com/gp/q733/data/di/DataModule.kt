@@ -1,4 +1,4 @@
-package com.gp.q733.data.di
+﻿package com.gp.q733.data.di
 
 import com.gp.q733.data.BluetoothRepositoryImpl
 import com.gp.q733.data.local.db.ProductDao
@@ -34,6 +34,12 @@ abstract class DataModule {
         @Singleton
         fun provideProductDao(database: ProductDatabase.Provider): ProductDao {
             return database.get().productDao()
+        }
+
+        @Provides
+        @Singleton
+        fun provideCustomTemplateDao(database: ProductDatabase.Provider): com.gp.q733.data.local.db.CustomTemplateDao {
+            return database.get().customTemplateDao()
         }
     }
 }

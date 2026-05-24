@@ -13,12 +13,13 @@ import javax.inject.Singleton
  * Room本地SQLite存储
  */
 @Database(
-    entities = [ProductEntity::class],
-    version = 3,
+    entities = [ProductEntity::class, CustomTemplateEntity::class],
+    version = 4,
     exportSchema = false
 )
 abstract class ProductDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
+    abstract fun customTemplateDao(): CustomTemplateDao
 
     @Singleton
     class Provider @Inject constructor(

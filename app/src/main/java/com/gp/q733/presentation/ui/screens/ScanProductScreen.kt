@@ -203,6 +203,21 @@ fun ScanProductScreen(
             }
         }
 
+        // ===== 未找到商品提示弹窗 =====
+        if (uiState.showNotFoundDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissNotFound() },
+                title = { Text("未查到商品") },
+                text = { Text("条码 ${uiState.productInfo.barcode} 在商品库中未找到，是否维护商品信息？") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.confirmNotFound() }) { Text("去维护") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissNotFound() }) { Text("取消") }
+                }
+            )
+        }
+
         // ===== 维护商品资料弹窗 =====
         if (uiState.showProductDialog) {
             AlertDialog(

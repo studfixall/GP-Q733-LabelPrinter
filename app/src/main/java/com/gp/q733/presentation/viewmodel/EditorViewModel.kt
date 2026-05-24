@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.viewmodel
+﻿package com.gp.q733.presentation.viewmodel
 
 import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
@@ -36,6 +36,8 @@ data class EditorUiState(
     val isSaving: Boolean = false,
     val isPrinting: Boolean = false,
     val saveSuccess: Boolean = false,
+    val showSaveTemplateDialog: Boolean = false,
+    val templateName: String = "",
     val errorMessage: String? = null
 )
 
@@ -44,7 +46,8 @@ class EditorViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val gpPrinterService: GpPrinterService,
     private val settingsDataStore: SettingsDataStore,
-    private val labelDataStore: LabelDataStore
+    private val labelDataStore: LabelDataStore,
+    private val customTemplateDao: com.gp.q733.data.local.db.CustomTemplateDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -62,6 +65,18 @@ class EditorViewModel @Inject constructor(
 
     fun setConnectedDevice(device: BluetoothDevice?) {
         connectedDevice = device
+    }
+
+    fun showSaveTemplateDialog() {
+        _uiState.value = _uiState.value.copy(showSaveTemplateDialog = true, templateName = "自定义模板")
+    }
+
+    fun dismissSaveTemplateDialog() {
+        _uiState.value = _uiState.value.copy(showSaveTemplateDialog = false)
+    }
+
+    fun updateTemplateName(name: String) {
+        _uiState.value = _uiState.value.copy(templateName = name)
     }
 
     fun showAddElementDialog() {
@@ -179,6 +194,27 @@ class EditorViewModel @Inject constructor(
             val label = _uiState.value.label
             labelDataStore.saveLabel(label)
             _uiState.value = _uiState.value.copy(isSaving = false, saveSuccess = true)
+            kotlinx.coroutines.delay(2000)
+            _uiState.value = _uiState.value.copy(saveSuccess = false)
+        }
+    }
+
+    /**
+     * 保存为自定义模板（存入Room数据库）
+     */
+    fun saveAsTemplate(templateName: String) {
+        viewModelScope.launch {
+            val label = _uiState.value.label
+            val elementsJson = com.gp.q733.domain.util.TemplateJsonParser.toJson(label.elements)
+            customTemplateDao.insert(
+                com.gp.q733.data.local.db.CustomTemplateEntity(
+                    name = templateName,
+                    widthMm = label.widthMm,
+                    heightMm = label.heightMm,
+                    elementsJson = elementsJson
+                )
+            )
+            _uiState.value = _uiState.value.copy(saveSuccess = true)
             kotlinx.coroutines.delay(2000)
             _uiState.value = _uiState.value.copy(saveSuccess = false)
         }
