@@ -10,6 +10,7 @@ import com.gp.q733.domain.model.ProductInfo
 import com.gp.q733.domain.print.GpPrinterService
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
+import com.gp.q733.domain.repository.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +34,8 @@ data class ScanProductUiState(
 class ScanProductViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val gpPrinterService: GpPrinterService,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    private val productRepository: ProductRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScanProductUiState())
@@ -62,13 +64,19 @@ class ScanProductViewModel @Inject constructor(
         }
     }
 
-    private fun lookupProduct(barcode: String): ProductInfo {
+    private suspend fun lookupProduct(barcode: String): ProductInfo {
+        // First query local database
+        val dbProduct = productRepository.getProductByBarcode(barcode)
+        if (dbProduct != null) {
+            return dbProduct
+        }
+        // Not found in database — return placeholder, user can fill in and save
         return ProductInfo(
             barcode = barcode,
-            name = "\u5546\u54c1$barcode",
+            name = "",
             price = 0.0,
             spec = "",
-            unit = "\u4e2a",
+            unit = "",
             origin = ""
         )
     }

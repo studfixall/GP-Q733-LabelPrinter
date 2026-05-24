@@ -51,21 +51,24 @@ class TemplateBrowserViewModel @Inject constructor(@ApplicationContext private v
     suspend fun loadTemplates() = withContext(Dispatchers.IO) {
         try {
             val templates = mutableListOf<BarsoftTemplateInfo>()
-            val assetDirs = context.assets.list("templates") ?: emptyArray()
+            val topDirs = context.assets.list("templates") ?: emptyArray()
 
-            for (dir in assetDirs) {
-                val files = context.assets.list("templates/$dir") ?: emptyArray()
-                for (file in files) {
-                    if (file.endsWith(".xml")) {
-                        val filePath = "templates/$dir/$file"
-                        try {
-                            val inputStream = context.assets.open(filePath)
-                            val templateInfo = parseTemplate(inputStream, file, dir)
-                            if (templateInfo != null) {
-                                templates.add(templateInfo)
+            for (topDir in topDirs) {
+                val categories = context.assets.list("templates/$topDir") ?: emptyArray()
+                for (category in categories) {
+                    val files = context.assets.list("templates/$topDir/$category") ?: emptyArray()
+                    for (file in files) {
+                        if (file.endsWith(".xml")) {
+                            val filePath = "templates/$topDir/$category/$file"
+                            try {
+                                val inputStream = context.assets.open(filePath)
+                                val templateInfo = parseTemplate(inputStream, file, category)
+                                if (templateInfo != null) {
+                                    templates.add(templateInfo)
+                                }
+                            } catch (e: Exception) {
+                                // Skip unreadable templates
                             }
-                        } catch (e: Exception) {
-                            // Skip unreadable templates
                         }
                     }
                 }
