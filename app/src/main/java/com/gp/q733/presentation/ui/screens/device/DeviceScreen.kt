@@ -62,7 +62,7 @@ fun DeviceScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("扫描中...")
                 } else {
-                    Icon(Icons.AutoMirrored.Filled.BluetoothSearching, contentDescription = null)
+                    Icon(Icons.Default.BluetoothSearching, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("扫描设备")
                 }
