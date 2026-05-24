@@ -1,4 +1,4 @@
-package com.gp.q733.ui.template
+﻿package com.gp.q733.ui.template
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,6 +32,7 @@ data class TemplatePrintUiState(
     val productMprice: String = "",
     val fieldHints: Map<String, String> = emptyMap(), // textName -> label
     val isPrinting: Boolean = false,
+    val printCopies: Int = 1,
     val printResult: String? = null, // null=未打印, "success"=成功, "error:msg"=失败
     val showProductPicker: Boolean = false,
     val productSearchResults: List<ProductInfo> = emptyList(),
@@ -134,7 +135,8 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
                     )
                     return@launch
                 }
-                val cmdBytes = gpPrinterService.generatePrintCommands(label)
+                val copies = _uiState.value.printCopies
+                val cmdBytes = gpPrinterService.generatePrintCommands(label, copies)
                 val writeResult = bluetoothRepository.write(cmdBytes)
                 _uiState.value = _uiState.value.copy(
                     isPrinting = false,
@@ -147,6 +149,10 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
                 )
             }
         }
+    }
+
+    fun updatePrintCopies(copies: Int) {
+        _uiState.value = _uiState.value.copy(printCopies = copies.coerceIn(1, 999))
     }
 
     fun clearPrintResult() {

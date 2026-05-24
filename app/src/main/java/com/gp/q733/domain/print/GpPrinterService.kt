@@ -142,7 +142,7 @@ class GpPrinterService @Inject constructor(
 
      */
 
-    suspend fun generatePrintCommands(label: Label): ByteArray {
+    suspend fun generatePrintCommands(label: Label, copies: Int = 1): ByteArray {
 
         val settings = settingsDataStore.settingsFlow.first()
 
@@ -156,7 +156,7 @@ class GpPrinterService @Inject constructor(
 
         }
 
-        val cmd = createPrintCommand(cmdType, label, settings)
+        val cmd = createPrintCommand(cmdType, label, settings, copies)
 
         val bytes = cmd.appendCmds
 
@@ -242,11 +242,11 @@ class GpPrinterService @Inject constructor(
 
 
 
-    private fun createPrintCommand(cmdType: Int, label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
+    private fun createPrintCommand(cmdType: Int, label: Label, settings: com.gp.q733.data.local.AppSettings, copies: Int = 1): Cmd {
 
         return when (cmdType) {
 
-            BaseEnum.CMD_CPCL -> createCpclCommand(label, settings)
+            BaseEnum.CMD_CPCL -> createCpclCommand(label, settings, copies)
 
             BaseEnum.CMD_TSPL -> createTsplCommand(label, settings)
 
@@ -266,7 +266,7 @@ class GpPrinterService @Inject constructor(
 
      */
 
-    private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
+    private fun createCpclCommand(label: Label, settings: com.gp.q733.data.local.AppSettings, copies: Int = 1): Cmd {
 
         setCpclResolution()
 
@@ -286,7 +286,7 @@ class GpPrinterService @Inject constructor(
 
     val heightDots = height * 8
 
-    val header = "! $offset $DPI $DPI ${heightDots} 1\r\nPW ${widthDots}\r\n"
+    val header = "! $offset $DPI $DPI ${heightDots} $copies\r\nPW ${widthDots}\r\n"
 
     cmd.append(header.toByteArray(Charsets.US_ASCII))
 

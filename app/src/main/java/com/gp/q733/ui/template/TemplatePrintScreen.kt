@@ -8,7 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -184,6 +186,29 @@ fun TemplatePrintScreen(
                         Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("从商品库选择")
+                    }
+                }
+            }
+
+            // 打印份数
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("打印份数", style = MaterialTheme.typography.bodyLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { viewModel.updatePrintCopies(uiState.printCopies - 1) }) {
+                        Icon(Icons.Default.Remove, contentDescription = "减少")
+                    }
+                    Text(
+                        "${uiState.printCopies}",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.width(40.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    IconButton(onClick = { viewModel.updatePrintCopies(uiState.printCopies + 1) }) {
+                        Icon(Icons.Default.Add, contentDescription = "增加")
                     }
                 }
             }
@@ -368,7 +393,7 @@ private fun LabelPreview(
 
 /**
  * Draw simplified barcode bars visualization
- * Uses content hash to deterministically generate bar pattern
+ * Uses real CODE_128 encoding for scannable barcodes
  */
 private fun DrawScope.drawBarcodeBars(
     content: String,
@@ -377,25 +402,22 @@ private fun DrawScope.drawBarcodeBars(
     width: Float,
     height: Float
 ) {
-    val barCount = 60  // Total bars (simplified)
-    val barWidth = width / barCount
+    if (content.isBlank()) return
+
+    val modules = com.gp.q733.domain.util.Code128Encoder.encodeToModules(content)
+    if (modules.isEmpty()) return
+
+    val moduleWidth = width / modules.size
     val paint = android.graphics.Paint().apply {
         color = android.graphics.Color.BLACK
         style = android.graphics.Paint.Style.FILL
     }
 
-    // Generate deterministic bar pattern from content
-    val chars = content.ifBlank { "0" }
-    var barIndex = 0
-    for (i in 0 until barCount) {
-        val charIndex = i % chars.length
-        val charVal = chars[charIndex].code
-        val isBar = (charVal + i) % 3 != 0  // ~67% bars, 33% spaces
-
-        if (isBar) {
-            val barLeft = x + i * barWidth
+    for (i in modules.indices) {
+        if (modules[i]) {
+            val barLeft = x + i * moduleWidth
             drawContext.canvas.nativeCanvas.drawRect(
-                barLeft, y, barLeft + barWidth, y + height,
+                barLeft, y, barLeft + moduleWidth, y + height,
                 paint
             )
         }
