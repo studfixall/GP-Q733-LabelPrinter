@@ -446,6 +446,47 @@ fun EditorScreen(
                                             onCheckedChange = { underline -> viewModel.updateTextUnderline(index, underline) }
                                         )
                                     }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    // 数据绑定字段选择
+                                    var bindingExpanded by remember { mutableStateOf(false) }
+                                    val bindingOptions = listOf(
+                                        "" to "不绑定（固定文本）",
+                                        "name" to "商品名称",
+                                        "price" to "价格",
+                                        "mprice" to "会员价",
+                                        "barcode" to "条码",
+                                        "spec" to "规格",
+                                        "unit" to "单位",
+                                        "area" to "产地"
+                                    )
+                                    val currentBindingLabel = bindingOptions.find { it.first == element.textName }?.second ?: "不绑定（固定文本）"
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("绑定字段", style = MaterialTheme.typography.labelMedium)
+                                        Box {
+                                            TextButton(onClick = { bindingExpanded = true }) {
+                                                Text(currentBindingLabel)
+                                                Icon(Icons.Default.ArrowDropDown, null)
+                                            }
+                                            DropdownMenu(
+                                                expanded = bindingExpanded,
+                                                onDismissRequest = { bindingExpanded = false }
+                                            ) {
+                                                bindingOptions.forEach { (value, label) ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(label) },
+                                                        onClick = {
+                                                            viewModel.updateTextName(index, value)
+                                                            bindingExpanded = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 else -> {}
                             }

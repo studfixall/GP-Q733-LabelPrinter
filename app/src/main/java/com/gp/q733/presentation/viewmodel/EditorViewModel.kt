@@ -439,6 +439,29 @@ class EditorViewModel @Inject constructor(
     }
 
     /**
+     * 设置文本元素的商品数据绑定字段
+     * @param textName 绑定字段名（""=不绑定，固定文本）
+     */
+    fun updateTextName(index: Int, textName: String) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.Text) {
+                    elements[index] = element.copy(
+                        textName = textName,
+                        variable = if (textName.isNotEmpty()) 1 else 0
+                    )
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * 导出为 Barsoft XML 格式字符串
      */
     fun exportBarsoftXml(): String {
