@@ -242,13 +242,13 @@ fun ScanProductScreen(
                             Text("\u6761\u7801:", style = MaterialTheme.typography.bodyMedium)
                             Text(info.barcode, style = MaterialTheme.typography.bodyLarge)
                         }
-                        if (info.price.isNotBlank()) {
+                        if (info.price > 0) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("\u4ef7\u683c:", style = MaterialTheme.typography.bodyMedium)
-                                Text("\u00a5${info.price}", style = MaterialTheme.typography.titleLarge)
+                                Text("\u00a5${String.format("%.2f", info.price)}", style = MaterialTheme.typography.titleLarge)
                             }
                         }
 

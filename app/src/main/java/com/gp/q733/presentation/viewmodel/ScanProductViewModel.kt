@@ -66,7 +66,7 @@ class ScanProductViewModel @Inject constructor(
         return ProductInfo(
             barcode = barcode,
             name = "\u5546\u54c1$barcode",
-            price = "0.00",
+            price = 0.0,
             spec = "",
             unit = "\u4e2a",
             origin = ""
@@ -166,8 +166,8 @@ class ScanProductViewModel @Inject constructor(
             elements.add(LabelElement.Text(x = 3f, y = yOffset, text = info.name, fontSize = 6f, isBold = true))
             yOffset += 7f
         }
-        if (info.price.isNotBlank()) {
-            elements.add(LabelElement.Text(x = 3f, y = yOffset, text = "\u00a5${info.price}/${info.unit}", fontSize = 5f, isBold = false))
+        if (info.price > 0) {
+            elements.add(LabelElement.Text(x = 3f, y = yOffset, text = "\u00a5${String.format("%.2f", info.price)}/${info.unit}", fontSize = 5f, isBold = false))
             yOffset += 6f
         }
         if (info.spec.isNotBlank()) {
