@@ -177,9 +177,8 @@ fun Q733NavHost(
             TemplateBrowserScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onTemplateSelected = { label ->
-                    SharedTemplateHolder.label = label
-                    navController.navigate(Screen.TemplatePrint.route)
+                onTemplateSelected = { assetPath, widthMm, heightMm ->
+                    navController.navigate(Screen.Editor.createRoute(assetPath, widthMm, heightMm))
                 }
             )
         }

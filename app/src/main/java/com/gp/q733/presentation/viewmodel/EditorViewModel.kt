@@ -8,12 +8,15 @@ import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.domain.model.BarcodeFormat
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
+import com.gp.q733.domain.util.BarsoftTemplateParser
+import com.gp.q733.domain.util.TemplateJsonParser
 import com.gp.q733.domain.model.PrinterDevice
 import com.gp.q733.domain.print.GpPrinterService
 import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +50,8 @@ class EditorViewModel @Inject constructor(
     private val gpPrinterService: GpPrinterService,
     private val settingsDataStore: SettingsDataStore,
     private val labelDataStore: LabelDataStore,
-    private val customTemplateDao: com.gp.q733.data.local.db.CustomTemplateDao
+    private val customTemplateDao: com.gp.q733.data.local.db.CustomTemplateDao,
+    @ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditorUiState())
@@ -208,6 +212,7 @@ class EditorViewModel @Inject constructor(
             val elementsJson = com.gp.q733.domain.util.TemplateJsonParser.toJson(label.elements)
             customTemplateDao.insert(
                 com.gp.q733.data.local.db.CustomTemplateEntity(
+                    templateId = "custom_${System.currentTimeMillis()}",
                     name = templateName,
                     widthMm = label.widthMm,
                     heightMm = label.heightMm,
@@ -311,40 +316,26 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch { loadTemplateSync(templateId) }
     }
 
-    fun loadTemplateSync(templateId: String) {
-        val template = when (templateId) {
-            "express" -> Label(
-                id = "template_express_${System.currentTimeMillis()}",
-                widthMm = 50f, heightMm = 30f,
-                elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "\u6536\u4ef6\u4eba:\u5f20\u4e09", fontSize = 8f, isBold = true),
-                    LabelElement.Text(x = 2f, y = 10f, text = "\u7535\u8bdd:138****8888", fontSize = 7f, isBold = false),
-                    LabelElement.Text(x = 2f, y = 17f, text = "\u5317\u4eac\u5e02\u671d\u9633\u533axxx\u8857\u9053", fontSize = 7f, isBold = false),
-                    LabelElement.Barcode(x = 2f, y = 24f, content = "SF1234567890", format = BarcodeFormat.CODE128, height = 5f)
-                )
-            )
-            "product" -> Label(
-                id = "template_product_${System.currentTimeMillis()}",
-                widthMm = 40f, heightMm = 30f,
-                elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "\u5546\u54c1\u540d\u79f0", fontSize = 9f, isBold = true),
-                    LabelElement.Text(x = 2f, y = 10f, text = "\u578b\u53f7:ABC-001", fontSize = 7f, isBold = false),
-                    LabelElement.QRCode(x = 25f, y = 2f, content = "https://item.example.com/123", size = 12f),
-                    LabelElement.Text(x = 2f, y = 20f, text = "\u00a599.00", fontSize = 10f, isBold = true)
-                )
-            )
-            "price" -> Label(
-                id = "template_price_${System.currentTimeMillis()}",
-                widthMm = 30f, heightMm = 20f,
-                elements = listOf(
-                    LabelElement.Text(x = 2f, y = 2f, text = "\u7279\u4ef7", fontSize = 7f, isBold = false),
-                    LabelElement.Text(x = 2f, y = 8f, text = "\u00a59.9", fontSize = 12f, isBold = true),
-                    LabelElement.Barcode(x = 2f, y = 16f, content = "690123456789", format = BarcodeFormat.EAN13, height = 3f)
-                )
-            )
+    suspend fun loadTemplateSync(templateId: String) {
+        val label: Label? = when {
+            templateId.startsWith("built_in_") || templateId.startsWith("custom_") -> {
+                val entity = customTemplateDao.getByTemplateId(templateId)
+                entity?.let {
+                    Label(
+                        id = "template_${System.currentTimeMillis()}",
+                        widthMm = it.widthMm,
+                        heightMm = it.heightMm,
+                        elements = TemplateJsonParser.fromJson(it.elementsJson)
+                    )
+                }
+            }
+            templateId.startsWith("templates/") -> {
+                // Barsoft XML asset path, e.g. "templates/Templet/normal/4030.xml"
+                BarsoftTemplateParser.loadFromAssets(context, templateId)
+            }
             else -> null
         }
-        template?.let {
+        label?.let {
             _uiState.value = _uiState.value.copy(
                 label = it,
                 selectedElementIndex = null

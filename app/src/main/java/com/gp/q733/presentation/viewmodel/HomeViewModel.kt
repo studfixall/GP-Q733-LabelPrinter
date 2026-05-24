@@ -2,26 +2,32 @@ package com.gp.q733.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gp.q733.data.local.db.CustomTemplateDao
+import com.gp.q733.data.local.db.CustomTemplateEntity
 import com.gp.q733.data.local.LabelDataStore
-import com.gp.q733.domain.model.BarcodeFormat
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
+import com.gp.q733.domain.util.TemplateJsonParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class LabelTemplate(
-    val id: String,
+    val templateId: String,
     val name: String,
     val description: String,
-    val label: Label
+    val widthMm: Float,
+    val heightMm: Float,
+    val label: Label,
+    val isBuiltIn: Boolean
 )
 
 data class HomeUiState(
@@ -44,7 +50,8 @@ enum class PrinterStatus {
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
-    private val labelDataStore: LabelDataStore
+    private val labelDataStore: LabelDataStore,
+    private val customTemplateDao: CustomTemplateDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -58,8 +65,14 @@ class HomeViewModel @Inject constructor(
         )
 
     init {
-        // Load templates
-        _uiState.value = _uiState.value.copy(templates = createDefaultTemplates())
+        // 加载所有模板（内置 + 自定义）
+        viewModelScope.launch {
+            customTemplateDao.getAllSorted().collect { entities ->
+                _uiState.value = _uiState.value.copy(
+                    templates = entities.map { it.toLabelTemplate() }
+                )
+            }
+        }
 
         // Observe connection state and update UI
         viewModelScope.launch {
@@ -90,58 +103,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun createDefaultTemplates(): List<LabelTemplate> {
-        return listOf(
-            LabelTemplate(
-                id = "express",
-                name = "快递面单",
-                description = "50×30mm 标准快递标签",
-                label = Label(
-                    id = "template_express",
-                    widthMm = 50f,
-                    heightMm = 30f,
-                    elements = listOf(
-                        LabelElement.Text(x = 2f, y = 2f, text = "收件人：张三", fontSize = 8f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 10f, text = "电话：138****8888", fontSize = 7f, isBold = false),
-                        LabelElement.Text(x = 2f, y = 17f, text = "北京市朝阳区xxx街道", fontSize = 7f, isBold = false),
-                        LabelElement.Barcode(x = 2f, y = 24f, content = "SF1234567890", format = BarcodeFormat.CODE128, height = 5f)
-                    )
-                )
-            ),
-            LabelTemplate(
-                id = "product",
-                name = "商品标签",
-                description = "40×30mm 商品信息标签",
-                label = Label(
-                    id = "template_product",
-                    widthMm = 40f,
-                    heightMm = 30f,
-                    elements = listOf(
-                        LabelElement.Text(x = 2f, y = 2f, text = "商品名称", fontSize = 9f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 10f, text = "型号：ABC-001", fontSize = 7f, isBold = false),
-                        LabelElement.QRCode(x = 25f, y = 2f, content = "https://item.example.com/123", size = 12f),
-                        LabelElement.Text(x = 2f, y = 20f, text = "￥99.00", fontSize = 10f, isBold = true)
-                    )
-                )
-            ),
-            LabelTemplate(
-                id = "price",
-                name = "价格标签",
-                description = "30×20mm 简洁价格标签",
-                label = Label(
-                    id = "template_price",
-                    widthMm = 30f,
-                    heightMm = 20f,
-                    elements = listOf(
-                        LabelElement.Text(x = 2f, y = 2f, text = "特价", fontSize = 7f, isBold = false),
-                        LabelElement.Text(x = 2f, y = 8f, text = "￥49.9", fontSize = 12f, isBold = true),
-                        LabelElement.Barcode(x = 2f, y = 16f, content = "690123456789", format = BarcodeFormat.EAN13, height = 3f)
-                    )
-                )
-            )
-        )
-    }
-
     fun showConnectionDialog() {
         _uiState.value = _uiState.value.copy(showConnectionDialog = true)
     }
@@ -155,11 +116,44 @@ class HomeViewModel @Inject constructor(
             labelDataStore.deleteLabel(label.id)
         }
     }
+
+    fun deleteTemplate(template: LabelTemplate) {
+        viewModelScope.launch {
+            if (!template.isBuiltIn) {
+                customTemplateDao.getByTemplateId(template.templateId)?.let {
+                    customTemplateDao.delete(it)
+                }
+            }
+        }
+    }
     
     fun setNewLabelSize(width: Float, height: Float) {
         _uiState.value = _uiState.value.copy(
             newLabelWidth = width,
             newLabelHeight = height
+        )
+    }
+
+    private fun CustomTemplateEntity.toLabelTemplate(): LabelTemplate {
+        val elements = TemplateJsonParser.fromJson(elementsJson)
+        val description = if (isBuiltIn) {
+            "内置模板 · ${widthMm.toInt()}×${heightMm.toInt()}mm"
+        } else {
+            "自定义模板 · ${widthMm.toInt()}×${heightMm.toInt()}mm"
+        }
+        return LabelTemplate(
+            templateId = templateId,
+            name = name,
+            description = description,
+            widthMm = widthMm,
+            heightMm = heightMm,
+            label = Label(
+                id = templateId,
+                elements = elements,
+                widthMm = widthMm,
+                heightMm = heightMm
+            ),
+            isBuiltIn = isBuiltIn
         )
     }
 }

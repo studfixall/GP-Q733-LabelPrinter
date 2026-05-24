@@ -178,13 +178,13 @@ fun HomeScreen(
                     TemplateCard(
                         name = template.name,
                         description = template.description,
-                        icon = when (template.id) {
-                            "express" -> Icons.Default.LocalShipping
-                            "product" -> Icons.Default.Inventory
-                            "price" -> Icons.Default.AttachMoney
+                        icon = when {
+                            template.templateId.startsWith("built_in_express") -> Icons.Default.LocalShipping
+                            template.templateId.startsWith("built_in_product") -> Icons.Default.Inventory
+                            template.templateId.startsWith("built_in_price") -> Icons.Default.AttachMoney
                             else -> Icons.AutoMirrored.Filled.Label
                         },
-                        onClick = { onNavigateToEditor(template.id, null, null) }
+                        onClick = { onNavigateToEditor(template.templateId, null, null) }
                     )
                 }
             }

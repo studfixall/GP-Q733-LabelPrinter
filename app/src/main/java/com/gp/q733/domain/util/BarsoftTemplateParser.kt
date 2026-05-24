@@ -5,6 +5,7 @@ import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
+import android.content.Context
 import java.io.InputStream
 import java.io.InputStreamReader
 
@@ -37,6 +38,20 @@ object BarsoftTemplateParser {
      * @param inputStream XML 文件输入流
      * @return 解析后的 Label 对象
      */
+    /**
+     * 从 assets 加载并解析 Barsoft XML 模板
+     * @param context Android Context
+     * @param assetPath assets 下的完整路径，如 "templates/Templet/normal/4030.xml"
+     * @return 解析后的 Label 对象，失败返回 null
+     */
+    fun loadFromAssets(context: Context, assetPath: String): Label? {
+        return try {
+            context.assets.open(assetPath).use { parse(it) }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun parse(inputStream: InputStream): Label {
         val items = mutableListOf<LabelElement>()
         var widthMm = 40f

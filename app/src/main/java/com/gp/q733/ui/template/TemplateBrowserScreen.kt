@@ -27,7 +27,7 @@ import com.gp.q733.domain.model.Label
 fun TemplateBrowserScreen(
     viewModel: TemplateBrowserViewModel,
     onBack: () -> Unit,
-    onTemplateSelected: (Label) -> Unit
+    onTemplateSelected: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -114,8 +114,7 @@ fun TemplateBrowserScreen(
                         TemplateCard(
                             template = template,
                             onClick = {
-                    com.gp.q733.presentation.navigation.SharedTemplateHolder.label = template.label
-                    onTemplateSelected(template.label)
+                    onTemplateSelected(template.assetPath, template.widthMm, template.heightMm)
                 }
                         )
                     }

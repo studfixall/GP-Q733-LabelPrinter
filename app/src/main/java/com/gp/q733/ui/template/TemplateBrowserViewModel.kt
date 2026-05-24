@@ -17,6 +17,7 @@ import java.io.InputStream
  * Barsoft XML 模板信息
  */
 data class BarsoftTemplateInfo(
+    val assetPath: String,      // assets 完整路径（如 "templates/Templet/normal/4030.xml"）
     val fileName: String,       // 文件名（如 "4030.xml"）
     val category: String,       // 分类（normal/price/clothe/jewelry/custome）
     val displayName: String,    // 显示名称（如 "40×30mm 商品标签"）
@@ -62,7 +63,7 @@ class TemplateBrowserViewModel @Inject constructor(@ApplicationContext private v
                             val filePath = "templates/$topDir/$category/$file"
                             try {
                                 val inputStream = context.assets.open(filePath)
-                                val templateInfo = parseTemplate(inputStream, file, category)
+                                val templateInfo = parseTemplate(inputStream, filePath, file, category)
                                 if (templateInfo != null) {
                                     templates.add(templateInfo)
                                 }
@@ -120,7 +121,7 @@ class TemplateBrowserViewModel @Inject constructor(@ApplicationContext private v
         )
     }
 
-    private fun parseTemplate(inputStream: InputStream, fileName: String, category: String): BarsoftTemplateInfo? {
+    private fun parseTemplate(inputStream: InputStream, assetPath: String, fileName: String, category: String): BarsoftTemplateInfo? {
         return try {
             val label = BarsoftTemplateParser.parse(inputStream)
             inputStream.close()
@@ -136,6 +137,7 @@ class TemplateBrowserViewModel @Inject constructor(@ApplicationContext private v
             val displayName = generateDisplayName(fileName, label.widthMm, label.heightMm, category)
 
             BarsoftTemplateInfo(
+                assetPath = assetPath,
                 fileName = fileName,
                 category = category,
                 displayName = displayName,

@@ -83,33 +83,17 @@ class ScanProductViewModel @Inject constructor(
         viewModelScope.launch {
             val templates = mutableListOf<ScanTemplateOption>()
 
-            // 内置模板（硬编码）
-            templates.add(ScanTemplateOption(
-                id = "default_50x30",
-                name = "商品标签 50×30",
-                label = buildDefaultLabel(50f, 30f)
-            ))
-            templates.add(ScanTemplateOption(
-                id = "default_40x30",
-                name = "价格标签 40×30",
-                label = buildDefaultLabel(40f, 30f)
-            ))
-            templates.add(ScanTemplateOption(
-                id = "default_40x20",
-                name = "紧凑标签 40×20",
-                label = buildDefaultLabel(40f, 20f)
-            ))
-
-            // 从 Room 加载自定义模板
+            // 从 Room 加载所有模板（内置 + 自定义），统一排序
             try {
-                val customs = customTemplateDao.getAll().first()
-                for (entity in customs) {
+                val roomTemplates = customTemplateDao.getAllSorted().first()
+                for (entity in roomTemplates) {
                     val elements = TemplateJsonParser.fromJson(entity.elementsJson)
+                    val prefix = if (entity.isBuiltIn) "" else "★ "
                     templates.add(ScanTemplateOption(
-                        id = "custom_${entity.id}",
-                        name = "★ ${entity.name} (${entity.widthMm.toInt()}×${entity.heightMm.toInt()})",
+                        id = entity.templateId,
+                        name = "$prefix${entity.name} (${entity.widthMm.toInt()}×${entity.heightMm.toInt()})",
                         label = Label(
-                            id = "custom_${entity.id}",
+                            id = entity.templateId,
                             elements = elements,
                             widthMm = entity.widthMm,
                             heightMm = entity.heightMm
@@ -144,8 +128,8 @@ class ScanProductViewModel @Inject constructor(
                 }
             } catch (_: Exception) {}
 
-            // 默认选中第一个自定义模板（如果有的话），否则选内置
-            val selectedId = templates.find { it.id.startsWith("custom_") }?.id
+            // 默认选中第一个自定义模板（Room中 isBuiltIn=false），没有则选内置
+            val selectedId = templates.find { !it.id.startsWith("built_in_") && !it.id.startsWith("barsoft_") }?.id
                 ?: templates.firstOrNull()?.id
                 ?: ""
             _uiState.value = _uiState.value.copy(
@@ -381,6 +365,7 @@ class ScanProductViewModel @Inject constructor(
                 val json = com.gp.q733.domain.util.TemplateJsonParser.toJson(template.label.elements)
                 customTemplateDao.insert(
                     com.gp.q733.data.local.db.CustomTemplateEntity(
+                        templateId = "custom_${System.currentTimeMillis()}",
                         name = name,
                         widthMm = template.label.widthMm,
                         heightMm = template.label.heightMm,
