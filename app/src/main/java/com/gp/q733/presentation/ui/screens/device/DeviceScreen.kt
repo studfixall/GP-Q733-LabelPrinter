@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,7 +30,7 @@ fun DeviceScreen(
                 title = { Text("连接设备") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
@@ -61,7 +62,7 @@ fun DeviceScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("扫描中...")
                 } else {
-                    Icon(Icons.Default.BluetoothSearching, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.BluetoothSearching, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("扫描设备")
                 }

@@ -7,7 +7,7 @@ import java.io.InputStreamReader
 /**
  * CSV解析器
  * 支持UTF-8 / UTF-8-BOM / GBK编码的CSV文件
- * 期望表头: barcode,name,price,spec,unit,category
+ * 期望表头: barcode,name,price,mprice,spec,unit,origin,category
  */
 object CsvParser {
 
@@ -33,8 +33,10 @@ object CsvParser {
         val barcodeIdx = headers.indexOf("barcode")
         val nameIdx = headers.indexOf("name")
         val priceIdx = headers.indexOf("price")
+        val mpriceIdx = headers.indexOf("mprice")
         val specIdx = headers.indexOf("spec")
         val unitIdx = headers.indexOf("unit")
+        val originIdx = headers.indexOf("origin")
         val categoryIdx = headers.indexOf("category")
 
         if (barcodeIdx < 0 || nameIdx < 0) {
@@ -51,8 +53,10 @@ object CsvParser {
                 val barcode = fields.getOrElse(barcodeIdx) { "" }
                 val name = fields.getOrElse(nameIdx) { "" }
                 val price = fields.getOrElse(priceIdx) { "0" }.toDoubleOrNull() ?: 0.0
+                val mprice = fields.getOrElse(mpriceIdx) { "0" }.toDoubleOrNull() ?: 0.0
                 val spec = fields.getOrElse(specIdx) { "" }
                 val unit = fields.getOrElse(unitIdx) { "" }
+                val origin = fields.getOrElse(originIdx) { "" }
                 val category = fields.getOrElse(categoryIdx) { "" }
 
                 if (barcode.isNotBlank() && name.isNotBlank()) {
@@ -61,8 +65,10 @@ object CsvParser {
                             barcode = barcode,
                             name = name,
                             price = price,
+                            mprice = if (mprice > 0) mprice else price,
                             spec = spec,
                             unit = unit,
+                            origin = origin,
                             category = category
                         )
                     )

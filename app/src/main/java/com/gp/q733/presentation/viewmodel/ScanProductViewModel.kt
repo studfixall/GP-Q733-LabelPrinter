@@ -208,15 +208,16 @@ class ScanProductViewModel @Inject constructor(
             LabelTemplate(
                 id = "product_scan_5030",
                 name = "商品标签 50x30",
-                description = "名称+规格+价格+条码",
+                description = "名称+规格+价格+会员价+条码",
                 label = Label(
                     id = "tpl_product_5030",
                     widthMm = 50f,
                     heightMm = 30f,
                     elements = listOf(
                         LabelElement.Text(x = 2f, y = 1f, text = TemplateFields.PRODUCT_NAME, fontSize = 10f, isBold = true),
-                        LabelElement.Text(x = 2f, y = 6f, text = TemplateFields.SPEC, fontSize = 7f),
-                        LabelElement.Text(x = 2f, y = 11f, text = "¥${TemplateFields.PRICE}", fontSize = 10f, isBold = true),
+                        LabelElement.Text(x = 2f, y = 5f, text = TemplateFields.SPEC, fontSize = 7f),
+                        LabelElement.Text(x = 2f, y = 9f, text = "¥${TemplateFields.PRICE}", fontSize = 9f, isBold = true),
+                        LabelElement.Text(x = 2f, y = 13f, text = "会员¥${TemplateFields.MPRICE}", fontSize = 8f),
                         LabelElement.Barcode(x = 2f, y = 17f, content = TemplateFields.BARCODE, format = BarcodeFormat.CODE128, height = 8f, widthMm = 46f)
                     )
                 )

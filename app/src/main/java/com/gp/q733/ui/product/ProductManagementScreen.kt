@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.gp.q733.data.util.CsvParser
 import com.gp.q733.domain.model.ProductInfo
@@ -233,11 +234,25 @@ private fun ProductItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = "¥${"%.2f".format(product.price)}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "¥${"%.2f".format(product.price)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (product.mprice > 0 && product.mprice != product.price) {
+                        Text(
+                            text = "会员 ¥${"%.2f".format(product.mprice)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
             Row {
                 IconButton(onClick = onEdit) {
@@ -267,6 +282,7 @@ private fun ProductEditDialog(
     var barcode by remember { mutableStateOf(product?.barcode ?: "") }
     var name by remember { mutableStateOf(product?.name ?: "") }
     var price by remember { mutableStateOf(product?.price?.toString() ?: "") }
+    var mprice by remember { mutableStateOf(product?.mprice?.let { if (it > 0) it.toString() else "" } ?: "") }
     var spec by remember { mutableStateOf(product?.spec ?: "") }
     var unit by remember { mutableStateOf(product?.unit ?: "") }
     var category by remember { mutableStateOf(product?.category ?: "") }
@@ -291,13 +307,26 @@ private fun ProductEditDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = price,
-                    onValueChange = { price = it },
-                    label = { Text("价格 *") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = price,
+                        onValueChange = { price = it },
+                        label = { Text("零售价 *") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = mprice,
+                        onValueChange = { mprice = it },
+                        label = { Text("会员价") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text("同零售价") }
+                    )
+                }
                 OutlinedTextField(
                     value = spec,
                     onValueChange = { spec = it },
@@ -325,12 +354,14 @@ private fun ProductEditDialog(
             TextButton(
                 onClick = {
                     val priceValue = price.toDoubleOrNull() ?: 0.0
+                    val mpriceValue = mprice.toDoubleOrNull() ?: 0.0
                     if (barcode.isNotBlank() && name.isNotBlank()) {
                         onSave(
                             ProductInfo(
                                 barcode = barcode.trim(),
                                 name = name.trim(),
                                 price = priceValue,
+                                mprice = if (mpriceValue > 0) mpriceValue else priceValue,
                                 spec = spec.trim(),
                                 unit = unit.trim(),
                                 category = category.trim()
