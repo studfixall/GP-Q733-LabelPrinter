@@ -254,6 +254,19 @@ fun ScanProductScreen(
 
                         Spacer(Modifier.height(8.dp))
 
+                        // 保存到商品库（仅当商品不在库中且已填写名称时显示）
+                        if (!uiState.productExistsInDb && uiState.productInfo.name.isNotBlank()) {
+                            OutlinedButton(
+                                onClick = { viewModel.saveToDatabase() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Default.Save, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("保存到商品库")
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
+
                         // 打印按钮
                         Button(
                             onClick = { viewModel.printFilledLabel() },

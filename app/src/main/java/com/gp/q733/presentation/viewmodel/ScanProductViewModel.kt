@@ -27,7 +27,8 @@ data class ScanProductUiState(
     val isPrinting: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val lastScannedCode: String? = null
+    val lastScannedCode: String? = null,
+    val productExistsInDb: Boolean = false
 )
 
 @HiltViewModel
@@ -57,8 +58,10 @@ class ScanProductViewModel @Inject constructor(
         viewModelScope.launch {
             // TODO: Replace with actual API call to SQL Server
             val product = lookupProduct(barcode)
+            val existsInDb = product.name.isNotBlank()
             _uiState.value = _uiState.value.copy(
                 productInfo = product,
+                productExistsInDb = existsInDb,
                 isLoading = false
             )
         }
@@ -83,6 +86,28 @@ class ScanProductViewModel @Inject constructor(
 
     fun updateProductInfo(info: ProductInfo) {
         _uiState.value = _uiState.value.copy(productInfo = info)
+    }
+
+    /**
+     * Save current scanned product to the local database
+     */
+    fun saveToDatabase() {
+        viewModelScope.launch {
+            val info = _uiState.value.productInfo
+            if (info.barcode.isBlank() || info.name.isBlank()) {
+                _uiState.value = _uiState.value.copy(errorMessage = "请填写商品名称")
+                return@launch
+            }
+            try {
+                productRepository.addProduct(info)
+                _uiState.value = _uiState.value.copy(
+                    productExistsInDb = true,
+                    successMessage = "已保存到商品库"
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "保存失败: ${e.message}")
+            }
+        }
     }
 
     /**
