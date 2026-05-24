@@ -36,12 +36,13 @@ import com.gp.q733.ui.template.TemplatePrintViewModel
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Device : Screen("device")
-    object Editor : Screen("editor/{templateId}?width={width}&height={height}") {
+    object Editor : Screen("editor?templateId={templateId}&width={width}&height={height}") {
         fun createRoute(templateId: String = "new", width: Float? = null, height: Float? = null): String {
+            val encoded = java.net.URLEncoder.encode(templateId, "UTF-8")
             return if (width != null && height != null) {
-                "editor/$templateId?width=$width&height=$height"
+                "editor?templateId=$encoded&width=$width&height=$height"
             } else {
-                "editor/$templateId"
+                "editor?templateId=$encoded"
             }
         }
     }
@@ -112,7 +113,9 @@ fun Q733NavHost(
             )
         ) { backStackEntry ->
             val viewModel: EditorViewModel = hiltViewModel()
-            val templateId = backStackEntry.arguments?.getString("templateId") ?: "new"
+            val templateId = java.net.URLDecoder.decode(
+                backStackEntry.arguments?.getString("templateId") ?: "new", "UTF-8"
+            )
             val width = backStackEntry.arguments?.getFloat("width") ?: 50f
             val height = backStackEntry.arguments?.getFloat("height") ?: 30f
 

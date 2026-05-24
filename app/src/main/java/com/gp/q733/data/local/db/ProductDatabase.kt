@@ -53,6 +53,9 @@ abstract class ProductDatabase : RoomDatabase() {
  * 插入内置模板（id 固定，已存在则跳过）
  */
 private suspend fun seedBuiltInTemplates(dao: CustomTemplateDao) {
+    // Skip if already seeded (prevents duplicates on DB recreate)
+    dao.getByTemplateId("built_in_express")?.let { return }
+
     val builtIns = listOf(
         CustomTemplateEntity(
             templateId = "built_in_express",
