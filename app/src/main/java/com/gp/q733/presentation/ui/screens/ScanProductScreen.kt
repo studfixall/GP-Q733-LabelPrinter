@@ -1,69 +1,49 @@
 package com.gp.q733.presentation.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanProductScreen(
     viewModel: ScanProductViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToEditor: (labelId: String, width: Float?, height: Float?) -> Unit = { _, _, _ -> }
+    onNavigateToEditor: (String, Float?, Float?) -> Unit = { _, _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val connectionState by viewModel.connectionState.collectAsState()
+    val focusRequester = remember { FocusRequester() }
 
-    var manualBarcode by remember { mutableStateOf("") }
-
-    // ZXing 扫码启动器
-    val scanLauncher = rememberLauncherForActivityResult(
-        contract = ScanContract()
-    ) { result ->
-        if (result.contents != null) {
-            viewModel.onBarcodeScanned(result.contents)
-        }
-    }
-
-    // 相机权限请求启动器
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            val options = ScanOptions()
-                .setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
-                .setPrompt("\u5c06\u6761\u7801\u5bf9\u51c6\u626b\u63cf\u6846")
-                .setCameraId(0)
-                .setBeepEnabled(true)
-                .setBarcodeImageEnabled(false)
-            scanLauncher.launch(options)
-        } else {
-            viewModel.setError("\u9700\u8981\u76f8\u673a\u6743\u9650\u624d\u80fd\u626b\u7801")
-        }
+    // 自动聚焦到扫码输入框
+    LaunchedEffect(Unit) {
+        try { focusRequester.requestFocus() } catch (_: Exception) {}
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("\u626b\u7801\u5546\u54c1\u6253\u5370") },
+                title = { Text("扫码打印") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "\u8fd4\u56de")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
@@ -73,243 +53,192 @@ fun ScanProductScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(16.dp)
         ) {
-            // 扫码/输入区域
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "\u626b\u63cf\u6216\u8f93\u5165\u5546\u54c1\u6761\u7801",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    // 手动输入条码
-                    OutlinedTextField(
-                        value = manualBarcode,
-                        onValueChange = { manualBarcode = it },
-                        label = { Text("\u5546\u54c1\u6761\u7801") },
-                        placeholder = { Text("\u4f8b\u5982: 6901234567890") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                if (manualBarcode.isNotBlank()) {
-                                    viewModel.onBarcodeScanned(manualBarcode)
-                                    manualBarcode = ""
-                                }
-                            }
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.QrCodeScanner, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("\u626b\u7801")
+            // ===== 扫码输入栏 =====
+            var barcodeInput by remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = barcodeInput,
+                onValueChange = { barcodeInput = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
+                placeholder = { Text("扫描条码或手动输入") },
+                leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = null) },
+                trailingIcon = {
+                    IconButton(onClick = {
+                        if (barcodeInput.isNotBlank()) {
+                            viewModel.onBarcodeScanned(barcodeInput.trim())
                         }
-                        Button(
-                            onClick = {
-                                if (manualBarcode.isNotBlank()) {
-                                    viewModel.onBarcodeScanned(manualBarcode)
-                                    manualBarcode = ""
-                                }
-                            },
-                            enabled = manualBarcode.isNotBlank(),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.Search, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text("\u67e5\u8be2")
-                        }
+                    }) {
+                        Icon(Icons.Default.Search, contentDescription = "查询")
                     }
-                }
-            }
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    if (barcodeInput.isNotBlank()) {
+                        viewModel.onBarcodeScanned(barcodeInput.trim())
+                    }
+                })
+            )
 
-            // 加载状态
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ===== 加载中 =====
             if (uiState.isLoading) {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                        Spacer(Modifier.width(16.dp))
-                        Text("\u67e5\u8be2\u5546\u54c1\u4fe1\u606f\u4e2d...")
-                    }
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
 
-            // 错误信息
-            uiState.errorMessage?.let { error ->
+            // ===== 商品信息展示 =====
+            if (uiState.productInfo.name.isNotBlank() && !uiState.showProductDialog) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
+                        containerColor = if (uiState.productExistsInDb)
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer
                     )
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.Error, contentDescription = null)
-                        Text(error, modifier = Modifier.weight(1f))
-                        IconButton(onClick = { viewModel.clearMessages() }) {
-                            Icon(Icons.Default.Close, contentDescription = "\u5173\u95ed")
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (uiState.productExistsInDb) Icons.Default.CheckCircle else Icons.Default.Info,
+                                contentDescription = null,
+                                tint = if (uiState.productExistsInDb) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = if (uiState.productExistsInDb) "商品已入库" else "商品信息",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("条码: ${uiState.productInfo.barcode}", style = MaterialTheme.typography.bodyMedium)
+                        Text("名称: ${uiState.productInfo.name}", style = MaterialTheme.typography.bodyLarge)
+                        if (uiState.productInfo.price > 0) {
+                            Text("价格: ¥${String.format("%.2f", uiState.productInfo.price)}", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        if (uiState.productInfo.spec.isNotBlank()) {
+                            Text("规格: ${uiState.productInfo.spec}", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
-            }
 
-            // 成功信息
-            uiState.successMessage?.let { msg ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary)
-                        Text(msg, color = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.weight(1f))
-                        IconButton(onClick = { viewModel.clearMessages() }) {
-                            Icon(Icons.Default.Close, contentDescription = "\u5173\u95ed")
-                        }
-                    }
-                }
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // 商品信息显示
-            val info = uiState.productInfo
-            if (info.barcode.isNotBlank()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
+                // ===== 模板选择 =====
+                Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "\u5546\u54c1\u4fe1\u606f",
-                            style = MaterialTheme.typography.titleMedium
+                    items(uiState.templates) { template ->
+                        val isSelected = template.id == uiState.selectedTemplateId
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = { viewModel.selectTemplate(template.id) },
+                            label = { Text(template.name, style = MaterialTheme.typography.labelMedium) }
                         )
-                        if (info.name.isNotBlank()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("\u540d\u79f0:", style = MaterialTheme.typography.bodyMedium)
-                                Text(info.name, style = MaterialTheme.typography.bodyLarge)
-                            }
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text("\u6761\u7801:", style = MaterialTheme.typography.bodyMedium)
-                            Text(info.barcode, style = MaterialTheme.typography.bodyLarge)
-                        }
-                        if (info.price > 0) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text("\u4ef7\u683c:", style = MaterialTheme.typography.bodyMedium)
-                                Text("\u00a5${String.format("%.2f", info.price)}", style = MaterialTheme.typography.titleLarge)
-                            }
-                        }
-
-                        Spacer(Modifier.height(8.dp))
-
-                        // 保存到商品库（仅当商品不在库中且已填写名称时显示）
-                        if (!uiState.productExistsInDb && uiState.productInfo.name.isNotBlank()) {
-                            OutlinedButton(
-                                onClick = { viewModel.saveToDatabase() },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Icon(Icons.Default.Save, contentDescription = null)
-                                Spacer(Modifier.width(8.dp))
-                                Text("保存到商品库")
-                            }
-                            Spacer(Modifier.height(8.dp))
-                        }
-
-                        // 打印按钮
-                        Button(
-                            onClick = { viewModel.printFilledLabel() },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = !uiState.isPrinting
-                        ) {
-                            if (uiState.isPrinting) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text("\u6253\u5370\u4e2d...")
-                            } else {
-                                Icon(Icons.Default.Print, contentDescription = null)
-                                Spacer(Modifier.width(8.dp))
-                                Text("\u6253\u5370\u6807\u7b7e")
-                            }
-                        }
                     }
                 }
-            }
 
-            // 连接状态提示
-            if (connectionState == ConnectionState.Disconnected) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // ===== 打印按钮 =====
+                Button(
+                    onClick = { viewModel.print() },
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    enabled = !uiState.isPrinting && uiState.selectedTemplateId.isNotBlank()
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.BluetoothDisabled, contentDescription = null)
-                        Text("\u8bf7\u5148\u8fde\u63a5\u84dd\u7259\u6253\u5370\u673a")
+                    if (uiState.isPrinting) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("打印中...")
+                    } else {
+                        Icon(Icons.Default.Print, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("打印")
                     }
                 }
             }
+
+            // ===== 未扫码时的提示 =====
+            if (uiState.productInfo.name.isBlank() && !uiState.isLoading && !uiState.showProductDialog) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(top = 60.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("扫描商品条码开始打印", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // ===== 消息提示 =====
+            uiState.errorMessage?.let { msg ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Snackbar(
+                    action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
+                ) { Text(msg) }
+            }
+            uiState.successMessage?.let { msg ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Snackbar(
+                    action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
+                ) { Text(msg) }
+            }
+        }
+
+        // ===== 维护商品资料弹窗 =====
+        if (uiState.showProductDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissProductDialog() },
+                title = { Text("商品未入库") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("条码: ${uiState.productInfo.barcode}", style = MaterialTheme.typography.bodyMedium)
+                        OutlinedTextField(
+                            value = uiState.dialogName,
+                            onValueChange = { viewModel.updateDialogName(it) },
+                            label = { Text("商品名称") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = uiState.dialogPrice,
+                            onValueChange = { viewModel.updateDialogPrice(it) },
+                            label = { Text("价格") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.saveProductFromDialog() }) {
+                        Text("保存并继续")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissProductDialog() }) {
+                        Text("取消")
+                    }
+                }
+            )
         }
     }
 }
