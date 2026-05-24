@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:zwf="http://schemas.android.com/apk/res-auto">
+    <include layout="@layout/title_bar" />
+    <TextView android:text="@string/lineAttribute" style="@style/setting_text" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_linetype" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" zwf:left_text="@string/lineType" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_linewidth" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" zwf:left_text="@string/lineLength" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_linesize" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" zwf:left_text="@string/lineWidth" />
+</LinearLayout>

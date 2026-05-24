@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="66.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/image" android:layout_width="66.0dp" android:layout_height="66.0dp" android:src="@color/colorOS" android:scaleType="center" android:contentDescription="@string/app_name" />
+    <TextView android:layout_gravity="center_vertical" android:id="@id/fileName" android:layout_width="250.0dp" android:layout_height="wrap_content" android:layout_marginLeft="68.0dp" android:layout_marginTop="22.0dp" android:text="标题头" />
+    <TextView android:layout_gravity="center_vertical" android:id="@id/fileUrl" android:visibility="gone" android:layout_width="90.0dp" android:layout_height="wrap_content" android:layout_marginLeft="150.0dp" android:layout_marginTop="22.0dp" android:text="标题头" />
+    <Button android:textColor="@color/white" android:layout_gravity="center_vertical" android:id="@id/btnInput" android:background="@drawable/bg_btn_corner" android:layout_width="50.0dp" android:layout_height="30.0dp" android:layout_marginTop="18.0dp" android:layout_marginRight="10.0dp" android:text="观看" android:layout_alignParentRight="true" />
+</RelativeLayout>

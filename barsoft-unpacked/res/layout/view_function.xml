@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/iv" android:layout_width="match_parent" android:layout_height="40.0dp" android:layout_marginTop="10.0dp" android:src="@mipmap/c_input" android:layout_weight="1.0" />
+    <TextView android:textColor="@color/black" android:gravity="center" android:layout_gravity="center" android:id="@id/tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dp" android:layout_marginBottom="8.0dp" android:text="输入" android:layout_weight="1.0" />
+</LinearLayout>

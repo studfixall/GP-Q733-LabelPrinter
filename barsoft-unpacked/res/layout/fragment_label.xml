@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout android:id="@id/fl_top" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar android:id="@id/tool_bar1" android:background="@color/colorPrimaryDark" android:layout_width="match_parent" android:layout_height="44.0dp">
+            <RelativeLayout android:layout_gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textSize="14.0sp" android:textColor="@color/white" android:gravity="center" android:id="@id/tv_softTech" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10.0dp" android:text="@string/Software" android:layout_alignParentRight="true" />
+                <TextView android:textSize="18.0sp" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/template" android:layout_centerInParent="true" />
+                <TextView android:textSize="14.0sp" android:textColor="@color/white" android:gravity="center" android:id="@id/tv_machineTech" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10.0dp" android:text="@string/Hardware" android:layout_alignParentLeft="true" />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+    </FrameLayout>
+    <RelativeLayout android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="0.0dp" android:layout_marginTop="0.0dp" android:layout_marginRight="0.0dp">
+        <com.jude.rollviewpager.RollPagerView android:id="@id/roll_view_pager" android:background="@drawable/bg_btn_corner" android:layout_width="match_parent" android:layout_height="100.0dp" app:rollviewpager_play_delay="5000" />
+    </RelativeLayout>
+    <RelativeLayout android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2.0dp" />
+    <android.support.v7.widget.Toolbar android:id="@id/tool_bar" android:background="@drawable/bg_btn_corner" android:layout_width="match_parent" android:layout_height="30.0dp" android:layout_marginTop="2.0dp" android:layout_marginRight="0.0dp" app:contentInsetStart="2.0dp">
+        <LinearLayout android:orientation="horizontal" android:background="@drawable/bg_btn_corner" android:focusable="true" android:focusableInTouchMode="true" android:layout_width="match_parent" android:layout_height="30.0dp">
+            <EditText android:textSize="16.0dp" android:id="@id/search_txt" android:background="@drawable/et_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginRight="4.0dp" android:hint="请输入包装上条码数字部分点搜索" android:singleLine="true" android:layout_weight="3.0" android:imeOptions="actionSearch" />
+            <Button android:textSize="14.0sp" android:textColor="@color/white" android:id="@id/btn_search" android:background="@drawable/bg_btn_corner2" android:layout_width="60.0dp" android:layout_height="30.0dp" android:layout_marginRight="0.0dp" android:text="@string/str_search" android:layout_alignParentRight="true" />
+        </LinearLayout>
+    </android.support.v7.widget.Toolbar>
+    <RelativeLayout android:layout_gravity="center_vertical" android:background="@drawable/bg_btn_corner" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2.0dp">
+        <RadioGroup android:orientation="horizontal" android:id="@id/radio_Label" android:layout_width="match_parent" android:layout_height="30.0dp">
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_myLabel" android:layout_width="wrap_content" android:checked="true" android:text="@string/my" style="@style/radiobutton_style" />
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_Price" android:layout_width="wrap_content" android:text="@string/priceTag" style="@style/radiobutton_style" />
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_Normal" android:layout_width="wrap_content" android:text="@string/normal" style="@style/radiobutton_style" />
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_Clothe" android:layout_width="wrap_content" android:text="@string/costume" style="@style/radiobutton_style" />
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_Jewelry" android:layout_width="wrap_content" android:text="@string/jewels" style="@style/radiobutton_style" />
+            <RadioButton android:textSize="14.0sp" android:textColor="@drawable/selector_tab_color" android:id="@id/rb_customer" android:layout_width="wrap_content" android:text="@string/define" style="@style/radiobutton_style" />
+        </RadioGroup>
+    </RelativeLayout>
+    <android.support.v4.widget.SwipeRefreshLayout android:id="@id/SwipeRefreshLayout" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginBottom="100.0dp">
+        <android.support.v7.widget.RecyclerView android:scrollbarSize="5.0dp" android:scrollbarStyle="outsideOverlay" android:id="@id/recycler_view" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="50.0dp" />
+    </android.support.v4.widget.SwipeRefreshLayout>
+</LinearLayout>

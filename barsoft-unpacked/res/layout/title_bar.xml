@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar android:id="@id/tb_title" android:background="@color/colorPrimaryDark" android:layout_width="match_parent" android:layout_height="44.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="18.0sp" android:textColor="@color/white" android:layout_gravity="center" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setBluetooth" android:maxLines="1" />
+    <TextView android:textSize="18.0sp" android:textColor="@color/white" android:layout_gravity="right" android:id="@id/tv_right" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="12.0dp" android:text="@string/complete" />
+</android.support.v7.widget.Toolbar>

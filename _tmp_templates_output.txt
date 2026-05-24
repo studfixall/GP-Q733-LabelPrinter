@@ -1,0 +1,1027 @@
+﻿
+## clothe (12 templates)
+------------------------------------------------------------
+
+### 2060ϴ��.xml (30x60mm, gap=2, density=7, speed=3)
+  [text] text="ϴ��˵��" size=18 font=0 textName="����������"
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="���������¶�" size=16 font=0 textName="����������"
+  [unknown(4)]
+  [text] text="��������ά30%" size=20 font=0 textName="����������"
+  [text] text="���ϣ���˿100%" size=20 font=0 textName="����������"
+  [text] text="����50%" size=20 font=0 textName="����������"
+  [text] text="�ɷ�:��ë20%" size=20 font=0 textName="����������"
+  [text] text="�ȼ���һ��Ʒ" size=20 font=0 textName="����������"
+  [text] text="���������ĵط�����" size=16 font=0 textName="����������"
+  [text] text="����ϴ�»����" size=16 font=0 textName="����������"
+  [text] text="����Ư��" size=16 font=0 textName="����������"
+  [text] text="������ϴ" size=16 font=0 textName="����������"
+
+### 3060ϴ��.xml (30x60mm, gap=2, density=12, speed=3)
+  [text] text="ϴ��˵��" size=22 font=0 textName="����������"
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="����Ư��" size=20 font=0 textName="����������"
+  [text] text="���������¶�" size=20 font=0 textName="����������"
+  [text] text="���������ĵط�����" size=20 font=0 textName="����������"
+  [text] text="����ϴ�»����" size=20 font=0 textName="����������"
+  [text] text="������ϴ" size=20 font=0 textName="����������"
+  [text] text="�ȼ���һ��Ʒ" size=22 font=0 textName="����������"
+  [text] text="�ɷ�:��ë20%" size=22 font=0 textName="����������"
+  [text] text="���ϣ���˿100%" size=22 font=0 textName="����������"
+  [text] text="����50%" size=22 font=0 textName="����������"
+  [text] text="��������ά30%" size=22 font=0 textName="����������"
+
+### 35100ϴ��̨��.xml (35x100mm, gap=0, density=12, speed=3)
+  [text] text="1" size=37 font=Tahoma textName="����������"
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="�ߴ�" size=25 font=΢���ź� textName="����������"
+  [text] text="���" size=25 font=΢���ź� textName="����������"
+  [text] text="��Χ" size=25 font=΢���ź� textName="����������"
+  [text] text="��Χ" size=25 font=΢���ź� textName="����������"
+  [text] text="��Χ" size=25 font=΢���ź� textName="����������"
+  [text] text="�䳤" size=25 font=΢���ź� textName="����������"
+  [text] text="�³�" size=25 font=΢���ź� textName="����������"
+  [text] text="��/ȹ" size=14 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [text] text="����" size=25 font=΢���ź� textName="����������"
+  [line]
+  [line]
+  [line]
+  [line]
+
+### 40100ϴ��.xml (40x100mm, gap=2, density=12, speed=3)
+  [text] text="���ɻ�ϴ" size=18 font=���� textName="����������"
+  [text] text="��������" size=18 font=���� textName="����������"
+  [text] text="������Ư" size=18 font=���� textName="����������"
+  [text] text="��ϴ" size=18 font=���� textName="����������"
+  [text] text="��������" size=18 font=���� textName="����������"
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="��������90%" size=16 font=���� textName="����������"
+  [text] text="������Ѽ��" size=16 font=���� textName="����������"
+  [text] text="���޲��ɷ֣�100%��ά" size=16 font=���� textName="����������"
+  [text] text="���ϳɷ֣�100%������ά" size=15 font=���� textName="����������"
+  [text] text="���ϳɷ֣�100%����" size=16 font=���� textName="����������"
+  [text] text="��������80G(S)" size=16 font=���� textName="����������"
+  [text] text="�ͺţ�S155/80A" size=18 font=���� textName="����������"
+  [text] text="��ţ�Y12006" size=18 font=���� textName="����������"
+  [line]
+  [text] text="�Ϻ�����" size=21 font=Tahoma textName="����������"
+
+### 4060��װ.xml (40x60mm, gap=0, density=10, speed=3)
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+  [text] text="ͳһ���ۼ�198Ԫ" size=24 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="�ϸ�֤" size=30 font=0
+  [text] text="Ʒ��:���޷�" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+
+### 4070��װ.xml (40x70mm, gap=0, density=10, speed=3)
+  [text] text="�ϸ�֤" size=30 font=0
+  [text] text="ͳһ���ۼ�198Ԫ" size=24 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="Ʒ��:���޷�" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+
+### 4080��װ.xml (40x80mm, gap=0, density=10, speed=3)
+  [text] text="�ϸ�֤" size=34 font=2
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="ͳһ���ۼ�198Ԫ" size=30 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="Ʒ��:���޷�" size=24 font=2 textName="����������"
+
+### 4090.xml (40x86mm, gap=0, density=12, speed=3)
+  [barcode] text="123456789" format=CODE_128 size=18 font=0 textName="����������"
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="���ɺ��" size=14 font=0 textName="����������"
+  [unknown(4)]
+  [text] text="��������" size=14 font=0 textName="����������"
+  [text] text="���ɻ�ϴ" size=14 font=0 textName="����������"
+  [text] text="������Ư" size=14 font=0 textName="����������"
+  [text] text="�ȼ���һ��Ʒ" size=18 font=0 textName="����������"
+  [text] text="�ɷ֣�100%����" size=18 font=0 textName="����������"
+  [text] text="�۸�RMB 358.00" size=18 font=0 textName="����������"
+  [text] text="�ϸ�֤" size=24 font=0 textName="����������"
+  [unknown(4)]
+  [text] text="Ʒ�������޷�" size=18 font=0 textName="����������"
+  [text] text="���ţ�BMW688" size=18 font=0 textName="����������"
+  [text] text="��׼��GT/1742-2002" size=18 font=0 textName="����������"
+  [text] text="��ɫ����ɫ" size=18 font=0 textName="����������"
+  [text] text="���175" size=18 font=0 textName="����������"
+
+### 42121����.xml (42x119mm, gap=0, density=12, speed=3)
+  [text] text="�ϸ�֤" size=32 font=���� textName="����������"
+  [barcode] text="M2X518171710110" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="��ʽ:MeiMier����˹��" size=18 font=���� textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="Ʒ��:ʱ�������" size=18 font=���� textName="����������"
+  [text] text="��ţ�M2X5181" size=18 font=���� textName="����������"
+  [text] text="���160/84A M" size=18 font=���� textName="����������"
+  [text] text="��ɫ������̣�717��" size=18 font=���� textName="����������"
+  [text] text="���ϣ�56%ͭ��˿" size=18 font=���� textName="����������"
+  [text] text="3%����41%ճ��" size=18 font=���� textName="����������"
+  [text] text="���ϣ�100%ճ��" size=18 font=���� textName="����������"
+  [text] text="���ۼۣ���1299.00" size=18 font=���� textName="����������"
+  [text] text="���ۼۣ���1299.00" size=23 font=���� textName="����������"
+  [text] text="������������ڲ�ʹ�ã�" size=18 font=���� textName="����������"
+  [text] text="����Ա��01" size=27 font=���� textName="����������"
+  [text] text="�ȼ����ϸ�Ʒ" size=18 font=���� textName="����������"
+
+### 45110����.xml (45x107mm, gap=0, density=12, speed=3)
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="ϴ��˵����" size=23 font=���� textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="����ϸ�    ��09" size=18 font=���� textName="����������"
+  [text] text="��Ʒ�ȼ����ϸ�Ʒ" size=18 font=���� textName="����������"
+  [text] text="GB18401-2010 B��" size=18 font=���� textName="����������"
+  [text] text="FZ/T73045-2013" size=18 font=���� textName="����������"
+  [text] text="ִ�б�׼��" size=18 font=���� textName="����������"
+  [text] text="��ȫ�������" size=18 font=���� textName="����������"
+  [text] text="�ɷݣ�100%��" size=18 font=���� textName="����������"
+  [text] text="��ɫ����ɫ" size=18 font=���� textName="����������"
+  [text] text="Ʒ����KMKX  P003" size=18 font=���� textName="����������"
+  [text] text="RMB:50Ԫ" size=27 font=���� textName="����������"
+  [text] text="���룺  L" size=18 font=���� textName="����������"
+  [text] text="Ʒ�ƣ�" size=18 font=���� textName="����������"
+  [text] text="����" size=37 font=���� textName="����������"
+  [text] text="ͯ����¹�" size=18 font=���� textName="����������"
+  [text] text="��" size=37 font=���� textName="����������"
+
+### 45115����.xml (45x112mm, gap=0, density=8, speed=2)
+  [text] text="����������孺��������˳·9-6��" size=18 font=0
+  [text] text="�������˷�װ���޹�˾" size=22 font=0
+  [text] text="��׼�е�C��" size=22 font=0
+  [text] text="GB 18401-2010" size=22 font=0
+  [text] text="��ȫ����Ҫ�����" size=22 font=0
+  [text] text="�뽻רҵ��ϴ�µ���ϴ" size=21 font=0
+  [text] text="��������" size=22 font=0
+  [text] text="����ˮϴ" size=22 font=0
+  [text] text="רҵ��ϴ" size=22 font=0
+  [text] text="ϴ��˵��" size=22 font=0
+  [text] text="�ڵ���������������ά100%" size=19 font=0
+  [text] text="�ڵ����ϣ�������ά100%" size=22 font=0
+  [text] text="�ڵ����ϣ�ˮ��ëƤ" size=22 font=0
+  [text] text="���ϣ�ճ��52% ������ά48%" size=22 font=0
+  [text] text="���ף����ϣ�������ά100%" size=22 font=0
+  [text] text="���ͣ�175/96A��44��" size=22 font=0
+  [text] text="��ɫ������" size=22 font=0
+  [text] text="��ţ�QDAM19113-3" size=22 font=0
+  [text] text="�ȼ����ϸ�Ʒ �죺��1" size=22 font=0
+  [text] text="Ʒ�����ɿ˴���" size=22 font=0
+  [text] text="�̱꣺����� ���أ�����" size=22 font=0
+  [text] text="����Ư��" size=22 font=0
+  [text] text="����ת�����" size=22 font=0
+  [unknown(4)]
+  [unknown(4)]
+  [unknown(4)]
+  [text] text="�۸񣺣�28800.00" size=30 font=0
+  [text] text="��׼��GB/T2665-2017" size=22 font=0
+  [unknown(4)]
+  [unknown(4)]
+
+### 45120����.xml (45x120mm, gap=0, density=12, speed=3)
+  [text] text="���ۼۣ�" size=18 font=0 textName="����������"
+  [text] text="RMB" size=12 font=0 textName="����������"
+  [text] text="169Ԫ" size=24 font=0 textName="����������"
+  [text] text="XL" size=28 font=0 textName="����������"
+  [text] text="�ڲ���" size=14 font=0 textName="����������"
+  [barcode] text="P9PB3617N0005" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="��ȫ�������:GB18401 -2010 B��" size=16 font=0 textName="����������"
+  [text] text="��Ʒ����:ֱ�ӽӴ�Ƥ��ķ�֯��Ʒ" size=16 font=0 textName="����������"
+  [text] text="Ʒ��:�����д���" size=16 font=0 textName="����������"
+  [text] text="����:XL(180/100A)" size=16 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ00(N0O" size=16 font=0 textName="����������"
+  [text] text="Ʒ��:�����д���" size=16 font=0 textName="����������"
+  [text] text="�ɷ�: 100%��" size=16 font=0 textName="����������"
+  [text] text="���: P9PB3617" size=16 font=0 textName="����������"
+  [text] text="��ʽ:" size=16 font=0 textName="����������"
+  [barcode] text="12345678" format=QR_CODE size=18 font=4 textName="����������"
+  [text] text="ɨһɨ. �о�ϲ" size=14 font=0 textName="����������"
+  [text] text="TEL:0769- 113389888 FAX:0769- 18329906" size=12 font=0 textName="����������"
+  [text] text="�����ȼ�:�ϸ�Ʒ���� Ա: 008" size=16 font=0 textName="����������"
+  [text] text="ִ�б�׼:GB/T 22700-2016" size=16 font=0 textName="����������"
+  [text] text="XXXXXXXXXX���޹�˾" size=16 font=0 textName="����������"
+  [text] text="XXXXXXXXXXXXX·1��" size=16 font=0 textName="����������"
+  [text] text="�� �� ֤" size=24 font=0 textName="����������"
+  [barcode] text="6902337911544" format=CODE_128 size=18 font=0 textName="����������"
+
+## custome (8 templates)
+------------------------------------------------------------
+
+### 50X30.xml (50x30mm, gap=0, density=13, speed=2)
+  [text] text="��Ⱥ" size=22 font=0 textName="name"
+  [text] text="�㽭" size=22 font=0 textName="aera"
+  [text] text="25.00" size=22 font=0 textName="price"
+  [text] text="358.00" size=22 font=0
+
+### 51X25.xml (50x30mm, gap=0, density=13, speed=2)
+  [text] text="��Ⱥ" size=22 font=0 textName="name"
+  [text] text="�㽭" size=22 font=0 textName="aera"
+  [text] text="25.00" size=22 font=0 textName="price"
+  [text] text="358.00" size=22 font=0
+
+### 5540���ǩ.xml (55x37mm, gap=1, density=12, speed=3)
+  [text] text="һ��Ʒ" size=22 font=0
+  [text] text="������Һ" size=22 font=0 textName="name"
+  [text] text="���ְ���" size=22 font=0 textName="area"
+  [text] text="10֧" size=22 font=0 textName="spec"
+  [text] text="��" size=22 font=0 textName="unit"
+  [text] text="22" size=22 font=0 textName="price"
+
+### 6542Ȯ��.xml (65x39mm, gap=1, density=12, speed=3)
+  [text] text="�޹�����Ȫˮ" size=18 font=���� textName="name"
+  [text] text="5.50" size=27 font=���� textName="price"
+  [text] text="5.00" size=27 font=���� textName="mprice"
+  [barcode] text="1234567890123" format=CODE_128 size=18 font=0 textName="barcode"
+
+### 73 37�۸�ǩ.xml (73x34mm, gap=0, density=12, speed=3)
+  [text] text="90Ԫ" size=50 font=΢���ź� textName="����������"
+  [text] text="500ml" size=23 font=΢���ź� textName="����������"
+  [text] text="�ɿڿ���" size=27 font=΢���ź� textName="����������"
+
+### 7538���ƿ�ֽ.xml (75x35mm, gap=1, density=12, speed=3)
+  [text] text="���ϰ�ҩ" size=21 font=Tahoma textName="name"
+  [text] text="100g" size=21 font=Tahoma textName="spec"
+  [text] text="ƿ" size=21 font=Tahoma textName="unit"
+  [text] text="�Ϻ��ɽ���" size=21 font=Tahoma textName="area"
+  [text] text="10054" size=21 font=Tahoma textName="barcode"
+  [text] text="99.00" size=30 font=Tahoma textName="price"
+  [text] text="99.00" size=31 font=Tahoma textName="mprice"
+
+### 8038�ͻ���ǩ.xml (80x38mm, gap=1, density=8, speed=2)
+  [text] text="500ml" size=16 font=0 textName="spec"
+  [text] text="�Ϻ�" size=16 font=0 textName="area"
+  [text] text="ƿ" size=16 font=0 textName="unit"
+  [text] text="5.00" size=19 font=0 textName="price"
+  [text] text="3.50" size=30 font=0 textName="mprice"
+  [text] text="�޹�����Ȫˮ" size=16 font=0 textName="name"
+
+### ���˹���3.0mm.xml (70x50mm, gap=0, density=12, speed=3)
+  [unknown(4)]
+  [text] text="��ַ���Ͼ�����ϼ����Ⱥ�Ƽ�԰ ����·1��" size=14 font=Tahoma textName="����������"
+  [text] text="��Ŀ          ÿ100��     Ӫ���زο�ֵ%" size=9 font=Tahoma textName="����������"
+  [text] text="Ӫ���ɷֱ�" size=14 font=Tahoma textName="����������"
+  [text] text="Ʒ����������3.0mm" size=23 font=Tahoma textName="����������"
+  [text] text="���ϣ�С��� ˮ ʳ���� ʳƷ��Ӽ���̼����)" size=14 font=Tahoma textName="����������"
+  [text] text="��Ʒ��׼���룺Q/NJYY 0001S" size=14 font=Tahoma textName="����������"
+  [text] text="�������֤��ţ�SC10132011300646" size=14 font=Tahoma textName="����������"
+  [text] text="�����ڣ����� 2��  0��-10�� 5��" size=14 font=Tahoma textName="����������"
+  [text] text="�������ڣ�2020��11��14��" size=14 font=Tahoma textName="����������"
+  [text] text="��������2.5����" size=14 font=Tahoma textName="����������"
+  [text] text="���أ������Ͼ�" size=14 font=Tahoma textName="����������"
+  [text] text="�绰��025-86560985" size=14 font=Tahoma textName="����������"
+  [text] text="���۷����Ͼ���������������޹�˾" size=14 font=Tahoma textName="����������"
+  [text] text="����            1141ǧ��         14%" size=9 font=Tahoma textName="����������"
+  [text] text="������         8.7��              14%" size=9 font=Tahoma textName="����������"
+  [text] text="֬��             1��                  2%" size=9 font=Tahoma textName="����������"
+  [text] text="̼ˮ������   55.2��          18%" size=9 font=Tahoma textName="����������"
+  [text] text="��                424����           21%" size=9 font=Tahoma textName="����������"
+  [text] text="��������������" size=14 font=Tahoma textName="����������"
+
+## jewelry (5 templates)
+------------------------------------------------------------
+
+### 25X45����.xml (25x45mm, gap=1, density=10, speed=1)
+  [text] text="MYBARCODE" size=44 font=0
+  [text] text="�������±�ǩ" size=45 font=0 textName="����������"
+  [text] text="������·��ʶ" size=45 font=0 textName="����������"
+  [text] text="DP1004" size=45 font=0 textName="����������"
+
+### 65X25����.xml (25x65mm, gap=1, density=10, speed=1)
+  [text] text="DP1004" size=45 font=0 textName="����������"
+  [text] text="�������±�ǩ" size=45 font=0 textName="����������"
+  [text] text="MYBARCODE" size=44 font=0
+  [text] text="������·��ʶ" size=45 font=0 textName="����������"
+
+### 7024����.xml (70x24mm, gap=0, density=12, speed=3)
+  [text] text="���߶˿�001" size=18 font=���� textName="����������"
+  [text] text="�����ר�ñ�" size=18 font=���� textName="����������"
+  [text] text="1�Ż�ר��" size=18 font=���� textName="����������"
+  [text] text="����P�����±�ǩ" size=18 font=���� textName="����������"
+
+### 7230.xml (72x30mm, gap=0, density=15, speed=2)
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4
+  [text] text="125Ԫ" size=25 font=0
+  [text] text="����" size=18 font=0
+  [text] text="�鱦��ǩģ��" size=22 font=0
+
+### 7525.xml (75x25mm, gap=0, density=15, speed=2)
+  [text] text="125Ԫ" size=16 font=2
+  [text] text="����" size=18 font=2
+  [barcode] text="695641620" format=CODE_128 size=15 font=4
+  [text] text="�鱦��ǩģ��" size=15 font=2
+
+## normal (24 templates)
+------------------------------------------------------------
+
+### 10040.xml (100x40mm, gap=0, density=12, speed=3)
+  [line]
+  [line]
+  [text] text="�ϸ�" size=14 font=0 textName="����������"
+  [text] text="PRODUCT NAME" size=14 font=0 textName="����������"
+  [line]
+  [line]
+  [text] text="08TJMC948A" size=14 font=0 textName="����������"
+  [text] text="LOT NUMBER" size=14 font=0 textName="����������"
+  [text] text="PACKING TYPE" size=14 font=0 textName="����������"
+  [text] text="4.2LX6" size=14 font=0 textName="����������"
+  [text] text="PRODUCT DATE" size=14 font=0 textName="����������"
+  [text] text="2020��08��10��" size=14 font=0 textName="����������"
+  [barcode] text="34155024-74800102008TJMC948A" format=QR_CODE size=21 font=0 textName="����������"
+  [text] text="CHANGAN MAZDA ENGINE 0IL SN 0W-20 4. 2LX6" size=13 font=0 textName="����������"
+  [line]
+
+### 100X100�ϸ�֤.xml (100x100mm, gap=0, density=12, speed=3)
+  [text] text="��Ʒ�ϸ�֤" size=22 font=0
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="ģ�ߺţ�" size=22 font=0 textName="����������"
+  [text] text="���" size=22 font=0 textName="����������"
+  [text] text="������" size=22 font=0 textName="����������"
+  [text] text="��⣺" size=22 font=0 textName="����������"
+  [text] text="���ڣ�" size=22 font=0 textName="����������"
+  [line]
+  [line]
+  [line]
+  [text] text="ͼ��" size=22 font=0 textName="����������"
+  [text] text="������" size=22 font=0 textName="����������"
+  [text] text="������ϸ�  ׼�����" size=22 font=0 textName="����������"
+
+### 2515.xml (28x15mm, gap=0, density=15, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="25*15���ű�ǩģ��" size=14 font=���� textName="����������"
+
+### 3015.xml (30x15mm, gap=0, density=15, speed=3)
+  [text] text="YJ160909HT300" size=21 font=Tahoma textName="����������"
+  [text] text="˫�����޸�����" size=21 font=΢���ź� textName="����������"
+
+### 3020.xml (30x20mm, gap=0, density=15, speed=3)
+  [text] text="ͳһ���ۼ�98Ԫ" size=28 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=18 font=4 textName="����������"
+  [text] text="Ʒ��:�칫��Ͳ" size=28 font=0 textName="����������"
+
+### 3525.xml (35x25mm, gap=0, density=15, speed=3)
+  [text] text="Ʒ����ѧ���ľߺ�" size=26 font=0
+  [text] text="�ͺţ�160" size=26 font=0 textName="����������"
+  [text] text="�۸�12.5Ԫ" size=26 font=0 textName="����������"
+  [text] text="���140*160" size=26 font=0 textName="����������"
+
+### 4020.xml (40x20mm, gap=0, density=15, speed=3)
+  [text] text="ͳһ���ۼۣ�8Ԫ" size=26 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=18 font=4 textName="����������"
+  [text] text="Ʒ��:�칫��Ͳ" size=26 font=0 textName="����������"
+
+### 4030.xml (40x30mm, gap=0, density=15, speed=3)
+  [barcode] text="2018824899" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="Ʒ������ǩ��ӡ���" size=23 font=΢���ź� textName="����������"
+  [text] text="�ͺţ�322" size=23 font=΢���ź� textName="����������"
+  [text] text="�۸�320Ԫ" size=23 font=΢���ź� textName="����������"
+
+### 4030�̲�.xml (40x30mm, gap=0, density=15, speed=3)
+  [text] text="�̲��ǩ" size=21 font=΢���ź� textName="����������"
+  [text] text="��" size=21 font=΢���ź� textName="����������"
+  [text] text="�۸�12.00Ԫ" size=21 font=΢���ź� textName="����������"
+  [text] text="���͵绰��1234678" size=21 font=΢���ź� textName="����������"
+  [text] text="ţ����ζ" size=21 font=΢���ź� textName="����������"
+
+### 4060.xml (40x60mm, gap=0, density=15, speed=3)
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+  [text] text="ͳһ���ۼ�198Ԫ" size=24 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="�ϸ�֤" size=30 font=0
+  [text] text="Ʒ��:���޷�" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+
+### 4070.xml (40x70mm, gap=0, density=15, speed=3)
+  [text] text="�ϸ�֤" size=30 font=0
+  [text] text="ͳһ���ۼ�198Ԫ" size=24 font=0 textName="����������"
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="Ʒ��:���޷�" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+
+### 4080.xml (40x80mm, gap=0, density=15, speed=3)
+  [text] text="�ϸ�֤" size=34 font=2
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="ͳһ���ۼ�198Ԫ" size=30 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="Ʒ��:���޷�" size=24 font=2 textName="����������"
+
+### 4080����.xml (40x80mm, gap=0, density=10, speed=3)
+  [text] text="�ϸ�֤" size=34 font=2
+  [barcode] text="12345678" format=CODE_128 size=14 font=4 textName="����������"
+  [text] text="ͳһ���ۼ�198Ԫ" size=30 font=0 textName="����������"
+  [text] text="���:2003-1028" size=24 font=0 textName="����������"
+  [text] text="��׼:GB2003-0810" size=24 font=0 textName="����������"
+  [text] text="���:175" size=24 font=0 textName="����������"
+  [text] text="�ɷ�:100%����" size=24 font=0 textName="����������"
+  [text] text="�ȼ�:һ��Ʒ" size=24 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=24 font=0 textName="����������"
+  [text] text="����:BMW175" size=24 font=0 textName="����������"
+  [text] text="Ʒ��:���޷�" size=24 font=2 textName="����������"
+
+### 5030.xml (50x30mm, gap=0, density=12, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="Ʒ�������㻨��" size=18 font=΢���ź� textName="����������"
+  [text] text="���ϣ��������ǡ������" size=16 font=΢���ź� textName="����������"
+  [text] text="�����ڣ�180��" size=16 font=΢���ź� textName="����������"
+  [text] text="������500g" size=16 font=΢���ź� textName="����������"
+  [text] text="�������ڣ�2020.06.18" size=16 font=΢���ź� textName="����������"
+  [text] text="����Ҫ�󣺳������������" size=16 font=΢���ź� textName="����������"
+
+### 60 50.xml (60x50mm, gap=0, density=15, speed=3)
+  [barcode] text="6933955951858" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="�Ϻ�:113239" size=21 font=΢���ź� textName="����������"
+  [text] text="Ʒ��:����һ�����߿׿�����(��ɫ)" size=21 font=΢���ź� textName="����������"
+  [text] text="����:QP140A 102��ɫ" size=21 font=΢���ź� textName="����������"
+  [text] text="����ԱA2��Ʒ�ȼ� �ϸ�Ʒ" size=21 font=΢���ź� textName="����������"
+  [text] text="��о:150cmX210cmX2" size=21 font=΢���ź� textName="����������"
+  [text] text="ͳһ���ۼ�: 988Ԫ" size=27 font=΢���ź� textName="����������"
+
+### 6030.xml (60x30mm, gap=0, density=12, speed=3)
+  [text] text="¯��:XXX" size=27 font=΢���ź� textName="����������"
+  [barcode] text="����:45��Բ�ֹ��:��102����1.5t¯��:XXX" format=QR_CODE size=21 font=0 textName="����������"
+  [text] text="����:45#Բ��" size=27 font=΢���ź� textName="����������"
+  [text] text="���:��102" size=27 font=΢���ź� textName="����������"
+  [text] text="����:1.5t" size=27 font=΢���ź� textName="����������"
+
+### 6040.xml (60x40mm, gap=0, density=15, speed=3)
+  [text] text="Ʒ��:��ζ�齺��" size=30 font=0 textName="����������"
+  [text] text="��ɫ:��ɫ" size=22 font=0 textName="����������"
+  [text] text="ִ�б�׼:9756-2001" size=22 font=0 textName="����������"
+  [text] text="����ʱ��:2018-9-20" size=22 font=0 textName="����������"
+  [text] text="�ͺ�:901" size=22 font=0
+  [barcode] text="SS2018824" format=CODE_128 size=20 font=4 textName="����������"
+
+### 6040���.xml (60x40mm, gap=0, density=15, speed=3)
+  [text] text="ע������ֹ���������Ӽ�Ӧ����ʳ�ÿڸи���" size=21 font=΢���ź� textName="����������"
+  [text] text="�������ڣ�2020��10��18��" size=21 font=΢���ź� textName="����������"
+  [text] text="�����ڣ�����3-4��" size=21 font=���� textName="����������"
+  [text] text="���ϣ���ۡ����������ǡ�ʳ����" size=21 font=���� textName="����������"
+  [text] text="Ʒ�������" size=21 font=΢���ź� textName="����������"
+
+### 6050����.xml (60x50mm, gap=0, density=15, speed=3)
+  [barcode] text="6933955951858" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="�Ϻţ�P055" size=18 font=΢���ź� textName="����������"
+  [text] text="Ʒ��:����һ�����߿׿�����(��ɫ)" size=21 font=΢���ź� textName="����������"
+  [text] text="���ף�150cmX110cm X 1" size=18 font=΢���ź� textName="����������"
+  [text] text="����ԱA2��Ʒ�ȼ� �ϸ�Ʒ" size=21 font=΢���ź� textName="����������"
+  [text] text="���ף�48cmX 14cmX1" size=18 font=΢���ź� textName="����������"
+  [text] text="ͳһ���ۼ�: 988Ԫ" size=27 font=΢���ź� textName="����������"
+  [text] text="���ţ�RTK07C X03" size=18 font=΢���ź� textName="����������"
+  [text] text="����:  190cmx 230cm X 1" size=18 font=΢���ź� textName="����������"
+  [text] text="��ȫ�������GB31701 B��" size=18 font=΢���ź� textName="����������"
+  [text] text="ִ�б�׼031 /0120000328 C001" size=18 font=΢���ź� textName="����������"
+
+### 7030.xml (70x30mm, gap=0, density=12, speed=3)
+  [line]
+  [text] text="���:190516032" size=18 font=���� textName="����������"
+  [text] text="2017F688-32" size=18 font=���� textName="����������"
+  [text] text="����:������ƽ" size=18 font=���� textName="����������"
+  [text] text="������:2000g" size=18 font=���� textName="����������"
+  [text] text="��С����:0.5g" size=18 font=���� textName="����������"
+  [text] text="�ͺ�:WT20002G" size=18 font=���� textName="����������"
+  [text] text="ʵ�ʷֶ�ֵ:0.01g" size=18 font=���� textName="����������"
+  [text] text="�춨�ֶ�ֵ:0.1g" size=18 font=���� textName="����������"
+  [text] text="WANT������̩��ƽ�������޹�˾" size=18 font=���� textName="����������"
+  [line]
+
+### 7050�ϸ�֤.xml (70x50mm, gap=0, density=15, speed=3)
+  [text] text="�����ڣ�12����" size=18 font=���� textName="����������"
+  [text] text="�������ڣ�2016-04-15" size=18 font=���� textName="����������"
+  [text] text="��ɫ����ɫ" size=18 font=���� textName="����������"
+  [text] text="�ͺţ�NQ-901" size=23 font=���� textName="����������"
+  [text] text="����Ա��02" size=18 font=���� textName="����������"
+  [text] text="�ϸ�֤" size=27 font=���� textName="����������"
+  [text] text="��������20kg" size=23 font=���� textName="����������"
+  [text] text="GB/T9756-2001" size=18 font=���� textName="����������"
+  [text] text="GB/T18582-2001" size=18 font=���� textName="����������"
+  [barcode] text="��ζ�齺��" format=QR_CODE size=21 font=0 textName="����������"
+  [text] text="ִ�б�׼" size=18 font=���� textName="����������"
+  [text] text="��ζ�齺��" size=23 font=΢���ź� textName="����������"
+
+### 7060.xml (80x67mm, gap=1, density=8, speed=2)
+  [text] text="ҽԺ���ƣ�" size=25 font=0
+  [text] text="ҽ��������" size=25 font=0 textName="����������"
+  [text] text="�ͻ�������" size=25 font=0 textName="����������"
+  [text] text="������Ŀ��" size=25 font=0 textName="����������"
+  [text] text="������λ��" size=25 font=0 textName="����������"
+  [text] text="����ʱ�䣺" size=25 font=0 textName="����������"
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="12" size=22 font=0
+  [text] text="28" size=22 font=0
+  [text] text="xxxҽԺ" size=22 font=0
+  [text] text="��ĳĳ" size=22 font=0
+  [text] text="��ĳĳ" size=22 font=0
+  [text] text="��λ" size=22 font=0
+  [text] text="2019��12��18��" size=22 font=0
+
+### 8060.xml (80x60mm, gap=1, density=15, speed=2)
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="����������" size=22 font=0 textName="����������"
+  [text] text="����������" size=22 font=0 textName="����������"
+  [text] text="����������" size=22 font=0 textName="����������"
+  [text] text="�����" size=28 font=0
+  [text] text="����������" size=22 font=0 textName="����������"
+  [text] text="����������" size=22 font=0 textName="����������"
+  [text] text="����������" size=22 font=0 textName="����������"
+  [line]
+  [text] text="����������" size=22 font=0 textName="����������"
+  [line]
+  [text] text="����������" size=22 font=0 textName="����������"
+  [line]
+  [barcode] text="12345678899996" format=CODE_128 size=18 font=4 textName="����������"
+
+### 8060�±�.xml (80x60mm, gap=0, density=12, speed=3)
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="����" size=18 font=0 textName="����������"
+  [text] text="������" size=18 font=0 textName="����������"
+  [text] text="�ر�����" size=18 font=0 textName="����������"
+  [text] text="��Ʒ����" size=18 font=0
+  [text] text="�����±�" size=18 font=0 textName="����������"
+  [text] text="��������" size=18 font=0 textName="����������"
+  [text] text="�����±�" size=18 font=0 textName="����������"
+  [text] text="4ö" size=18 font=0 textName="����������"
+  [text] text="2��" size=18 font=0 textName="����������"
+  [text] text="4ö" size=18 font=0 textName="����������"
+  [text] text="7��" size=18 font=0 textName="����������"
+  [text] text="15��" size=18 font=0 textName="����������"
+  [text] text="3��" size=18 font=0 textName="����������"
+  [text] text="��֥��" size=18 font=0 textName="����������"
+  [text] text="��֥��" size=18 font=0 textName="����������"
+  [unknown(5)] text="2020��09��17��" size=18 font=0
+  [text] text="�������ڣ�" size=18 font=0 textName="����������"
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [line]
+  [text] text="���ֹ�����������ӷ��������뾡��ʳ��" size=15 font=0 textName="����������"
+
+## price (48 templates)
+------------------------------------------------------------
+
+### 10040��ֽ.xml (100x37mm, gap=0, density=12, speed=3)
+  [text] text="32.00" size=34 font=΢���ź� textName="price"
+  [text] text="100*40" size=14 font=΢���ź� textName="spec"
+  [text] text="MY8040" size=14 font=΢���ź� textName="����������"
+  [text] text="�Ϻ�" size=14 font=΢���ź� textName="area"
+  [text] text="A" size=14 font=΢���ź� textName="����������"
+  [text] text="��" size=14 font=΢���ź� textName="unit"
+  [text] text="���б��ǩ" size=18 font=΢���ź� textName="name"
+  [barcode] text="123456" format=CODE_128 size=12 font=0 textName="barcode"
+
+### 4080��ǩ.xml (80x40mm, gap=0, density=15, speed=0)
+  [text] text="��֭Դ������" size=21 font=���� textName="name"
+  [text] text="����" size=20 font=���� textName="area"
+  [text] text="ƿ" size=20 font=���� textName="unit"
+  [text] text="0865" size=20 font=���� textName="����������"
+  [text] text="500ml" size=20 font=���� textName="spec"
+  [barcode] text="6912345612586" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="5.50" size=50 font=���� textName="price"
+
+### 5030�հ�.xml (50x27mm, gap=1, density=15, speed=0)
+  [text] text="���ۼ�:" size=30 font=0
+  [text] text="2.50" size=35 font=0 textName="price"
+  [text] text="��" size=30 font=0
+  [barcode] text="6912345678124" format=EAN_13 size=18 font=4 textName="barcode"
+  [text] text="�Ϻ�" size=20 font=0 textName="area"
+  [text] text="����:" size=22 font=0 textName="����������"
+  [text] text="���:" size=22 font=0 textName="����������"
+  [text] text="ƿ" size=20 font=0 textName="unit"
+  [text] text="500ml" size=20 font=0 textName="spec"
+  [text] text="��λ:" size=22 font=0 textName="����������"
+  [text] text="�ɿڿ���" size=20 font=0 textName="name"
+  [text] text="Ʒ��:" size=22 font=0
+
+### 5030��ɫ��ǩ.xml (50x27mm, gap=0, density=12, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="�ɿڿ���" size=16 font=Tahoma textName="name"
+  [text] text="99.00" size=16 font=Tahoma textName="price"
+  [text] text="��Ա�ۣ�" size=16 font=Tahoma textName="����������"
+  [text] text="89.00" size=16 font=Tahoma textName="mprice"
+
+### 5031��ǩ.xml (50x31mm, gap=0, density=12, speed=3)
+  [text] text="175" size=21 font=���� textName="����������"
+  [text] text="��Ⱥ����" size=21 font=���� textName="name"
+  [text] text="�㽭" size=21 font=���� textName="area"
+  [text] text="20֧/��" size=21 font=���� textName="spec"
+  [text] text="18" size=21 font=���� textName="price"
+
+### 5328��ֽ.xml (53x25mm, gap=1, density=12, speed=3)
+  [text] text="12" size=41 font=΢���ź� textName="price"
+  [text] text="��ȺӲ��" size=32 font=΢���ź� textName="name"
+  [text] text="�㽭" size=32 font=΢���ź� textName="area"
+
+### 5328��ֽ.xml (53x28mm, gap=0, density=12, speed=3)
+  [text] text="12" size=41 font=΢���ź� textName="price"
+  [text] text="��ȺӲ��" size=32 font=΢���ź� textName="name"
+  [text] text="�㽭" size=32 font=΢���ź� textName="area"
+
+### 5430��ǩ.xml (54x27mm, gap=1, density=15, speed=2)
+  [text] text="8.00" size=25 font=0
+  [text] text="55.00" size=25 font=0 textName="price"
+  [text] text="��Ⱥ" size=25 font=0 textName="name"
+  [text] text="�Ϻ�" size=25 font=0 textName="area"
+
+### 5433��ǩ.xml (54x30mm, gap=1, density=15, speed=3)
+  [text] text="��" size=22 font=0 textName="unit"
+  [text] text="12.5" size=50 font=0 textName="price"
+  [text] text="20֧" size=22 font=0 textName="spec"
+  [text] text="��˫ϲ" size=22 font=0 textName="name"
+  [text] text="�㶫" size=22 font=0 textName="area"
+
+### 5435����.xml (54x32mm, gap=1, density=12, speed=3)
+  [text] text="�Ϻ���˫ϲӲ��" size=21 font=΢���ź� textName="name"
+  [text] text="��" size=27 font=΢���ź� textName="unit"
+  [text] text="11.00" size=37 font=Tahoma textName="price"
+  [text] text="�Ϻ�" size=21 font=΢���ź� textName="area"
+
+### 5530��ǩ.xml (55x30mm, gap=0, density=15, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+
+### 5531��ǩ.xml (55x28mm, gap=1, density=15, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="����������"
+  [text] text="�ɿڿ���" size=16 font=΢���ź� textName="����������"
+  [text] text="9.00" size=16 font=΢���ź� textName="����������"
+  [text] text="��" size=16 font=΢���ź� textName="����������"
+  [text] text="500ml" size=16 font=΢���ź� textName="����������"
+
+### 5545��ǩ.xml (55x42mm, gap=1, density=8, speed=2)
+  [text] text="5.5" size=45 font=0 textName="price"
+  [text] text="���Ͼ����" size=22 font=2 textName="name"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="��" size=18 font=2 textName="unit"
+
+### 6040��ǩ.xml (60x37mm, gap=1, density=15, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+
+### 6040��ֽ.xml (60x37mm, gap=1, density=15, speed=3)
+  [text] text="2.8" size=40 font=���� textName="price"
+  [text] text="����԰������" size=22 font=���� textName="name"
+  [text] text="֧" size=18 font=���� textName="unit"
+  [text] text="��" size=18 font=���� textName="area"
+  [text] text="45��" size=18 font=���� textName="spec"
+  [barcode] text="6939003000288" format=CODE_128 size=18 font=0 textName="barcode"
+
+### 6040�곤�Ƽ�.xml (60x37mm, gap=1, density=15, speed=3)
+  [text] text="30.0" size=21 font=΢���ź� textName="price"
+  [text] text="29.5" size=21 font=΢���ź� textName="mprice"
+  [barcode] text="12345678" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="ֱ�ӿ��볬�л���" size=21 font=΢���ź� textName="spec"
+  [text] text="���г��б��ǩ" size=21 font=΢���ź� textName="name"
+
+### 6040�հ�.xml (60x37mm, gap=1, density=15, speed=0)
+  [text] text="���:" size=22 font=0 textName="����������"
+  [text] text="��λ:" size=22 font=0 textName="����������"
+  [text] text="����:" size=22 font=0 textName="����������"
+  [barcode] text="6912345678124" format=EAN_13 size=18 font=4 textName="barcode"
+  [text] text="Ʒ��:" size=22 font=0
+  [text] text="�ɿڿ���" size=22 font=0 textName="name"
+  [text] text="500ml" size=22 font=0 textName="spec"
+  [text] text="ƿ" size=22 font=0 textName="unit"
+  [text] text="��" size=35 font=0
+  [text] text="���ۼ�:" size=25 font=0
+  [text] text="2.50" size=40 font=0 textName="price"
+
+### 6040��Ʒ��ѡ.xml (60x37mm, gap=1, density=15, speed=3)
+  [text] text="30.0" size=21 font=΢���ź� textName="price"
+  [text] text="29.5" size=21 font=΢���ź� textName="mprice"
+  [barcode] text="12345678" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="800��/��" size=21 font=΢���ź� textName="spec"
+  [text] text="���г��б��ǩ" size=21 font=΢���ź� textName="name"
+
+### 6040��ɫ.xml (60x37mm, gap=0, density=12, speed=3)
+  [barcode] text="123456789" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="�ɿڿ���" size=16 font=Tahoma textName="name"
+  [text] text="500ML" size=16 font=Tahoma textName="spec"
+  [text] text="�Ϻ�" size=16 font=Tahoma textName="area"
+  [text] text="9.00" size=16 font=Tahoma textName="price"
+
+### 6040������ѡ.xml (60x37mm, gap=1, density=15, speed=3)
+  [text] text="30.0" size=21 font=΢���ź� textName="price"
+  [text] text="29.5" size=21 font=΢���ź� textName="mprice"
+  [barcode] text="12345678" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="800��/��" size=21 font=΢���ź� textName="sepc"
+  [text] text="���г��б��ǩ" size=21 font=΢���ź� textName="name"
+
+### 6535��ǩ.xml (65x32mm, gap=1, density=8, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="����" size=18 font=2 textName="area"
+
+### 6636��ǩ.xml (66x36mm, gap=0, density=15, speed=2)
+  [text] text="���ֱ��̷�" size=22 font=0 textName="name"
+  [text] text="256.00" size=22 font=0 textName="price"
+  [text] text="246.00" size=22 font=0 textName="mprice"
+
+### 7030��ǩ.xml (70x30mm, gap=0, density=12, speed=3)
+  [text] text="��֭Դ������" size=23 font=���� textName="name"
+  [text] text="ƿ" size=18 font=���� textName="unit"
+  [text] text="450ml" size=18 font=���� textName="spec"
+  [text] text="5.5" size=40 font=���� textName="price"
+  [barcode] text="6956416200067" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="���д���" size=23 font=���� textName="����������"
+
+### 7030��ǩ.xml (70x30mm, gap=0, density=15, speed=2)
+  [text] text="��ȺӲ��" size=22 font=2 textName="name"
+  [text] text="14" size=40 font=0 textName="price"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="135" size=40 font=0 textName="mprice"
+
+### 7038��ǩ.xml (70x38mm, gap=0, density=15, speed=2)
+  [text] text="��֭Դ������" size=22 font=0 textName="name"
+  [text] text="����" size=18 font=0 textName="area"
+  [text] text="ƿ" size=18 font=0 textName="unit"
+  [text] text="450ml" size=18 font=0 textName="spec"
+  [text] text="5.5" size=40 font=0 textName="price"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=0 textName="barcode"
+
+### 7038��Ա��.xml (70x38mm, gap=0, density=15, speed=2)
+  [text] text="�ϰ��մ�ҩ��" size=20 font=0
+  [text] text="����θ̩" size=20 font=0 textName="name"
+  [text] text="��" size=15 font=0 textName="unit"
+  [text] text="�Ϻ�" size=15 font=0 textName="area"
+  [text] text="500g" size=15 font=0 textName="spec"
+  [text] text="A" size=15 font=0 textName="����������"
+  [barcode] text="6912345678919" format=EAN_13 size=12 font=4 textName="barcode"
+  [text] text="20.50" size=22 font=0 textName="price"
+  [text] text="10.50" size=22 font=0 textName="mprice"
+
+### 7040��ǩ.xml (70x40mm, gap=0, density=15, speed=2)
+  [text] text="С��ֹ�ȿ���" size=20 font=2 textName="name"
+  [text] text="450��" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="��" size=18 font=2 textName="unit"
+  [text] text="5.5" size=40 font=0 textName="price"
+
+### 7041��ֽ��ǩ.xml (70x38mm, gap=1, density=15, speed=3)
+  [barcode] text="6939003000288" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="45��" size=17 font=0 textName="spec"
+  [text] text="�㽭" size=18 font=0 textName="area"
+  [text] text="֧" size=18 font=0 textName="unit"
+  [text] text="����԰������" size=21 font=0 textName="name"
+  [text] text="2.5" size=45 font=0 textName="mprice"
+  [text] text="2.8" size=45 font=0 textName="price"
+
+### 7538��ǩ.xml (75x38mm, gap=0, density=12, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="3.5" size=50 font=΢���ź� textName="price"
+  [text] text="ά�����ֽ" size=18 font=΢���ź� textName="name"
+  [text] text="250*210" size=16 font=΢���ź� textName="spec"
+  [text] text="�㽭" size=16 font=΢���ź� textName="area"
+  [text] text="��" size=16 font=΢���ź� textName="unit"
+
+### 7538��ֽ��ǩ.xml (75x35mm, gap=1, density=12, speed=3)
+  [text] text="3.5" size=32 font=Tahoma textName="price"
+  [text] text="250ml" size=16 font=Tahoma textName="spec"
+  [text] text="�۹�����Ȫˮ" size=16 font=Tahoma textName="name"
+  [text] text="����" size=16 font=Tahoma textName="area"
+
+### 7540��ǩ.xml (75x37mm, gap=0, density=8, speed=2)
+  [barcode] text="6956416200067" format=CODE_128 size=10 font=4 textName="barcode"
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+
+### 7638��ǩ.xml (76x38mm, gap=0, density=12, speed=3)
+  [text] text="5.5" size=41 font=���� textName="price"
+  [text] text="��֭Դ������" size=23 font=���� textName="name"
+  [text] text="����" size=18 font=���� textName="area"
+  [text] text="450ml" size=18 font=���� textName="spec"
+  [text] text="ƿ" size=18 font=���� textName="unit"
+  [barcode] text="6956416200067" format=CODE_128 size=18 font=0 textName="barcode"
+
+### 7840��ǩ.xml (78x37mm, gap=1, density=15, speed=2)
+  [text] text="���д�ҩ��" size=17 font=0
+  [text] text="������ͪ����" size=17 font=0 textName="name"
+  [text] text="50mgx20Ƭ" size=13 font=0 textName="spec"
+  [text] text="���ģ��й���ҩҵ" size=13 font=0 textName="area"
+  [text] text="��" size=13 font=0 textName="unit"
+  [text] text="29.90" size=30 font=0 textName="price"
+
+### 7940��ֽ.xml (79x37mm, gap=1, density=15, speed=3)
+  [barcode] text="123456" format=CODE_128 size=18 font=0 textName="barcode"
+  [text] text="3.5" size=50 font=΢���ź� textName="price"
+  [text] text="ά�����ֽ" size=18 font=΢���ź� textName="name"
+  [text] text="250*210" size=16 font=΢���ź� textName="spec"
+  [text] text="�㽭" size=16 font=΢���ź� textName="area"
+  [text] text="��" size=16 font=΢���ź� textName="unit"
+
+### 8035��ǩ.xml (80x32mm, gap=1, density=8, speed=2)
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="5.5" size=40 font=0 textName="price"
+  [barcode] text="6956416200067" format=CODE_128 size=10 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+
+### 8035�ͻ���ǩ.xml (80x35mm, gap=0, density=12, speed=3)
+  [text] text="�ɿڿ���" size=21 font=΢���ź� textName="name"
+  [text] text="99.00" size=30 font=Tahoma textName="price"
+  [text] text="98.00" size=30 font=Tahoma textName="mprice"
+  [text] text="��" size=18 font=΢���ź� textName="unit"
+  [text] text="500ml" size=18 font=΢���ź� textName="spec"
+  [text] text="�Ϻ�" size=18 font=΢���ź� textName="area"
+
+### 8036��ǩ.xml (80x33mm, gap=1, density=8, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="����" size=18 font=2 textName="area"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+
+### 8038��ǩ.xml (80x35mm, gap=1, density=8, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=20 font=2 textName="name"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [barcode] text="6956416200067" format=CODE_128 size=10 font=4 textName="barcode"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="����" size=18 font=2 textName="area"
+
+### 8038������.xml (80x35mm, gap=1, density=12, speed=3)
+  [text] text="80*38" size=21 font=΢���ź� textName="spec"
+  [text] text="�Ϻ�" size=21 font=΢���ź� textName="area"
+  [text] text="����" size=21 font=΢���ź� textName="����������"
+  [text] text="���б��ǩ" size=23 font=΢���ź� textName="name"
+  [text] text="35.00" size=41 font=΢���ź� textName="price"
+  [barcode] text="692150512012" format=CODE_128 size=18 font=0 textName="barcode"
+
+### 8039��ǩ.xml (80x36mm, gap=1, density=15, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=20 font=0 textName="name"
+  [text] text="450ml" size=18 font=0 textName="spec"
+  [barcode] text="6956416200067" format=CODE_128 size=10 font=4 textName="barcode"
+  [text] text="ƿ" size=18 font=0 textName="unit"
+  [text] text="����" size=18 font=0 textName="area"
+
+### 8040��ǩ.xml (80x37mm, gap=1, density=8, speed=2)
+  [barcode] text="6956416200067" format=CODE_128 size=13 font=4 textName="barcode"
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="����" size=18 font=0 textName="area"
+  [text] text="450ml" size=18 font=0 textName="spec"
+  [text] text="ƿ" size=18 font=0 textName="unit"
+  [text] text="��֭Դ������" size=22 font=0 textName="name"
+
+### 8040�հ�.xml (80x37mm, gap=1, density=8, speed=2)
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [barcode] text="6956416200067" format=CODE_128 size=13 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="5.5" size=40 font=0 textName="price"
+
+### 8540��ǩ.xml (85x37mm, gap=1, density=8, speed=2)
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="50��" size=18 font=2 textName="spec"
+  [text] text="5.5" size=45 font=0 textName="price"
+  [text] text="����������" size=21 font=2 textName="name"
+  [text] text="��" size=18 font=2 textName="unit"
+
+### 8740��ǩ.xml (87x37mm, gap=1, density=8, speed=2)
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="��֭Դ������" size=22 font=2 textName="name"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="����" size=18 font=2 textName="area"
+
+### 8840��ǩ.xml (88x37mm, gap=1, density=8, speed=2)
+  [text] text="��֭Դ������" size=21 font=2 textName="name"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+  [text] text="5.5" size=40 font=0 textName="price"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+
+### 8840��Ա��.xml (88x37mm, gap=1, density=8, speed=2)
+  [text] text="��֭Դ������" size=21 font=2 textName="name"
+  [barcode] text="6956416200067" format=CODE_128 size=15 font=4 textName="barcode"
+  [text] text="450ml" size=18 font=2 textName="spec"
+  [text] text="����" size=18 font=2 textName="area"
+  [text] text="ƿ" size=18 font=2 textName="unit"
+  [text] text="5.5" size=31 font=0 textName="price"
+  [text] text="5.3" size=40 font=0 textName="mprice"
+
+### 9038��ǩ.xml (90x35mm, gap=0, density=12, speed=3)
+  [text] text="ƿ" size=18 font=0 textName="unit"
+  [text] text="��֭Դ������" size=19 font=0 textName="name"
+  [text] text="450ml" size=18 font=0 textName="spec"
+  [text] text="����" size=18 font=0 textName="area"
+  [barcode] text="6956416200067" format=CODE_128 size=12 font=0 textName="barcode"
+  [text] text="5.5" size=42 font=0 textName="price"
+
+### 9538��ǩ.xml (95x35mm, gap=1, density=12, speed=3)
+  [text] text="���б��ǩ" size=16 font=0 textName="name"
+  [text] text="35.00" size=32 font=0 textName="price"
+  [text] text="MY8040" size=14 font=0 textName="����������"
+  [text] text="95*38" size=14 font=0 textName="spec"
+  [text] text="��" size=14 font=0 textName="unit"
+  [text] text="�Ϻ�" size=14 font=0 textName="area"
+  [barcode] text="692150512012" format=CODE_128 size=14 font=0 textName="barcode"
+  [text] text="A" size=14 font=0 textName="����������"

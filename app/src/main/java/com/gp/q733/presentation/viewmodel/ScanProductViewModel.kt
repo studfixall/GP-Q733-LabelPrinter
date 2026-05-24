@@ -15,6 +15,7 @@ import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.domain.util.BarsoftTemplateParser
 import com.gp.q733.domain.util.LabelTemplateFiller
+import com.gp.q733.domain.util.TemplateJsonParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +77,7 @@ class ScanProductViewModel @Inject constructor(
     }
 
     /**
-     * 加载内置模板列表
+     * 加载模板列表：内置模板 + 自定义模板（Room）+ Barsoft XML
      */
     private fun loadTemplates() {
         viewModelScope.launch {
@@ -98,6 +99,24 @@ class ScanProductViewModel @Inject constructor(
                 name = "紧凑标签 40×20",
                 label = buildDefaultLabel(40f, 20f)
             ))
+
+            // 从 Room 加载自定义模板
+            try {
+                val customs = customTemplateDao.getAll().first()
+                for (entity in customs) {
+                    val elements = TemplateJsonParser.fromJson(entity.elementsJson)
+                    templates.add(ScanTemplateOption(
+                        id = "custom_${entity.id}",
+                        name = "★ ${entity.name} (${entity.widthMm.toInt()}×${entity.heightMm.toInt()})",
+                        label = Label(
+                            id = "custom_${entity.id}",
+                            elements = elements,
+                            widthMm = entity.widthMm,
+                            heightMm = entity.heightMm
+                        )
+                    ))
+                }
+            } catch (_: Exception) {}
 
             // 从assets加载Barsoft XML模板
             try {
@@ -125,9 +144,13 @@ class ScanProductViewModel @Inject constructor(
                 }
             } catch (_: Exception) {}
 
+            // 默认选中第一个自定义模板（如果有的话），否则选内置
+            val selectedId = templates.find { it.id.startsWith("custom_") }?.id
+                ?: templates.firstOrNull()?.id
+                ?: ""
             _uiState.value = _uiState.value.copy(
                 templates = templates,
-                selectedTemplateId = templates.firstOrNull()?.id ?: ""
+                selectedTemplateId = selectedId
             )
         }
     }

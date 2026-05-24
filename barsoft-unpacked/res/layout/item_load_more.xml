@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@android:color/darker_gray" android:visibility="invisible" android:layout_width="match_parent" android:layout_height="50.0dp" android:minHeight="50.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v4.widget.Space android:layout_width="match_parent" android:layout_height="1.0dp" />
+    <TextView android:textSize="14.0dp" android:textColor="#4d4d4d" android:id="@id/item_load_tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="上拉加载更多" android:layout_centerInParent="true" android:layout_marginStart="5.0dp" />
+    <ProgressBar android:id="@id/item_load_pb" android:visibility="gone" android:layout_width="20.0dp" android:layout_height="20.0dp" android:layout_centerVertical="true" android:layout_marginStart="140.0dp" style="@android:style/Widget.Holo.ProgressBar" />
+</RelativeLayout>

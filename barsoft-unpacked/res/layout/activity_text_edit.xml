@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <include layout="@layout/title_bar" />
+        <TextView android:text="@string/textProperty" style="@style/setting_text" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st2_dataType" android:layout_width="match_parent" android:layout_height="48.0dp" app:left_text="@string/dataType" app:right_text="@string/fixContent" />
+        <LinearLayout android:background="@color/white" android:layout_width="match_parent" android:layout_height="48.0dp">
+            <TextView android:textColor="@color/text_color" android:layout_gravity="center_vertical" android:id="@id/et_tv_content" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginLeft="12.0dp" android:text="@string/textContent" android:layout_weight="1.0" />
+            <EditText android:layout_gravity="center_vertical" android:id="@id/et_tc_text" android:background="@drawable/et_bg" android:padding="5.0dp" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginRight="7.0dp" android:hint="@string/inputContent" android:lines="1" android:singleLine="true" android:layout_weight="2.9" android:inputType="textMultiLine" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/lCount1" android:background="@color/white" android:layout_width="match_parent" android:layout_height="48.0dp">
+            <TextView android:textColor="@color/text_color" android:layout_gravity="center_vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginLeft="12.0dp" android:text="@string/prefix" android:layout_weight="1.0" />
+            <EditText android:layout_gravity="center_vertical" android:id="@id/et_text_before" android:background="@drawable/et_bg" android:padding="5.0dp" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginRight="7.0dp" android:hint="@string/inputContent" android:lines="1" android:singleLine="true" android:layout_weight="2.9" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/lCount2" android:background="@color/white" android:layout_width="match_parent" android:layout_height="48.0dp">
+            <TextView android:textColor="@color/text_color" android:layout_gravity="center_vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginLeft="12.0dp" android:text="@string/suffix" android:layout_weight="1.0" />
+            <EditText android:layout_gravity="center_vertical" android:id="@id/et_text_after" android:background="@drawable/et_bg" android:padding="5.0dp" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginRight="7.0dp" android:hint="@string/inputContent" android:lines="1" android:singleLine="true" android:layout_weight="2.9" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/lCount3" android:background="@color/white" android:layout_width="match_parent" android:layout_height="48.0dp">
+            <com.bd.printer.btapp.ui.widgets.view.CountView android:id="@id/text_addQty" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_name="@string/increment" app:cv_num="1" />
+        </LinearLayout>
+        <TextView android:text="@string/font" style="@style/setting_text" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st2_fontName" android:layout_width="match_parent" android:layout_height="48.0dp" app:left_text="@string/font" app:right_text="@string/fontSytem" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView android:id="@id/sv_textsize" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_name="@string/fontSize" app:cv_num="1" />
+        <LinearLayout android:background="@color/white" android:layout_width="match_parent" android:layout_height="48.0dp">
+            <TextView android:textColor="@color/text_color" android:layout_gravity="center_vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginLeft="12.0dp" android:text="@string/datasourceName" android:layout_weight="1.0" />
+            <EditText android:layout_gravity="center_vertical" android:id="@id/et_dt_name" android:background="@drawable/et_bg" android:padding="5.0dp" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_marginRight="7.0dp" android:hint="@string/datasourceContent" android:lines="1" android:singleLine="true" android:layout_weight="2.9" />
+        </LinearLayout>
+        <LinearLayout android:background="@color/white" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+        </LinearLayout>
+        <com.bd.printer.btapp.ui.widgets.view.CountView3 android:id="@id/st2_linespace" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_num3="0.2" app:cv_text3="@string/rowSpace" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView3 android:id="@id/st2_charspace" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_num3="0.1" app:cv_text3="@string/characterSpace" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st2_fontstyle" android:layout_width="match_parent" android:layout_height="48.0dp" app:left_text="@string/fontStyle" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView4 android:id="@id/sv_bgblack" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_text4="@string/antiWhite" />
+        <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st2_excelName" android:layout_width="match_parent" android:layout_height="48.0dp" app:left_text="文件名称" />
+    </LinearLayout>
+</ScrollView>

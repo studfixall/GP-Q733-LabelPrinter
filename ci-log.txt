@@ -1,0 +1,88 @@
+﻿build	Build Debug APK	﻿2026-05-24T03:15:27.4399813Z ##[group]Run ./gradlew assembleDebug
+build	Build Debug APK	2026-05-24T03:15:27.4400156Z [36;1m./gradlew assembleDebug[0m
+build	Build Debug APK	2026-05-24T03:15:27.4433472Z shell: /usr/bin/bash -e {0}
+build	Build Debug APK	2026-05-24T03:15:27.4433731Z env:
+build	Build Debug APK	2026-05-24T03:15:27.4434056Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+build	Build Debug APK	2026-05-24T03:15:27.4434579Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.19-10/x64
+build	Build Debug APK	2026-05-24T03:15:27.4434986Z   ANDROID_HOME: /usr/local/lib/android/sdk
+build	Build Debug APK	2026-05-24T03:15:27.4435292Z   ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+build	Build Debug APK	2026-05-24T03:15:27.4435573Z ##[endgroup]
+build	Build Debug APK	2026-05-24T03:15:28.0081687Z 
+build	Build Debug APK	2026-05-24T03:15:28.0083090Z Welcome to Gradle 8.5!
+build	Build Debug APK	2026-05-24T03:15:28.0083396Z 
+build	Build Debug APK	2026-05-24T03:15:28.0085068Z Here are the highlights of this release:
+build	Build Debug APK	2026-05-24T03:15:28.0092193Z  - Support for running on Java 21
+build	Build Debug APK	2026-05-24T03:15:28.0092763Z  - Faster first use with Kotlin DSL
+build	Build Debug APK	2026-05-24T03:15:28.0093132Z  - Improved error and warning messages
+build	Build Debug APK	2026-05-24T03:15:28.0093340Z 
+build	Build Debug APK	2026-05-24T03:15:28.0093698Z For more details see https://docs.gradle.org/8.5/release-notes.html
+build	Build Debug APK	2026-05-24T03:15:28.0093990Z 
+build	Build Debug APK	2026-05-24T03:15:28.2076615Z Starting a Gradle Daemon (subsequent builds will be faster)
+build	Build Debug APK	2026-05-24T03:15:47.3104990Z WARNING:We recommend using a newer Android Gradle plugin to use compileSdk = 34
+build	Build Debug APK	2026-05-24T03:15:47.3126029Z 
+build	Build Debug APK	2026-05-24T03:15:47.3137796Z This Android Gradle plugin (7.4.0) was tested up to compileSdk = 33
+build	Build Debug APK	2026-05-24T03:15:47.3138418Z 
+build	Build Debug APK	2026-05-24T03:15:47.3138912Z This warning can be suppressed by updating
+build	Build Debug APK	2026-05-24T03:15:47.3147059Z     android.suppressUnsupportedCompileSdk=35,34
+build	Build Debug APK	2026-05-24T03:15:47.3147934Z to this project's gradle.properties
+build	Build Debug APK	2026-05-24T03:15:47.3148414Z 
+build	Build Debug APK	2026-05-24T03:15:47.3149101Z The build will continue, but you are strongly encouraged to update your project to
+build	Build Debug APK	2026-05-24T03:15:47.3150562Z use a newer Android Gradle Plugin that has been tested with compileSdk = 34
+build	Build Debug APK	2026-05-24T03:15:47.4077344Z This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+build	Build Debug APK	2026-05-24T03:15:49.1079978Z Checking the license for package Android SDK Build-Tools 30.0.3 in /usr/local/lib/android/sdk/licenses
+build	Build Debug APK	2026-05-24T03:15:49.1081459Z License for package Android SDK Build-Tools 30.0.3 accepted.
+build	Build Debug APK	2026-05-24T03:15:49.1082587Z Preparing "Install Android SDK Build-Tools 30.0.3 (revision: 30.0.3)".
+build	Build Debug APK	2026-05-24T03:15:51.2082006Z "Install Android SDK Build-Tools 30.0.3 (revision: 30.0.3)" ready.
+build	Build Debug APK	2026-05-24T03:15:51.2104062Z Installing Android SDK Build-Tools 30.0.3 in /usr/local/lib/android/sdk/build-tools/30.0.3
+build	Build Debug APK	2026-05-24T03:15:51.2110176Z "Install Android SDK Build-Tools 30.0.3 (revision: 30.0.3)" complete.
+build	Build Debug APK	2026-05-24T03:15:51.3073407Z "Install Android SDK Build-Tools 30.0.3 (revision: 30.0.3)" finished.
+build	Build Debug APK	2026-05-24T03:15:51.5074643Z Values of variant API AnnotationProcessorOptions.arguments are queried and may return non final values, this is unsupported
+build	Build Debug APK	2026-05-24T03:15:51.7073208Z Values of variant API AnnotationProcessorOptions.arguments are queried and may return non final values, this is unsupported
+build	Build Debug APK	2026-05-24T03:15:51.8103394Z > Task :app:preBuild UP-TO-DATE
+build	Build Debug APK	2026-05-24T03:15:51.8121947Z > Task :app:preDebugBuild UP-TO-DATE
+build	Build Debug APK	2026-05-24T03:15:51.8123123Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+build	Build Debug APK	2026-05-24T03:15:51.8124017Z > Task :app:compileDebugAidl NO-SOURCE
+build	Build Debug APK	2026-05-24T03:15:51.8124904Z > Task :app:checkKotlinGradlePluginConfigurationErrors
+build	Build Debug APK	2026-05-24T03:15:51.8125810Z > Task :app:compileDebugRenderscript NO-SOURCE
+build	Build Debug APK	2026-05-24T03:15:51.9073067Z > Task :app:generateDebugBuildConfig
+build	Build Debug APK	2026-05-24T03:15:54.4082917Z > Task :app:generateDebugResValues
+build	Build Debug APK	2026-05-24T03:15:54.4084025Z > Task :app:checkDebugAarMetadata
+build	Build Debug APK	2026-05-24T03:15:54.5072857Z > Task :app:mapDebugSourceSetPaths
+build	Build Debug APK	2026-05-24T03:15:54.5073804Z > Task :app:generateDebugResources
+build	Build Debug APK	2026-05-24T03:15:55.5109195Z > Task :app:packageDebugResources
+build	Build Debug APK	2026-05-24T03:15:56.1072124Z > Task :app:mergeDebugResources
+build	Build Debug APK	2026-05-24T03:15:56.6076502Z > Task :app:createDebugCompatibleScreenManifests
+build	Build Debug APK	2026-05-24T03:15:56.6120188Z > Task :app:extractDeepLinksDebug
+build	Build Debug APK	2026-05-24T03:15:56.7079662Z > Task :app:parseDebugLocalResources
+build	Build Debug APK	2026-05-24T03:15:56.9093704Z > Task :app:processDebugMainManifest
+build	Build Debug APK	2026-05-24T03:15:57.0071931Z > Task :app:processDebugManifest
+build	Build Debug APK	2026-05-24T03:16:04.0073990Z > Task :app:javaPreCompileDebug FAILED
+build	Build Debug APK	2026-05-24T03:16:04.0075145Z > Task :app:processDebugManifestForPackage
+build	Build Debug APK	2026-05-24T03:16:04.1084588Z 
+build	Build Debug APK	2026-05-24T03:16:04.1086824Z 
+build	Build Debug APK	2026-05-24T03:16:04.1097508Z Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+build	Build Debug APK	2026-05-24T03:16:04.1098401Z 
+build	Build Debug APK	2026-05-24T03:16:04.1099659Z You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+build	Build Debug APK	2026-05-24T03:16:04.1100673Z 
+build	Build Debug APK	2026-05-24T03:16:04.1101908Z For more on this, please refer to https://docs.gradle.org/8.5/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+build	Build Debug APK	2026-05-24T03:16:04.1103337Z 14 actionable tasks: 14 executed
+build	Build Debug APK	2026-05-24T03:16:04.1107128Z FAILURE: Build failed with an exception.
+build	Build Debug APK	2026-05-24T03:16:04.1107452Z 
+build	Build Debug APK	2026-05-24T03:16:04.1107652Z * What went wrong:
+build	Build Debug APK	2026-05-24T03:16:04.1108619Z Execution failed for task ':app:javaPreCompileDebug'.
+build	Build Debug APK	2026-05-24T03:16:04.1109933Z > Could not resolve all files for configuration ':app:_agp_internal_javaPreCompileDebug_kaptClasspath'.
+build	Build Debug APK	2026-05-24T03:16:04.1110917Z    > Could not resolve androidx.room:room-compiler:2.6.1.
+build	Build Debug APK	2026-05-24T03:16:04.1111471Z      Required by:
+build	Build Debug APK	2026-05-24T03:16:04.1111858Z          project :app
+build	Build Debug APK	2026-05-24T03:16:04.1112421Z       > Could not resolve androidx.room:room-compiler:2.6.1.
+build	Build Debug APK	2026-05-24T03:16:04.1113717Z          > Could not get resource 'https://maven.aliyun.com/repository/central/androidx/room/room-compiler/2.6.1/room-compiler-2.6.1.pom'.
+build	Build Debug APK	2026-05-24T03:16:04.1115775Z             > Could not GET 'https://maven.aliyun.com/repository/central/androidx/room/room-compiler/2.6.1/room-compiler-2.6.1.pom'. Received status code 502 from server: Bad Gateway
+build	Build Debug APK	2026-05-24T03:16:04.1116809Z 
+build	Build Debug APK	2026-05-24T03:16:04.1116946Z * Try:
+build	Build Debug APK	2026-05-24T03:16:04.1117457Z > Run with --stacktrace option to get the stack trace.
+build	Build Debug APK	2026-05-24T03:16:04.1118188Z > Run with --info or --debug option to get more log output.
+build	Build Debug APK	2026-05-24T03:16:04.1118821Z > Run with --scan to get full insights.
+build	Build Debug APK	2026-05-24T03:16:04.1119732Z > Get more help at https://help.gradle.org.
+build	Build Debug APK	2026-05-24T03:16:04.1120069Z 
+build	Build Debug APK	2026-05-24T03:16:04.1120267Z BUILD FAILED in 36s
+build	Build Debug APK	2026-05-24T03:16:04.4948804Z ##[error]Process completed with exit code 1.

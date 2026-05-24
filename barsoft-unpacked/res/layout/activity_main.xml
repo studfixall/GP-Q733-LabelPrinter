@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:id="@id/frame_content" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <RadioGroup android:orientation="horizontal" android:id="@id/radio_group" android:background="@color/colorOS" android:layout_width="match_parent" android:layout_height="56.0dp" android:layout_alignParentBottom="true">
+        <RadioButton android:textColor="@drawable/selector_tab_color" android:id="@id/rb_home" android:checked="true" android:text="@string/edit" android:drawableTop="@drawable/bg_edit" style="@style/radiobutton_style" />
+        <RadioButton android:textColor="@drawable/selector_tab_color" android:id="@id/rb_label" android:text="@string/save" android:drawableTop="@drawable/bg_label" style="@style/radiobutton_style" />
+        <RadioButton android:id="@id/rb_print" android:layout_marginBottom="10.0dp" android:drawableTop="@mipmap/bottom_print" style="@style/radiobutton_style" />
+        <RadioButton android:textColor="@drawable/selector_tab_color" android:id="@id/rb_setting" android:text="@string/template" android:drawableTop="@drawable/bg_setting" style="@style/radiobutton_style" />
+        <RadioButton android:textColor="@drawable/selector_tab_color" android:id="@id/rb_my" android:text="@string/mall" android:drawableTop="@drawable/bg_my" style="@style/radiobutton_style" />
+    </RadioGroup>
+</RelativeLayout>

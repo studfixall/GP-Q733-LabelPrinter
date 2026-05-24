@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include layout="@layout/title_bar" />
+    <RelativeLayout android:id="@id/bluetooth_rl" android:background="@color/white" android:layout_width="match_parent" android:layout_height="50.0dp" android:layout_marginTop="10.0dp">
+        <TextView android:textSize="16.0sp" android:textColor="@color/black" android:gravity="center_vertical" android:id="@id/text" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_marginLeft="10.0dp" android:text="@string/conntectPrinter" />
+        <Switch android:id="@id/bluetooth_switch" android:layout_width="80.0dp" android:layout_height="match_parent" android:layout_marginRight="10.0dp" android:layout_alignParentRight="true" android:layout_centerVertical="true" android:switchMinWidth="25.0dp" />
+    </RelativeLayout>
+    <TextView android:textColor="@color/text_color" android:id="@id/bluetooth_tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:layout_marginTop="5.0dp" android:text="@string/turnOnPrinter" />
+    <TextView android:textColor="@color/text_gray" android:id="@id/bluetooth_already_tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:layout_marginTop="5.0dp" android:text="@string/lastPrinter" />
+    <RelativeLayout android:id="@id/bluetooth_already_rl" android:background="@color/white" android:layout_width="match_parent" android:layout_height="60.0dp" android:layout_marginTop="7.0dp">
+        <TextView android:textSize="16.0sp" android:textColor="@color/black" android:id="@id/bluetooth_already_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dp" android:text="@string/scanPrinter" android:layout_centerVertical="true" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/black" android:id="@id/bluetooth_already_id" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dp" android:text="@string/printerID" android:layout_toRightOf="@id/bluetooth_already_name" android:layout_centerVertical="true" />
+        <ImageView android:id="@id/bluetooth_already_iv" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_marginRight="10.0dp" android:src="@mipmap/dg" android:layout_alignParentRight="true" />
+    </RelativeLayout>
+    <TextView android:textColor="@color/text_gray" android:id="@id/bluetooth_device_tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:layout_marginTop="15.0dp" android:text="@string/canContectPrinter" />
+    <ListView android:id="@id/bluetooth_list" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_marginTop="5.0dp" android:layout_weight="1.0" />
+    <TextView android:textColor="@color/colorOS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:text="@string/step1" />
+    <TextView android:textColor="@color/colorOS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:text="@string/step2" />
+    <TextView android:textColor="@color/colorOS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:text="@string/step3" />
+    <TextView android:textColor="@color/colorOS" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10.0dp" android:text="@string/step4" />
+    <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+    <Button android:id="@id/blue_scan" android:background="@color/white" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/scan" />
+</LinearLayout>

@@ -31,7 +31,9 @@ object LabelTemplateFiller {
                     val filledText = if (element.textName.isNotEmpty() &&
                         BarsoftTemplateParser.isDataBindingField(element.textName)
                     ) {
-                        resolveTextName(element.textName, product)
+                        // 先解析 textName 得到商品字段值，再做占位符替换（支持嵌套场景）
+                        val resolved = resolveTextName(element.textName, product)
+                        fillText(resolved, product)
                     } else {
                         fillText(element.text, product)
                     }

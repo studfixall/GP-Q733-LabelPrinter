@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/imageView2" android:layout_width="match_parent" android:layout_height="wrap_content" app:srcCompat="@android:drawable/presence_away" />
+    <TextView android:textColor="#f800b7ff" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/labelMy" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/buy_tmall" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/buyTmall" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/buy_jd" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/buyJD" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/contact_us" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/contactUs" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/language_set" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/languageSet" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/syncTemplate" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/syncTemplate" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/user_agreement" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/agreement" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/user_privacy" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/privacy" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/print_Mode" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/printMode" app:right_text="@string/labelMode" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/insert_Excel" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:img_gone="true" app:left_text="@string/syncExcel" app:right_text="选择文件" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:img_gone="true" app:left_text="@string/currentVersion" app:right_text="2.0.2" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <TextView android:textColor="@color/black" android:gravity="center" android:layout_width="match_parent" android:layout_height="60.0dp" android:text="" style="@style/setting_text" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

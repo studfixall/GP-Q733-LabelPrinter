@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/item_bluetooth_rl" android:background="@color/white" android:layout_width="match_parent" android:layout_height="71.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <RelativeLayout android:orientation="horizontal" android:background="@color/white" android:layout_width="match_parent" android:layout_height="70.0dp">
+        <TextView android:textSize="16.0sp" android:textColor="@color/black" android:id="@id/item_bluetooth_name" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dp" android:text="扫描设备" android:layout_centerVertical="true" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/black" android:id="@id/item_bluetooth_tv" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dp" android:text="设备号" android:layout_toRightOf="@id/item_bluetooth_name" android:layout_centerVertical="true" />
+        <ImageView android:id="@id/item_bluetooth_iv" android:visibility="invisible" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_marginRight="10.0dp" android:src="@mipmap/dg" android:layout_alignParentRight="true" />
+    </RelativeLayout>
+</LinearLayout>

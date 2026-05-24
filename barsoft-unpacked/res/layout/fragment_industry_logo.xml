@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.widget.Toolbar android:id="@id/tool_bar" android:background="@color/colorPrimaryDark" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <RelativeLayout android:layout_gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageView android:id="@id/iv_back" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/ic_arrow_back" />
+            <TextView android:textSize="20.0sp" android:textColor="@color/white" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="行业logo" android:layout_centerInParent="true" />
+        </RelativeLayout>
+    </android.support.v7.widget.Toolbar>
+    <android.support.v7.widget.RecyclerView android:id="@id/recycler_industry" android:background="@color/gray" android:paddingLeft="20.0dp" android:paddingTop="10.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <LinearLayout android:orientation="horizontal" android:id="@id/ll_content" android:layout_width="match_parent" android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView android:id="@id/recycler_category" android:layout_width="120.0dp" android:layout_height="match_parent" />
+        <com.bd.printer.btapp.ui.widgets.view.XRecyclerView android:id="@id/recycler_logo_content" android:layout_width="match_parent" android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>

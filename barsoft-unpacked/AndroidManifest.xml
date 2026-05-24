@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:compileSdkVersion="35" android:compileSdkVersionCodename="15" package="com.bd.printer.btapp" platformBuildVersionCode="35" platformBuildVersionName="15">
+    <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:resizeable="true" android:smallScreens="true"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <uses-permission android:maxSdkVersion="30" android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:maxSdkVersion="30" android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.hardware.usb.accessory"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.MANAGE_LOCATION_POLICY"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.flash" android:required="false"/>
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
+    <uses-feature android:name="android.hardware.wifi" android:required="false"/>
+    <application android:allowBackup="true" android:appComponentFactory="android.support.v4.app.CoreComponentFactory" android:extractNativeLibs="true" android:icon="@mipmap/barsoft" android:label="@string/app_name" android:name="com.stub.StubApp" android:preserveLegacyExternalStorage="true" android:requestLegacyExternalStorage="true" android:supportsRtl="true" android:theme="@style/AppTheme" android:usesCleartextTraffic="true">
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.MainAct" android:screenOrientation="portrait" android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/vnd.ms-excel"/>
+                <data android:mimeType="application/vnd.malformations-office document.spreadsheet.sheet"/>
+                <data android:mimeType="*/plist"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+        </activity>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.PermissionAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.BluetoothList" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.bd.printer.btapp.ui.activity.TextEditAct" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.bd.printer.btapp.ui.activity.DateEditAct" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|adjustPan"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.bd.printer.btapp.ui.activity.BarCodeEditAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.bd.printer.btapp.ui.activity.LineEditAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:launchMode="singleTask" android:name="com.bd.printer.btapp.ui.activity.RectEditAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.PlayActivity" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.TermsActivity" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.PrivacyPolicyActivity" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.ExcelNameAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.ScanListShopAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.VideoNameAct" android:screenOrientation="portrait"/>
+        <activity android:exported="true" android:name="com.bd.printer.btapp.ui.activity.ExcelTableActivity" android:screenOrientation="portrait"/>
+        <activity android:configChanges="keyboardHidden|orientation" android:name="com.uuzuche.lib_zxing.activity.CaptureActivity" android:screenOrientation="portrait" android:theme="@style/Theme.AppCompat.NoActionBar" android:windowSoftInputMode="stateAlwaysHidden"/>
+        <activity android:exported="true" android:name="com.soundcloud.android.crop.CropImageActivity"/>
+        <activity android:configChanges="orientation|screenSize" android:exported="true" android:label="@string/app_name" android:name="com.darsh.multipleimageselect.activities.AlbumSelectActivity" android:theme="@style/MultipleImageSelectTheme">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <activity android:configChanges="orientation|screenSize" android:exported="true" android:label="@string/app_name" android:name="com.darsh.multipleimageselect.activities.ImageSelectActivity" android:theme="@style/MultipleImageSelectTheme">
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        <provider android:authorities="com.bd.printer.btapp.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="android.support.v4.content.FileProvider">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/>
+        </provider>
+    </application>
+</manifest>

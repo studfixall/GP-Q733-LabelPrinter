@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout android:id="@id/fl_top" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <android.support.v7.widget.Toolbar android:id="@id/tool_bar" android:background="@color/colorPrimaryDark" android:layout_width="match_parent" android:layout_height="44.0dp">
+            <RelativeLayout android:layout_gravity="center_vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <TextView android:textSize="18.0sp" android:textColor="@color/white" android:gravity="center" android:id="@id/tv_set" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10.0dp" android:text="@string/setUp" android:layout_alignParentRight="true" />
+                <TextView android:textSize="20.0sp" android:textColor="@color/white" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Barsoft" android:layout_centerInParent="true" />
+                <TextView android:textSize="18.0sp" android:textColor="@color/white" android:gravity="center" android:id="@id/tv_new" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="10.0dp" android:text="@string/newLabel" android:layout_alignParentLeft="true" />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+        <RelativeLayout android:id="@id/rl_edit" android:background="@color/line_bg" android:visibility="gone" android:layout_width="match_parent" android:layout_height="44.0dp">
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="40.0dp" android:layout_marginLeft="8.0dp" android:layout_marginRight="8.0dp" android:layout_toLeftOf="@id/btn_attributes" android:layout_centerVertical="true">
+                <EditText android:id="@id/et_text" android:background="@drawable/bg_btn_et" android:layout_width="match_parent" android:layout_height="match_parent" android:hint="@string/inputContent" android:layout_toLeftOf="@id/btn_confirm" />
+                <Button android:textSize="14.0sp" android:textColor="@color/white" android:id="@id/btn_confirm" android:background="@drawable/bg_btn_corner2" android:layout_width="40.0dp" android:layout_height="40.0dp" android:text="@string/str_confirm" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+            <Button android:textSize="14.0sp" android:textColor="@color/white" android:id="@id/btn_attributes" android:background="@drawable/bg_btn_corner" android:layout_width="40.0dp" android:layout_height="40.0dp" android:layout_marginRight="5.0dp" android:text="@string/attribute" android:layout_alignParentRight="true" android:layout_centerVertical="true" />
+        </RelativeLayout>
+    </FrameLayout>
+    <RelativeLayout android:id="@id/rl_content" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_above="@id/line2" android:layout_below="@id/fl_top">
+        <ScrollView android:id="@id/scrollview" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+            <RelativeLayout android:id="@id/rview" android:paddingBottom="10.0dp" android:layout_width="match_parent" android:layout_height="match_parent">
+                <LinearLayout android:id="@id/sv1" android:layout_width="match_parent" android:layout_height="20.0dp" android:layout_marginLeft="20.0dp" android:layout_marginRight="10.0dp">
+                    <com.bd.printer.btapp.ui.widgets.view.ScaleView android:id="@id/scaleview" android:layout_width="match_parent" android:layout_height="20.0dp" />
+                </LinearLayout>
+                <LinearLayout android:id="@id/sv2" android:layout_width="20.0dp" android:layout_height="match_parent" android:layout_marginTop="20.0dp">
+                    <com.bd.printer.btapp.ui.widgets.view.ScaleViewVertical android:id="@id/scaleviewVertical" android:layout_width="20.0dp" android:layout_height="match_parent" />
+                </LinearLayout>
+                <LinearLayout android:id="@id/s2" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginLeft="20.0dp" android:layout_marginTop="20.0dp" android:layout_marginRight="10.0dp">
+                    <com.bd.printer.btapp.ui.widgets.view.DrawView android:id="@id/draw_view" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_centerInParent="true" />
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+    </RelativeLayout>
+    <View android:id="@id/line2" android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" android:layout_above="@id/fl_manager_2" />
+    <FrameLayout android:id="@id/fl_manager_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_above="@id/ll_manager">
+        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:fillViewport="true">
+            <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/ll_input_2" android:background="@color/gray" android:visibility="visible" android:layout_width="match_parent" android:layout_height="44.0dp">
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_text" android:text="@string/text" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_one" android:text="@string/barcode" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_two" android:text="@string/qr" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_line" android:text="@string/line" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_round" android:text="@string/round" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_rectangle" android:text="@string/rectangle" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_logo" android:text="@string/logo" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_date" android:text="@string/date" style="@style/home_btn" />
+                <Button android:textColor="@drawable/bg_btn_text" android:id="@id/btn_input_image" android:text="@string/image" style="@style/home_btn" />
+                <Button android:id="@id/btn_op_multiple" android:visibility="gone" android:text="多选" style="@style/home_btn" />
+            </LinearLayout>
+        </HorizontalScrollView>> 
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/ll_operate_2" android:background="@color/gray" android:visibility="gone" android:layout_width="match_parent" android:layout_height="44.0dp">
+            <Button android:id="@id/btn_op_undo" android:text="撤销" style="@style/home_btn" />
+            <Button android:id="@id/btn_op_recover" android:text="恢复" style="@style/home_btn" />
+            <Button android:id="@id/btn_op_lock" android:text="锁定" style="@style/home_btn" />
+            <Button android:id="@id/btn_op_copy" android:text="拷贝" style="@style/home_btn" />
+            <Button android:id="@id/btn_op_multiple1" android:text="多选" style="@style/home_btn" />
+        </LinearLayout>
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/ll_align_2" android:background="@color/white" android:visibility="gone" android:layout_width="match_parent" android:layout_height="44.0dp">
+            <ImageView android:id="@id/btn_align_parent_left" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_center_parent" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_parent_right" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_center_vertical" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_center_horizontal" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_gravity_left" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_gravity_center" style="@style/home_btn_2" />
+            <ImageView android:id="@id/btn_align_gravity_right" style="@style/home_btn_2" />
+        </LinearLayout>
+    </FrameLayout>
+    <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" android:layout_above="@id/ll_manager" />
+    <HorizontalScrollView android:id="@id/ll_manager" android:background="@color/white" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="56.0dp" android:fillViewport="true" android:layout_alignParentBottom="true">
+        <LinearLayout android:orientation="horizontal" android:background="@color/white" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/btn_operator_add" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/add" app:fv_text="@string/add" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/btn_operator_reduce" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/narrow" app:fv_text="@string/reduce" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_cpoy" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@drawable/bg_btn_input" app:fv_text="@string/copy" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_scan_batch" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/c_stan_batch" app:fv_text="@string/scanBatch" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_del" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@drawable/bg_btn_delete" app:fv_text="@string/delete" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_scan" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/c_stan" app:fv_text="@string/scan" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_alignment" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@drawable/bg_btn_align" app:fv_text="@string/rotate" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_left" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/left" app:fv_text="@string/left" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_right" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/right" app:fv_text="@string/right" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_top" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/top" app:fv_text="@string/top" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_down" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/bottom" app:fv_text="@string/down" />
+            <com.bd.printer.btapp.ui.widgets.view.ControlView android:id="@id/fv_lock" android:layout_width="60.0dp" android:layout_height="match_parent" android:layout_weight="1.0" app:fv_image="@mipmap/lock" app:fv_text="@string/lock" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</RelativeLayout>

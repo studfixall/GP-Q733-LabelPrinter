@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include layout="@layout/title_bar" />
+    <TextView android:text="图形设置" style="@style/setting_text" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_graph_type" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="图形类型 " />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_rect_width" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="矩形长度 " />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_rect_height" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="矩形宽度 " />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_linewidth_rv" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="边框宽度" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_rect_radius" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="圆角半径" />
+    <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/cv_style_rv" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="内部填充" />
+</LinearLayout>

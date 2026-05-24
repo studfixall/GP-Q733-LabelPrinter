@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:id="@id/name" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:id="@id/tvName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="品名：" />
+        <EditText android:id="@id/text_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="品名" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@id/top" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:id="@id/tvArea" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="产地：" />
+        <EditText android:id="@id/text_area" android:layout_width="50.0dp" android:layout_height="wrap_content" android:hint="产地" />
+        <TextView android:id="@id/tvUnit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="单位：" />
+        <EditText android:id="@id/text_unit" android:layout_width="50.0dp" android:layout_height="wrap_content" android:hint="单位" />
+        <TextView android:id="@id/tvSpec" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="规格：" />
+        <EditText android:id="@id/text_spec" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="规格" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@id/BarPrice" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:id="@id/tvPrice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="单价：" />
+        <EditText android:id="@id/text_Price" android:layout_width="117.0dp" android:layout_height="wrap_content" android:hint="单价" />
+        <TextView android:id="@id/tvMemberPrice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="会员价：" />
+        <EditText android:id="@id/text_MemberPrice" android:layout_width="156.0dp" android:layout_height="wrap_content" android:hint="会员价" />
+    </LinearLayout>
+</LinearLayout>

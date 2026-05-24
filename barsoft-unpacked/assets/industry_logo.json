@@ -1,0 +1,367 @@
+{
+  "industry": [
+    {
+      "industry_name": "洗涤标志",
+      "category_list": [
+        {  "category": "温度",
+          "logo_list": [
+            {
+              "logo": "1.bmp"
+            },
+            {
+              "logo": "2.bmp"
+            },
+            {
+              "logo": "3.bmp"
+            },
+            {
+              "logo": "4.bmp"
+            },
+            {
+              "logo": "5.bmp"
+            },
+            {
+              "logo": "6.bmp"
+            },
+            {
+              "logo": "7.bmp"
+            },
+            {
+              "logo": "8.bmp"
+            },
+            {
+              "logo": "9.bmp"
+            },
+            {
+              "logo": "10.bmp"
+            },
+            {
+              "logo": "11.bmp"
+            },
+            {
+              "logo": "12.bmp"
+            },
+            {
+              "logo": "常规30度.bmp"
+            },
+            {
+              "logo": "常规40度.bmp"
+            },
+            {
+              "logo": "常规60度.bmp"
+            },
+            {
+              "logo": "常规75度.bmp"
+            },
+            {
+              "logo": "常规95度.bmp"
+            },
+            {
+              "logo": "缓和30度.bmp"
+            },
+            {
+              "logo": "缓和40度.bmp"
+            },
+            {
+              "logo": "缓和50度.bmp"
+            },
+            {
+              "logo": "缓和60度.bmp"
+            },
+            {
+              "logo": "缓和75度.bmp"
+            },
+            {
+              "logo": "缓和95度.bmp"
+            }
+          ]
+        },
+        { "category": "熨烫",
+          "logo_list": [
+            {
+              "logo": "不可熨烫.bmp"
+            },
+            {
+              "logo": "垫布熨烫.bmp"
+            },
+            {
+              "logo": "熨烫1点.bmp"
+            },
+            {
+              "logo": "熨烫2点.bmp"
+            },
+            {
+              "logo": "熨烫2点1-1.bmp"
+            },
+            {
+              "logo": "熨烫3.bmp"
+            },
+            {
+              "logo": "熨烫低温.bmp"
+            },
+            {
+              "logo": "熨烫中温.bmp"
+            },
+            {
+              "logo": "熨烫高温.bmp"
+            },
+            {
+              "logo": "蒸汽熨烫.bmp"
+            }
+          ]
+        },
+        {"category": "洗涤",
+          "logo_list": [
+            {
+              "logo": "13.bmp"
+            },
+            {
+              "logo": "16.bmp"
+            },
+            {
+              "logo": "22.bmp"
+            },
+            {
+              "logo": "26.bmp"
+            },
+            {
+              "logo": "27.bmp"
+            },
+            {
+              "logo": "28.bmp"
+            },
+            {
+              "logo": "31.bmp"
+            },
+            {
+              "logo": "32.bmp"
+            },
+            {
+              "logo": "34.bmp"
+            },
+            {
+              "logo": "常规干洗.bmp"
+            },
+            {
+              "logo": "手洗.bmp"
+            },
+            {
+              "logo": "手洗加粗.bmp"
+            },
+            {
+              "logo": "缓和干洗.bmp"
+            },
+            {
+              "logo": "转笼干燥.bmp"
+            }
+          ]},
+        {"category": "漂白",
+          "logo_list": [
+            {
+              "logo": "14.bmp"
+            },
+            {
+              "logo": "15.bmp"
+            },
+            {
+              "logo": "29.bmp"
+            },
+            {
+              "logo": "可以氯漂.bmp"
+            },
+            {
+              "logo": "可以氯漂CI.bmp"
+            }
+          ]},
+        {"category": "晾干",
+          "logo_list": [
+            {
+              "logo": "18.bmp"
+            },
+            {
+              "logo": "22.bmp"
+            },
+            {
+              "logo": "24.bmp"
+            },
+            {
+              "logo": "25.bmp"
+            },
+            {
+              "logo": "平摊干燥.bmp"
+            },
+            {
+              "logo": "悬挂晾干.bmp"
+            },
+            {
+              "logo": "滴干.bmp"
+            },
+            {
+              "logo": "衣平摊干燥.bmp"
+            },
+            {
+              "logo": "衣悬挂晾干.bmp"
+            },
+            {
+              "logo": "衣滴干.bmp"
+            },
+            {
+              "logo": "衣阴干.bmp"
+            },
+            {
+              "logo": "阴干.bmp"
+            }
+          ]},
+        { "category": "其它",
+          "logo_list": [
+            {
+              "logo": "13.bmp"
+            },
+            {
+              "logo": "16.bmp"
+            },
+            {
+              "logo": "17.bmp"
+            },
+            {
+              "logo": "19.bmp"
+            },
+            {
+              "logo": "20.bmp"
+            },
+            {
+              "logo": "21.bmp"
+            },
+            {
+              "logo": "23.bmp"
+            },
+            {
+              "logo": "转笼干燥.bmp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "industry_name": "简易标识",
+      "category_list": [
+        {
+          "category": "商品价签",
+          "logo_list": [
+            {
+              "logo": "商品logo1.jpg"
+            },
+            {
+              "logo": "商品logo2.jpg"
+            }
+          ]
+        },
+        {
+          "category": "日期时间",
+          "logo_list": [
+            {
+              "logo": "日期logo1.jpg"
+            },
+            {
+              "logo": "日期logo2.jpg"
+            }
+          ]
+        },
+        {
+          "category": "产品规格",
+          "logo_list": [
+            {
+              "logo": "产品logo1.jpg"
+            },
+            {
+              "logo": "产品logo2.jpg"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "industry_name": "通讯电力",
+      "category_list": [
+        {
+          "category": "电器系列",
+          "logo_list": [
+            {
+              "logo": "插座标识.bmp"
+            },
+            {
+              "logo": "有电危险.bmp"
+            },
+            {
+              "logo": "电池标识.bmp"
+            }
+          ]
+        },
+        {
+          "category": "移动系列",
+          "logo_list": [
+            {
+              "logo": "国家电网.bmp"
+            },
+            {
+              "logo": "国家电网logo.bmp"
+            },
+            {
+              "logo": "电信logo.bmp"
+            },
+            {
+              "logo": "电信带字.bmp"
+            },
+            {
+              "logo": "移动logo.bmp"
+            },
+            {
+              "logo": "移动文字.bmp"
+            },
+            {
+              "logo": "联通标志.bmp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "industry_name": "居家标识",
+      "category_list": [
+        {
+          "category": "居家整理",
+          "logo_list": [
+            {
+              "logo": "居家logo1.jpg"
+            },
+            {
+              "logo": "居家logo2.jpg"
+            }
+          ]
+        },
+        {
+          "category": "生活标识",
+          "logo_list": [
+            {
+              "logo": "生活logo1.jpg"
+            },
+            {
+              "logo": "生活logo2.jpg"
+            }
+          ]
+        },
+        {
+          "category": "母婴亲子",
+          "logo_list": [
+            {
+              "logo": "母婴logo1.jpg"
+            },
+            {
+              "logo": "母婴logo2.jpg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

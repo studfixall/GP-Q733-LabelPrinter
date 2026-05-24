@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="alignItems">
+        <item>居中</item>
+        <item>居左</item>
+        <item>居右</item>
+    </string-array>
+    <string-array name="barPosition">
+        <item>条码下面</item>
+        <item>条码上面</item>
+        <item>无</item>
+    </string-array>
+    <string-array name="baudrate">
+        <item>4800</item>
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>115200</item>
+    </string-array>
+    <string-array name="dataType">
+        <item>固定内容</item>
+        <item>序列内容</item>
+    </string-array>
+    <string-array name="fontName">
+        <item>DEFAULT</item>
+        <item>SANS_SERIF</item>
+        <item>SERIF</item>
+        <item>MONOSPACE</item>
+        <item>思源黑体</item>
+    </string-array>
+    <string-array name="fontStyle">
+        <item>粗体</item>
+        <item>斜体</item>
+        <item>下划线</item>
+        <item>删除线</item>
+    </string-array>
+    <string-array name="gapType">
+        <item>间距</item>
+        <item>黑标</item>
+        <item>连续</item>
+    </string-array>
+    <string-array name="printDirection">
+        <item>正常</item>
+        <item>旋转90</item>
+        <item>旋转180</item>
+        <item>旋转270</item>
+    </string-array>
+    <string-array name="printMode">
+        <item>标签模式</item>
+        <item>小票模式</item>
+    </string-array>
+    <string-array name="printQuality">
+        <item>普通</item>
+        <item>深色</item>
+    </string-array>
+    <string-array name="str_interf_type">
+        <item>蓝牙</item>
+        <item>网口</item>
+        <item>USB</item>
+    </string-array>
+    <string-array name="sync_item">
+        <item>价签</item>
+        <item>普通</item>
+        <item>服装</item>
+        <item>珠宝</item>
+        <item>定制</item>
+    </string-array>
+</resources>

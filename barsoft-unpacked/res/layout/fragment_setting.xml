@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/gray" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include layout="@layout/title_bar" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:text="@string/deviceConnect" style="@style/setting_text" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_fs_state" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/deviceStatus" app:right_text="@string/clickSearch" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:img_gone="true" app:left_text="@string/conntectMode" app:right_text="@string/str_bluetooth_connect" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_fs_dpi" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/machineType" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st_fs_width" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/labelWidth" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st_fs_height" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/labelHeight" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_fs_direction" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/printDirection" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_fs_speed" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/printSpeed" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv4_fs_gap" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/labelType" app:right_text="@string/labelGap" />
+            <com.bd.printer.btapp.ui.widgets.view.CountViewColumn android:id="@id/st_fs_gapValue" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_name="@string/GapValue" app:cv_num="1" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st_fs_density" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/printDensity" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/sv_fs_quality" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="@string/printQuality" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView2 android:id="@id/st_beijing" android:layout_width="match_parent" android:layout_height="@dimen/putong_viewheight" app:left_text="添加背景" app:right_text="选择图片" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <TextView android:textColor="@color/black" android:gravity="center" android:id="@id/tv_fs_moreSet" android:text="@string/expandMulti" style="@style/setting_text" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <com.bd.printer.btapp.ui.widgets.view.CountViewColumn android:id="@id/st_fs_Column" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_name="@string/labelColumns" app:cv_num="1" />
+            <com.bd.printer.btapp.ui.widgets.view.CountView android:id="@id/st_fs_ColumnGap" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_name="@string/columnsGap" app:cv_num="1" />
+            <com.bd.printer.btapp.ui.widgets.view.CountReference android:id="@id/st_fs_reference" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_nameReference="@string/referenceGap" app:cv_numReference="1" />
+            <com.bd.printer.btapp.ui.widgets.view.CountOffset android:id="@id/st_fs_offset" android:layout_width="match_parent" android:layout_height="48.0dp" app:cv_nameOffset="@string/offsetGap" app:cv_numOffset="1" />
+            <TextView android:gravity="center" android:id="@id/tv_fs_setOk" android:layout_width="match_parent" android:layout_height="48.0dp" android:text="@string/clickFinish" style="@style/setting_text" />
+            <View android:background="@color/line_bg" android:layout_width="match_parent" android:layout_height="1.0px" />
+            <TextView android:textColor="@color/black" android:gravity="center" android:layout_width="match_parent" android:layout_height="60.0dp" android:text="" style="@style/setting_text" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

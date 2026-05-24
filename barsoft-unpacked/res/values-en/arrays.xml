@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="alignItems">
+        <item>Center</item>
+        <item>Left</item>
+        <item>Right</item>
+    </string-array>
+    <string-array name="barPosition">
+        <item>Below</item>
+        <item>Above</item>
+        <item>NO</item>
+    </string-array>
+    <string-array name="baudrate">
+        <item>4800</item>
+        <item>9600</item>
+        <item>19200</item>
+        <item>38400</item>
+        <item>115200</item>
+    </string-array>
+    <string-array name="dataType">
+        <item>Fixed content</item>
+        <item>Serial content</item>
+    </string-array>
+    <string-array name="fontName">
+        <item>DEFAULT</item>
+        <item>SANS_SERIF</item>
+        <item>SERIF</item>
+        <item>MONOSPACE</item>
+        <item>Source Han Sans</item>
+    </string-array>
+    <string-array name="fontStyle">
+        <item>Bold</item>
+        <item>Italic</item>
+        <item>Underline</item>
+        <item>Deleteline</item>
+    </string-array>
+    <string-array name="gapType">
+        <item>Gap</item>
+        <item>Black</item>
+        <item>continue</item>
+    </string-array>
+    <string-array name="printDirection">
+        <item>normal</item>
+        <item>rotate 90</item>
+        <item>rotate 180</item>
+        <item>rotate 270</item>
+    </string-array>
+    <string-array name="printMode">
+        <item>Label Mode</item>
+        <item>Receipt Mode</item>
+    </string-array>
+    <string-array name="printQuality">
+        <item>normal</item>
+        <item>deep</item>
+    </string-array>
+    <string-array name="str_interf_type">
+        <item>Bluetooth</item>
+        <item>Ethernet</item>
+        <item>USB</item>
+    </string-array>
+    <string-array name="sync_item">
+        <item>price</item>
+        <item>normal</item>
+        <item>clothe</item>
+        <item>jewels</item>
+        <item>cutome</item>
+    </string-array>
+</resources>

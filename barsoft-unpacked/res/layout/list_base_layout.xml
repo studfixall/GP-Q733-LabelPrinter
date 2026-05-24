@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="120.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/prifixname" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="30.0dp" android:layout_marginTop="5.0dp" android:text="品名:" />
+    <TextView android:id="@id/name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="5.0dp" android:text="品名" android:layout_toRightOf="@id/prifixname" />
+    <TextView android:id="@id/prifixarea" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="30.0dp" android:layout_marginTop="30.0dp" android:text="产地:" />
+    <TextView android:id="@id/area" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="30.0dp" android:text="产地" android:layout_toRightOf="@id/prifixarea" />
+    <TextView android:id="@id/prifixunit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="80.0dp" android:layout_marginTop="30.0dp" android:text="单位:" android:layout_toRightOf="@id/prifixarea" />
+    <TextView android:id="@id/unit" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="30.0dp" android:text="单位" android:layout_toRightOf="@id/prifixunit" />
+    <TextView android:id="@id/prifixspecific" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="30.0dp" android:layout_marginTop="60.0dp" android:text="规格:" />
+    <TextView android:id="@id/specific" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="60.0dp" android:text="规格" android:layout_toRightOf="@id/prifixprice" />
+    <TextView android:id="@id/prifixbarcode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="80.0dp" android:layout_marginTop="60.0dp" android:text="条码:" android:layout_toRightOf="@id/prifixspecific" />
+    <TextView android:id="@id/barcode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="60.0dp" android:text="条码" android:layout_toRightOf="@id/prifixbarcode" />
+    <TextView android:id="@id/prifixprice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="30.0dp" android:layout_marginTop="90.0dp" android:text="价格:" />
+    <TextView android:id="@id/price" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="90.0dp" android:text="价格" android:layout_toRightOf="@id/prifixprice" />
+    <TextView android:id="@id/prifixmprice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="80.0dp" android:layout_marginTop="90.0dp" android:text="会员价:" android:layout_toRightOf="@id/prifixprice" />
+    <TextView android:id="@id/mprice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="2.0dp" android:layout_marginTop="90.0dp" android:text="会员价" android:layout_toRightOf="@id/prifixmprice" />
+    <Button android:textColor="@color/white" android:id="@id/btnEdit" android:background="@drawable/bg_btn_corner" android:layout_width="60.0dp" android:layout_height="40.0dp" android:layout_marginTop="10.0dp" android:text="编辑" android:layout_alignParentRight="true" />
+    <Button android:textColor="@color/white" android:id="@id/btnDelete" android:background="@drawable/bg_btn_corner" android:visibility="visible" android:layout_width="60.0dp" android:layout_height="40.0dp" android:layout_marginTop="60.0dp" android:text="删除" android:layout_alignParentRight="true" />
+</RelativeLayout>
