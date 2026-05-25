@@ -363,14 +363,15 @@ class ScanProductViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val json = com.gp.q733.domain.util.TemplateJsonParser.toJson(template.label.elements)
-                customTemplateDao.insert(
-                    com.gp.q733.data.local.db.CustomTemplateEntity(
-                        templateId = "custom_${System.currentTimeMillis()}",
-                        name = name,
-                        widthMm = template.label.widthMm,
-                        heightMm = template.label.heightMm,
-                        elementsJson = json
-                    )
+                customTemplateDao.upsert(
+                    templateId = "custom_${System.currentTimeMillis()}",
+                    name = name,
+                    widthMm = template.label.widthMm,
+                    heightMm = template.label.heightMm,
+                    elementsJson = json,
+                    isBuiltIn = false,
+                    sortOrder = 0,
+                    createdAt = System.currentTimeMillis()
                 )
                 // Reload templates
                 loadTemplates()

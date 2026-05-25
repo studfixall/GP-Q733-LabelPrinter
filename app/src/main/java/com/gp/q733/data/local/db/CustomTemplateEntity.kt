@@ -1,14 +1,19 @@
 package com.gp.q733.data.local.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
  * 标签模板
  * 内置模板（isBuiltIn=true）由系统初始化，不可删除
  * 自定义模板（isBuiltIn=false）由用户创建，可增删
+ * templateId 唯一索引，支持 upsert 语义
  */
-@Entity(tableName = "custom_templates")
+@Entity(
+    tableName = "custom_templates",
+    indices = [Index(value = ["templateId"], unique = true)]
+)
 data class CustomTemplateEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

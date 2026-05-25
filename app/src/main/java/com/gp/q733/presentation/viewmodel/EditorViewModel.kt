@@ -41,6 +41,7 @@ data class EditorUiState(
     val saveSuccess: Boolean = false,
     val showSaveTemplateDialog: Boolean = false,
     val templateName: String = "",
+    val currentTemplateId: String? = null,   // 正在编辑的模板ID（来自导航参数）
     val errorMessage: String? = null
 )
 
@@ -205,19 +206,41 @@ class EditorViewModel @Inject constructor(
 
     /**
      * 保存为自定义模板（存入Room数据库）
+     * @param sourceTemplateId 来源模板ID（来自导航参数）。
+     *   null               → 新建模板
+     *   templates/...      → 内置模板另存（upsert 到同一 templateId，isBuiltIn=true）
+     *   saved_xxx / custom_xxx → 更新已有自定义模板记录
      */
-    fun saveAsTemplate(templateName: String) {
+    fun saveAsTemplate(sourceTemplateId: String?, templateName: String) {
         viewModelScope.launch {
             val label = _uiState.value.label
             val elementsJson = com.gp.q733.domain.util.TemplateJsonParser.toJson(label.elements)
-            customTemplateDao.insert(
-                com.gp.q733.data.local.db.CustomTemplateEntity(
-                    templateId = "custom_${System.currentTimeMillis()}",
-                    name = templateName,
-                    widthMm = label.widthMm,
-                    heightMm = label.heightMm,
-                    elementsJson = elementsJson
-                )
+
+            // 根据来源决定 templateId 与 isBuiltIn
+            val (finalTemplateId, isBuiltIn) = when {
+                sourceTemplateId == null -> {
+                    // 纯新建
+                    "custom_${System.currentTimeMillis()}" to false
+                }
+                sourceTemplateId.startsWith("templates/") -> {
+                    // 内置模板另存为：复用同一 asset path 作为 templateId，upsert 覆盖
+                    sourceTemplateId to true
+                }
+                else -> {
+                    // saved_xxx / custom_xxx / built_in_xxx → 更新已有记录
+                    sourceTemplateId to false
+                }
+            }
+
+            customTemplateDao.upsert(
+                templateId = finalTemplateId,
+                name = templateName.ifBlank { "自定义模板" },
+                widthMm = label.widthMm,
+                heightMm = label.heightMm,
+                elementsJson = elementsJson,
+                isBuiltIn = isBuiltIn,
+                sortOrder = 0,
+                createdAt = System.currentTimeMillis()
             )
             _uiState.value = _uiState.value.copy(saveSuccess = true)
             kotlinx.coroutines.delay(2000)
@@ -354,7 +377,8 @@ class EditorViewModel @Inject constructor(
         label?.let {
             _uiState.value = _uiState.value.copy(
                 label = it,
-                selectedElementIndex = null
+                selectedElementIndex = null,
+                currentTemplateId = templateId  // 保存当前模板ID，存模板时用于判断upsert目标
             )
         }
     }
@@ -398,6 +422,26 @@ class EditorViewModel @Inject constructor(
                 val element = elements[index]
                 if (element is LabelElement.Barcode) {
                     elements[index] = element.copy(height = height)
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
+    // Issue #3 fix: Barcode数据绑定字段更新
+    fun updateBarcodeTextName(index: Int, textName: String) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.Barcode) {
+                    elements[index] = element.copy(
+                        textName = textName,
+                        variable = if (textName.isNotEmpty()) 1 else 0
+                    )
                     _uiState.value = _uiState.value.copy(
                         label = currentLabel.copy(elements = elements)
                     )
