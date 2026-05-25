@@ -30,9 +30,12 @@ fun TemplateBrowserScreen(
     onBack: () -> Unit,
     onOpenTemplate: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit,
     onEditTemplate: (id: Long, widthMm: Float, heightMm: Float) -> Unit,
-    onNewTemplate: () -> Unit
+    onNewTemplate: (Float, Float) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showSizeDialog by remember { mutableStateOf(false) }
+    var newWidth by remember { mutableStateOf("50") }
+    var newHeight by remember { mutableStateOf("30") }
 
     LaunchedEffect(Unit) {
         viewModel.loadTemplates()
@@ -56,7 +59,7 @@ fun TemplateBrowserScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNewTemplate,
+                onClick = { showSizeDialog = true },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "新建模板")
@@ -162,6 +165,55 @@ fun TemplateBrowserScreen(
                 }
             }
         }
+    }
+
+    if (showSizeDialog) {
+        AlertDialog(
+            onDismissRequest = { showSizeDialog = false },
+            title = { Text("新建标签模板") },
+            text = {
+                Column {
+                    Text("设置标签尺寸（毫米）", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value = newWidth,
+                            onValueChange = { newWidth = it },
+                            label = { Text("宽度") },
+                            suffix = { Text("mm") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        OutlinedTextField(
+                            value = newHeight,
+                            onValueChange = { newHeight = it },
+                            label = { Text("高度") },
+                            suffix = { Text("mm") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val w = newWidth.toFloatOrNull() ?: 50f
+                        val h = newHeight.toFloatOrNull() ?: 30f
+                        showSizeDialog = false
+                        onNewTemplate(w, h)
+                    }
+                ) {
+                    Text("创建")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSizeDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
     }
 }
 

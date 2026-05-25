@@ -1,0 +1,13 @@
+Fix #5: 内置模板保存后重新打开不生效
+
+Root cause: loadTemplateSync 对 templates/ 路径直接读 assets，
+不查 Room，导致保存后的修改被忽略。
+
+Fix: 对 templates/ 路径，先查 Room，有记录则优先加载
+(Room 中的 elementsJson)，无记录才读原始 assets XML。
+
+Fix #2: saveAsTemplate 新建时按 name+size 查重，命中则更新记录。
+
+- CustomTemplateDao: 新增 getByNameAndSize() 查询
+- EditorViewModel.saveAsTemplate: sourceTemplateId=null 时
+  先查同名+同尺寸模板，命中则 upsert 到已有记录

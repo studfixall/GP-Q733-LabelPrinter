@@ -86,6 +86,41 @@ fun EditorScreen(
             }
         )
     }
+    // 保存为模板对话框
+    if (uiState.showSaveTemplateDialog) {
+        var localTemplateName by remember { mutableStateOf(uiState.templateName) }
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissSaveTemplateDialog() },
+            title = { Text("保存为模板") },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text("将此标签布局保存为自定义模板，可在模板库中重复使用。", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = localTemplateName,
+                        onValueChange = { localTemplateName = it; viewModel.updateTemplateName(it) },
+                        label = { Text("模板名称") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val name = localTemplateName.ifBlank { "自定义模板" }
+                        viewModel.saveAsTemplate(uiState.currentTemplateId, name)
+                        viewModel.dismissSaveTemplateDialog()
+                    }
+                ) { Text("保存") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissSaveTemplateDialog() }) { Text("取消") }
+            }
+        )
+    }
+
+
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { error ->
             snackbarHostState.showSnackbar(error)
@@ -410,6 +445,45 @@ fun EditorScreen(
                                         steps = 17,
                                         modifier = Modifier.fillMaxWidth()
                                     )
+                                    // Issue #3 fix: Barcode也加数据绑定选择器
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    var barcodeBindingExpanded by remember { mutableStateOf(false) }
+                                    val barcodeBindingOptions = listOf(
+                                        "" to "不绑定（固定内容）",
+                                        "barcode" to "条码",
+                                        "name" to "商品名称",
+                                        "price" to "价格",
+                                        "mprice" to "会员价"
+                                    )
+                                    val currentBarcodeBindingLabel = barcodeBindingOptions.find { it.first == element.textName }?.second
+                                        ?: "不绑定（固定内容）"
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("绑定字段", style = MaterialTheme.typography.labelMedium)
+                                        Box {
+                                            TextButton(onClick = { barcodeBindingExpanded = true }) {
+                                                Text(currentBarcodeBindingLabel)
+                                                Icon(Icons.Default.ArrowDropDown, null)
+                                            }
+                                            DropdownMenu(
+                                                expanded = barcodeBindingExpanded,
+                                                onDismissRequest = { barcodeBindingExpanded = false }
+                                            ) {
+                                                barcodeBindingOptions.forEach { (value, label) ->
+                                                    DropdownMenuItem(
+                                                        text = { Text(label) },
+                                                        onClick = {
+                                                            viewModel.updateBarcodeTextName(index, value)
+                                                            barcodeBindingExpanded = false
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 is LabelElement.Text -> {
                                     Text(

@@ -40,11 +40,12 @@ object LabelTemplateFiller {
                     element.copy(text = filledText)
                 }
                 is LabelElement.Barcode -> {
-                    // Barsoft textName=barcode → 替换条码内容
-                    if (element.textName == "barcode" && element.variable == 1) {
-                        element.copy(content = product.barcode)
+                    // variable=1: 通过 textName 泛化解析商品字段值
+                    // variable=0: 保持固定 content 不变
+                    if (element.variable == 1 && element.textName.isNotEmpty()) {
+                        element.copy(content = resolveTextName(element.textName, product))
                     } else {
-                        element.copy(content = product.barcode)
+                        element // 保持原 content
                     }
                 }
                 is LabelElement.QRCode -> {

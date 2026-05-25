@@ -186,8 +186,8 @@ fun Q733NavHost(
                 onEditTemplate = { id, widthMm, heightMm ->
                     navController.navigate(Screen.Editor.createRoute("saved_$id", widthMm, heightMm))
                 },
-                onNewTemplate = {
-                    navController.navigate(Screen.Editor.createRoute("new"))
+                onNewTemplate = { w, h ->
+                    navController.navigate(Screen.Editor.createRoute("new", w, h))
                 }
             )
         }
