@@ -217,10 +217,16 @@ class EditorViewModel @Inject constructor(
             val elementsJson = com.gp.q733.domain.util.TemplateJsonParser.toJson(label.elements)
 
             // 根据来源决定 templateId 与 isBuiltIn
-            val (finalTemplateId, isBuiltIn) = when {
+            val templateNameToUse = templateName.ifBlank { "自定义模板" }
+            val (finalTemplateId, finalIsBuiltIn) = when {
                 sourceTemplateId == null -> {
-                    // 纯新建
-                    "custom_${System.currentTimeMillis()}" to false
+                    // 纯新建：先按 name+size 查重，命中则更新已有记录，避免重复
+                    val existing = customTemplateDao.getByNameAndSize(templateNameToUse, label.widthMm, label.heightMm)
+                    if (existing != null) {
+                        existing.templateId to existing.isBuiltIn
+                    } else {
+                        "custom_${System.currentTimeMillis()}" to false
+                    }
                 }
                 sourceTemplateId.startsWith("templates/") -> {
                     // 内置模板另存为：复用同一 asset path 作为 templateId，upsert 覆盖
@@ -234,11 +240,11 @@ class EditorViewModel @Inject constructor(
 
             customTemplateDao.upsert(
                 templateId = finalTemplateId,
-                name = templateName.ifBlank { "自定义模板" },
+                name = templateNameToUse,
                 widthMm = label.widthMm,
                 heightMm = label.heightMm,
                 elementsJson = elementsJson,
-                isBuiltIn = isBuiltIn,
+                isBuiltIn = finalIsBuiltIn,
                 sortOrder = 0,
                 createdAt = System.currentTimeMillis()
             )
@@ -369,8 +375,19 @@ class EditorViewModel @Inject constructor(
                 }
             }
             templateId.startsWith("templates/") -> {
-                // Barsoft XML asset path
-                BarsoftTemplateParser.loadFromAssets(context, templateId)
+                // 先查 Room：保存过的内置模板（isBuiltIn=true）以 Room 记录为准
+                val savedEntity = customTemplateDao.getByTemplateId(templateId)
+                if (savedEntity != null) {
+                    Label(
+                        id = "template_${savedEntity.id}",
+                        widthMm = savedEntity.widthMm,
+                        heightMm = savedEntity.heightMm,
+                        elements = TemplateJsonParser.fromJson(savedEntity.elementsJson)
+                    )
+                } else {
+                    // 无 Room 记录，回退到 assets 原始 XML
+                    BarsoftTemplateParser.loadFromAssets(context, templateId)
+                }
             }
             else -> null
         }

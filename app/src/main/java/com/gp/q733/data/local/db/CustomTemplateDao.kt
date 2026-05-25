@@ -19,6 +19,9 @@ interface CustomTemplateDao {
     @Query("SELECT * FROM custom_templates WHERE id = :id")
     suspend fun getById(id: Long): CustomTemplateEntity?
 
+    @Query("SELECT * FROM custom_templates WHERE name = :name AND widthMm = :widthMm AND heightMm = :heightMm LIMIT 1")
+    suspend fun getByNameAndSize(name: String, widthMm: Float, heightMm: Float): CustomTemplateEntity?
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(templates: List<CustomTemplateEntity>)
 
