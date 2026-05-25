@@ -180,8 +180,14 @@ fun Q733NavHost(
             TemplateBrowserScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
-                onTemplateSelected = { assetPath, widthMm, heightMm ->
+                onOpenTemplate = { assetPath, widthMm, heightMm ->
                     navController.navigate(Screen.Editor.createRoute(assetPath, widthMm, heightMm))
+                },
+                onEditTemplate = { id, widthMm, heightMm ->
+                    navController.navigate(Screen.Editor.createRoute("saved_$id", widthMm, heightMm))
+                },
+                onNewTemplate = {
+                    navController.navigate(Screen.Editor.createRoute("new"))
                 }
             )
         }

@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,18 +18,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.gp.q733.domain.model.Label
 
 /**
- * Barsoft 模板浏览器界面
- * 显示 97 个 XML 标签模板，按分类筛选，点击选择模板
+ * 标签模板库界面
+ * 自定义模板排前面（按创建时间倒序），内置模板按尺寸排后面
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateBrowserScreen(
     viewModel: TemplateBrowserViewModel,
     onBack: () -> Unit,
-    onTemplateSelected: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit
+    onOpenTemplate: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit,
+    onEditTemplate: (id: Long, widthMm: Float, heightMm: Float) -> Unit,
+    onNewTemplate: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -50,6 +53,14 @@ fun TemplateBrowserScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNewTemplate,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "新建模板")
+            }
         }
     ) { padding ->
         Column(
@@ -67,7 +78,7 @@ fun TemplateBrowserScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            // 分类筛选
+            // 分类筛选（只对内置模板生效）
             CategoryFilter(
                 categories = listOf("全部", "通用", "价格", "服装", "珠宝", "自定义"),
                 selectedCategory = uiState.selectedCategory,
@@ -77,7 +88,6 @@ fun TemplateBrowserScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 加载状态
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -96,32 +106,74 @@ fun TemplateBrowserScreen(
                     )
                 }
             } else {
-                // 模板数量
-                Text(
-                    text = "共 ${uiState.filteredTemplates.size} 个模板",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                )
+                val totalCustom = uiState.filteredCustom.size
+                val totalBuiltIn = uiState.filteredBuiltIn.size
 
-                // 模板列表
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(uiState.filteredTemplates) { template ->
-                        TemplateCard(
-                            template = template,
-                            onClick = {
-                    onTemplateSelected(template.assetPath, template.widthMm, template.heightMm)
-                }
-                        )
+                    // ===== 自定义模板 section =====
+                    if (totalCustom > 0) {
+                        item {
+                            SectionHeader(title = "自定义模板 ($totalCustom)")
+                        }
+                        items(uiState.filteredCustom) { template ->
+                            CustomTemplateCard(
+                                template = template,
+                                onOpen = { onEditTemplate(template.id, template.widthMm, template.heightMm) },
+                                onEdit = { onEditTemplate(template.id, template.widthMm, template.heightMm) }
+                            )
+                        }
+                    }
+
+                    // ===== 内置模板 section =====
+                    if (totalBuiltIn > 0) {
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            SectionHeader(title = "内置模板 ($totalBuiltIn)")
+                        }
+                        items(uiState.filteredBuiltIn) { template ->
+                            BuiltInTemplateCard(
+                                template = template,
+                                onOpen = { onOpenTemplate(template.assetPath, template.widthMm, template.heightMm) },
+                                onEdit = { onOpenTemplate(template.assetPath, template.widthMm, template.heightMm) }
+                            )
+                        }
+                    }
+
+                    if (totalCustom == 0 && totalBuiltIn == 0) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "暂无模板",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(vertical = 4.dp)
+    )
 }
 
 @Composable
@@ -150,12 +202,18 @@ private fun CategoryFilter(
     modifier: Modifier = Modifier
 ) {
     val categoryMap = mapOf(
-        "全部" to "全部", "通用" to "normal", "价格" to "price",
-        "服装" to "clothe", "珠宝" to "jewelry", "自定义" to "custome"
+        "全部" to "全部",
+        "通用" to "normal",
+        "价格" to "price",
+        "服装" to "clothe",
+        "珠宝" to "jewelry",
+        "自定义" to "custome"
     )
 
     ScrollableTabRow(
-        selectedTabIndex = categories.indexOf(categoryMap.entries.find { it.value == selectedCategory }?.key ?: "全部"),
+        selectedTabIndex = categories.indexOf(
+            categoryMap.entries.find { it.value == selectedCategory }?.key ?: "全部"
+        ),
         edgePadding = 0.dp,
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -173,16 +231,17 @@ private fun CategoryFilter(
 }
 
 @Composable
-private fun TemplateCard(
-    template: BarsoftTemplateInfo,
-    onClick: () -> Unit
+private fun CustomTemplateCard(
+    template: CustomTemplateInfo,
+    onOpen: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onOpen),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -191,11 +250,11 @@ private fun TemplateCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 尺寸图标区
+            // 尺寸图标
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = MaterialTheme.colorScheme.primary
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -206,24 +265,120 @@ private fun TemplateCard(
                         text = "${template.widthMm.toInt()}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         text = "×${template.heightMm.toInt()}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                     )
                     Text(
                         text = "mm",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                     )
                 }
             }
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // 模板信息
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = template.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "${template.elementCount} 个元素 · ${template.displayName}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (template.fieldNames.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        template.fieldNames.take(5).forEach { field ->
+                            Surface(
+                                shape = RoundedCornerShape(4.dp),
+                                color = MaterialTheme.colorScheme.secondaryContainer
+                            ) {
+                                Text(
+                                    text = fieldNameLabel(field),
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 编辑按钮
+            IconButton(onClick = onEdit) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "编辑模板",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuiltInTemplateCard(
+    template: BarsoftTemplateInfo,
+    onOpen: () -> Unit,
+    onEdit: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpen),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "${template.widthMm.toInt()}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Text(
+                        text = "×${template.heightMm.toInt()}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                    )
+                    Text(
+                        text = "mm",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = template.displayName,
@@ -240,32 +395,31 @@ private fun TemplateCard(
                 )
                 if (template.fieldNames.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp))
-                    // 数据绑定字段标签
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         template.fieldNames.take(5).forEach { field ->
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
-                                color = MaterialTheme.colorScheme.secondaryContainer
+                                color = MaterialTheme.colorScheme.tertiaryContainer
                             ) {
                                 Text(
                                     text = fieldNameLabel(field),
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
                                 )
                             }
                         }
-                        if (template.fieldNames.size > 5) {
-                            Text(
-                                text = "+${template.fieldNames.size - 5}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                     }
                 }
+            }
+
+            // 编辑按钮（内置模板编辑 = 另存为自定义后编辑）
+            IconButton(onClick = onEdit) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "编辑模板",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
             }
         }
     }

@@ -329,8 +329,24 @@ class EditorViewModel @Inject constructor(
                     )
                 }
             }
+            templateId.startsWith("saved_") -> {
+                // Room 数据库中的自定义模板，id = 数字
+                val idStr = templateId.removePrefix("saved_")
+                val id = idStr.toLongOrNull()
+                id?.let {
+                    val entity = customTemplateDao.getById(it)
+                    entity?.let { e ->
+                        Label(
+                            id = "template_${e.id}",
+                            widthMm = e.widthMm,
+                            heightMm = e.heightMm,
+                            elements = TemplateJsonParser.fromJson(e.elementsJson)
+                        )
+                    }
+                }
+            }
             templateId.startsWith("templates/") -> {
-                // Barsoft XML asset path, e.g. "templates/Templet/normal/4030.xml"
+                // Barsoft XML asset path
                 BarsoftTemplateParser.loadFromAssets(context, templateId)
             }
             else -> null
