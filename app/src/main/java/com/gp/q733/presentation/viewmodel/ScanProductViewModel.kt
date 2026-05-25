@@ -1,5 +1,6 @@
 ﻿package com.gp.q733.presentation.viewmodel
 
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -296,7 +297,7 @@ class ScanProductViewModel @Inject constructor(
                 if (connState != ConnectionState.Connected) {
                     val mac = gpPrinterService.getLastConnectedMac()
                     if (mac != null) {
-                        val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
                         val btDevice = adapter?.getRemoteDevice(mac)
                         if (btDevice != null) {
                             val printerDevice = PrinterDevice(

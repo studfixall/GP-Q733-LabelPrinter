@@ -1,6 +1,8 @@
 package com.gp.q733.presentation.viewmodel
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gp.q733.data.local.SettingsDataStore
@@ -10,6 +12,7 @@ import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ConnectionState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +38,8 @@ data class DeviceUiState(
 class DeviceViewModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val gpPrinterService: GpPrinterService,
-    private val settingsDataStore: SettingsDataStore
+    private val settingsDataStore: SettingsDataStore,
+    @ApplicationContext private val ctx: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DeviceUiState())
@@ -158,7 +162,7 @@ class DeviceViewModel @Inject constructor(
                 // 尝试重连
                 val mac = gpPrinterService.getLastConnectedMac()
                 if (mac != null) {
-                    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                    val adapter = (ctx.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
                     val btDevice = adapter?.getRemoteDevice(mac)
                     if (btDevice != null) {
                         val printerDevice = PrinterDevice(

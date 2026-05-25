@@ -1,6 +1,8 @@
 ﻿package com.gp.q733.presentation.viewmodel
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gp.q733.data.local.LabelDataStore
@@ -277,7 +279,7 @@ class EditorViewModel @Inject constructor(
                     // Try to reconnect using saved MAC
                     val mac = gpPrinterService.getLastConnectedMac()
                     if (mac != null) {
-                        val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+                        val adapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
                         val btDevice = adapter?.getRemoteDevice(mac)
                         if (btDevice != null) {
                             val printerDevice = PrinterDevice(
