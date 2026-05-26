@@ -373,6 +373,22 @@ private fun CustomTemplateCard(
                 }
             }
 
+            // 星标/快捷打印按钮
+
+            IconButton(onClick = onToggleQuickPrint) {
+
+            	Icon(
+
+            		if (template.isQuickPrint) Icons.Filled.Star else Icons.Outlined.StarOutline,
+
+            		contentDescription = if (template.isQuickPrint) "取消快捷打印" else "设为快捷打印",
+
+            		tint = if (template.isQuickPrint) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
+            	)
+
+            }
+
             // 编辑按钮
             IconButton(onClick = onEdit) {
                 Icon(

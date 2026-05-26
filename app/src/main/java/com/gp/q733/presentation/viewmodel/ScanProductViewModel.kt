@@ -53,7 +53,7 @@ data class ScanProductUiState(
     // 模板选择
     val templates: List<ScanTemplateOption> = emptyList(),
     val selectedTemplateId: String = "",
-    val showAllTemplates: Boolean = false,  // true=显示全部, false=只显示快捷打印模板
+    val showAllTemplates: Boolean = true,  // true=显示全部, false=只显示快捷打印模板
 
     // 打印状态
     val isPrinting: Boolean = false,
