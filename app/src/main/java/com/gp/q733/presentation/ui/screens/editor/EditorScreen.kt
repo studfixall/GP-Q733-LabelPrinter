@@ -149,7 +149,7 @@ fun EditorScreen(
                             Icon(Icons.Default.Print, contentDescription = "打印")
                         }
                     }
-                    IconButton(onClick = { viewModel.saveLabel() }) {
+                    IconButton(onClick = { viewModel.saveCurrentTemplate() }) {
                             Icon(Icons.Default.Save, contentDescription = "保存")
                         }
                         IconButton(onClick = { viewModel.showSaveTemplateDialog() }) {

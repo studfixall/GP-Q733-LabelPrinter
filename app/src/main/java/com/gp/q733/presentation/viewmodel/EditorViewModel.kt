@@ -206,7 +206,57 @@ class EditorViewModel @Inject constructor(
         }
     }
 
-    /**
+        /**
+     * 直接保存当前模板到Room（覆盖，不弹对话框）
+     * - 有 currentTemplateId → 直接 upsert 覆盖
+     * - 无 currentTemplateId → 自动生成名称并保存
+     */
+    fun saveCurrentTemplate() {
+        viewModelScope.launch {
+            val label = _uiState.value.label
+            val elementsJson = TemplateJsonParser.toJson(label.elements)
+            val tid = _uiState.value.currentTemplateId
+
+            val (finalTemplateId, finalIsBuiltIn, finalName) = when {
+                tid == null -> {
+                    val autoName = "\u6807\u7b7e ${label.widthMm.toInt()}x${label.heightMm.toInt()}"
+                    val existing = customTemplateDao.getByNameAndSize(autoName, label.widthMm, label.heightMm)
+                    if (existing != null) {
+                        Triple(existing.templateId, existing.isBuiltIn, existing.name)
+                    } else {
+                        Triple("custom_${System.currentTimeMillis()}", false, autoName)
+                    }
+                }
+                tid.startsWith("templates/") -> {
+                    val existing = customTemplateDao.getByTemplateId(tid)
+                    Triple(tid, true, existing?.name ?: "\u5185\u7f6e\u6a21\u677f")
+                }
+                else -> {
+                    val existing = customTemplateDao.getByTemplateId(tid)
+                    Triple(tid, existing?.isBuiltIn ?: false, existing?.name ?: "\u81ea\u5b9a\u4e49\u6a21\u677f")
+                }
+            }
+
+            customTemplateDao.upsert(
+                templateId = finalTemplateId,
+                name = finalName,
+                widthMm = label.widthMm,
+                heightMm = label.heightMm,
+                elementsJson = elementsJson,
+                isBuiltIn = finalIsBuiltIn,
+                sortOrder = 0,
+                createdAt = System.currentTimeMillis()
+            )
+            _uiState.value = _uiState.value.copy(
+                saveSuccess = true,
+                currentTemplateId = finalTemplateId
+            )
+            kotlinx.coroutines.delay(2000)
+            _uiState.value = _uiState.value.copy(saveSuccess = false)
+        }
+    }
+
+/**
      * 保存为自定义模板（存入Room数据库）
      * @param sourceTemplateId 来源模板ID（来自导航参数）。
      *   null               → 新建模板
