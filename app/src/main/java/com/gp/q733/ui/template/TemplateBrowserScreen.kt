@@ -1,4 +1,4 @@
-package com.gp.q733.ui.template
+﻿package com.gp.q733.ui.template
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,7 +29,7 @@ fun TemplateBrowserScreen(
     viewModel: TemplateBrowserViewModel,
     onBack: () -> Unit,
     onOpenTemplate: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit,
-    onEditTemplate: (id: Long, widthMm: Float, heightMm: Float) -> Unit,
+    onEditTemplate: (templateId: String, widthMm: Float, heightMm: Float) -> Unit,
     onNewTemplate: (Float, Float) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -125,8 +125,8 @@ fun TemplateBrowserScreen(
                         items(uiState.filteredCustom) { template ->
                             CustomTemplateCard(
                                 template = template,
-                                onOpen = { onEditTemplate(template.id, template.widthMm, template.heightMm) },
-                                onEdit = { onEditTemplate(template.id, template.widthMm, template.heightMm) }
+                                onOpen = { onEditTemplate(template.templateId, template.widthMm, template.heightMm) },
+                                onEdit = { onEditTemplate(template.templateId, template.widthMm, template.heightMm) }
                             )
                         }
                     }

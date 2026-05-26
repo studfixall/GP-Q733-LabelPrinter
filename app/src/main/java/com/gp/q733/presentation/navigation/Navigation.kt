@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.navigation
+﻿package com.gp.q733.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -130,11 +130,7 @@ fun Q733NavHost(
                         viewModel.resetLabel(width, height)
                         lastLabelSize = currentSize
                     }
-                    templateId.startsWith("saved_") && templateId != lastLoadedTemplate -> {
-                        val labelId = templateId.removePrefix("saved_")
-                        viewModel.loadLabelFromStore(labelId)
-                    }
-                    templateId != "new" && !templateId.startsWith("saved_") && templateId != lastLoadedTemplate -> {
+                    templateId != "new" && templateId != lastLoadedTemplate -> {
                         viewModel.loadTemplateSync(templateId)
                     }
                 }
@@ -183,8 +179,8 @@ fun Q733NavHost(
                 onOpenTemplate = { assetPath, widthMm, heightMm ->
                     navController.navigate(Screen.Editor.createRoute(assetPath, widthMm, heightMm))
                 },
-                onEditTemplate = { id, widthMm, heightMm ->
-                    navController.navigate(Screen.Editor.createRoute("saved_$id", widthMm, heightMm))
+                onEditTemplate = { templateId, widthMm, heightMm ->
+                    navController.navigate(Screen.Editor.createRoute(templateId, widthMm, heightMm))
                 },
                 onNewTemplate = { w, h ->
                     navController.navigate(Screen.Editor.createRoute("new", w, h))
