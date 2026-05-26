@@ -93,7 +93,7 @@ private fun loadTemplates() {
             // 从 Room 加载所有模板（内置 + 自定义），统一排序
             for (entity in roomTemplates) {
                 // 非快捷打印模式下，跳过未标记的模板
-                if (!_uiState.value.showAllTemplates && !entity.isQuickPrint) continue
+                if (!entity.isQuickPrint) continue  // 只显示星标模板
                 val elements = TemplateJsonParser.fromJson(entity.elementsJson)
                 val prefix = if (entity.isBuiltIn) "" else "★ "
                 templates.add(ScanTemplateOption(
@@ -108,9 +108,8 @@ private fun loadTemplates() {
                 ))
             }
             // 追加 assets 模板（快捷打印模式下不显示，太多了）
-            if (_uiState.value.showAllTemplates) {
-                templates.addAll(assetTemplates)
-            }
+            // 内置模板需要先星标(保存到Room)才显示在扫码打印页
+            // asset templates are only shown if user has starred them (saved to Room with isQuickPrint=true)
             // 保留用户当前选择，如果当前选择不在列表中则重新选
             val currentSelectedId = _uiState.value.selectedTemplateId
             val selectedId = if (currentSelectedId.isNotBlank() && templates.any { it.id == currentSelectedId }) {
