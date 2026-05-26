@@ -558,7 +558,7 @@ class EditorViewModel @Inject constructor(
                         2 -> "ALIGN_RIGHT"
                         else -> "ALIGN_NORMAL"
                     }
-                    sb.append(""")    <item viewtype="0" text="${element.text.replace("\"", "&quot;")}" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", if (element.widthMm > 0) element.widthMm else label.widthMm - element.x)}" height="${String.format("%.1f", if (element.heightMm > 0) element.heightMm else 5)}" textsize="${element.fontSize.toInt()}" font="${element.fontId}" align="$align" variable="0" />
+                    sb.append(""")    <item viewtype="0" text="${element.text.replace("\"", "&quot;")}" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", if (element.widthMm > 0) element.widthMm else label.widthMm - element.x)}" height="${String.format("%.1f", if (element.heightMm > 0) element.heightMm else 5)}" textsize="${element.fontSize.toInt()}" font="${element.fontId}" align="$align" variable="${element.variable}" textName="${element.textName}" />
 """)
                 }
                 is LabelElement.Barcode -> {
@@ -567,7 +567,7 @@ class EditorViewModel @Inject constructor(
                         BarcodeFormat.CODE39 -> "CODE_39"
                         BarcodeFormat.EAN13 -> "EAN13"
                     }
-                    sb.append(""")    <item viewtype="1" text="${element.content.replace("\"", "&quot;")}" format="$formatName" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", element.widthMm)}" height="${String.format("%.1f", element.height)}" MinBarWidth="${element.minBarWidth}" textposition="${element.textPosition}" />
+                    sb.append(""")    <item viewtype="1" text="${element.content.replace("\"", "&quot;")}" format="$formatName" left="${String.format("%.1f", element.x)}" top="${String.format("%.1f", element.y)}" width="${String.format("%.1f", element.widthMm)}" height="${String.format("%.1f", element.height)}" MinBarWidth="${element.minBarWidth}" textposition="${element.textPosition}" variable="${element.variable}" textName="${element.textName}" />
 """)
                 }
                 is LabelElement.QRCode -> {

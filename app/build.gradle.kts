@@ -10,6 +10,7 @@ plugins {
 android {
     namespace = "com.gp.q733"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.gp.q733"

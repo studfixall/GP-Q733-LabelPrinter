@@ -22,6 +22,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -77,68 +78,82 @@ class ScanProductViewModel @Inject constructor(
         loadTemplates()
     }
 
-    /**
-     * 加载模板列表：内置模板 + 自定义模板（Room）+ Barsoft XML
-     */
-    private fun loadTemplates() {
-        viewModelScope.launch {
+/**
+ * 加载模板列表：内置模板 + 自定义模板（Room）+ Barsoft XML
+ * 使用 Flow 持续观察 Room 变化，保存/修改模板后自动刷新
+ */
+private fun loadTemplates() {
+    // 先加载一次 assets 模板（不会变化，无需重复加载）
+    val assetTemplates = loadAssetTemplates()
+    // 用 Flow 观察 Room 数据变化
+    viewModelScope.launch {
+        customTemplateDao.getAllSorted().collect { roomTemplates ->
             val templates = mutableListOf<ScanTemplateOption>()
-
             // 从 Room 加载所有模板（内置 + 自定义），统一排序
-            try {
-                val roomTemplates = customTemplateDao.getAllSorted().first()
-                for (entity in roomTemplates) {
-                    val elements = TemplateJsonParser.fromJson(entity.elementsJson)
-                    val prefix = if (entity.isBuiltIn) "" else "★ "
-                    templates.add(ScanTemplateOption(
+            for (entity in roomTemplates) {
+                val elements = TemplateJsonParser.fromJson(entity.elementsJson)
+                val prefix = if (entity.isBuiltIn) "" else "★ "
+                templates.add(ScanTemplateOption(
+                    id = entity.templateId,
+                    name = "$prefix${entity.name} (${entity.widthMm.toInt()}×${entity.heightMm.toInt()})",
+                    label = Label(
                         id = entity.templateId,
-                        name = "$prefix${entity.name} (${entity.widthMm.toInt()}×${entity.heightMm.toInt()})",
-                        label = Label(
-                            id = entity.templateId,
-                            elements = elements,
-                            widthMm = entity.widthMm,
-                            heightMm = entity.heightMm
-                        )
-                    ))
-                }
-            } catch (_: Exception) {}
-
-            // 从assets加载Barsoft XML模板
-            try {
-                val topDirs = context.assets.list("templates") ?: emptyArray()
-                for (topDir in topDirs) {
-                    val categories = context.assets.list("templates/$topDir") ?: emptyArray()
-                    for (category in categories) {
-                        val files = context.assets.list("templates/$topDir/$category") ?: emptyArray()
-                        for (file in files) {
-                            if (file.endsWith(".xml")) {
-                                try {
-                                    val inputStream = context.assets.open("templates/$topDir/$category/$file")
-                                    val label = BarsoftTemplateParser.parse(inputStream)
-                                    inputStream.close()
-                                    val sizeStr = "${label.widthMm.toInt()}x${label.heightMm.toInt()}"
-                                    templates.add(ScanTemplateOption(
-                                        id = "barsoft_${category}_$file",
-                                        name = "$sizeStr $file",
-                                        label = label
-                                    ))
-                                } catch (_: Exception) {}
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {}
-
-            // 默认选中第一个自定义模板（Room中 isBuiltIn=false），没有则选内置
-            val selectedId = templates.find { !it.id.startsWith("built_in_") && !it.id.startsWith("barsoft_") }?.id
-                ?: templates.firstOrNull()?.id
-                ?: ""
+                        elements = elements,
+                        widthMm = entity.widthMm,
+                        heightMm = entity.heightMm
+                    )
+                ))
+            }
+            // 追加 assets 模板
+            templates.addAll(assetTemplates)
+            // 保留用户当前选择，如果当前选择不在列表中则重新选
+            val currentSelectedId = _uiState.value.selectedTemplateId
+            val selectedId = if (currentSelectedId.isNotBlank() && templates.any { it.id == currentSelectedId }) {
+                currentSelectedId
+            } else {
+                templates.find { !it.id.startsWith("built_in_") && !it.id.startsWith("barsoft_") }?.id
+                    ?: templates.firstOrNull()?.id
+                    ?: ""
+            }
             _uiState.value = _uiState.value.copy(
                 templates = templates,
                 selectedTemplateId = selectedId
             )
         }
     }
+}
+
+/**
+ * 从 assets 加载 Barsoft XML 模板（固定不变）
+ */
+private fun loadAssetTemplates(): List<ScanTemplateOption> {
+    val templates = mutableListOf<ScanTemplateOption>()
+    try {
+        val topDirs = context.assets.list("templates") ?: emptyArray()
+        for (topDir in topDirs) {
+            val categories = context.assets.list("templates/$topDir") ?: emptyArray()
+            for (category in categories) {
+                val files = context.assets.list("templates/$topDir/$category") ?: emptyArray()
+                for (file in files) {
+                    if (file.endsWith(".xml")) {
+                        try {
+                            val inputStream = context.assets.open("templates/$topDir/$category/$file")
+                            val label = BarsoftTemplateParser.parse(inputStream)
+                            inputStream.close()
+                            val sizeStr = "${label.widthMm.toInt()}x${label.heightMm.toInt()}"
+                            templates.add(ScanTemplateOption(
+                                id = "barsoft_${category}_$file",
+                                name = "$sizeStr $file",
+                                label = label
+                            ))
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
+        }
+    } catch (_: Exception) {}
+    return templates
+}
 
     /**
      * 扫码后查询商品库
