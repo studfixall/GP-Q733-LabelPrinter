@@ -184,6 +184,9 @@ fun Q733NavHost(
                 },
                 onNewTemplate = { w, h ->
                     navController.navigate(Screen.Editor.createRoute("new", w, h))
+                },
+                onToggleQuickPrint = { templateId, quickPrint ->
+                    viewModel.toggleQuickPrint(templateId, quickPrint)
                 }
             )
         }

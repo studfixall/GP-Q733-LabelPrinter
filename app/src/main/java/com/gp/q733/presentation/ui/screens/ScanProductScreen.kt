@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.ui.screens
+﻿package com.gp.q733.presentation.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -179,7 +179,19 @@ fun ScanProductScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // ===== 模板选择 =====
-                Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
+                    TextButton(onClick = { viewModel.toggleShowAllTemplates() }) {
+                        Text(
+                            if (uiState.showAllTemplates) "仅快捷" else "全部",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyRow(

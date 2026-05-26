@@ -10,6 +10,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +32,8 @@ fun TemplateBrowserScreen(
     onBack: () -> Unit,
     onOpenTemplate: (assetPath: String, widthMm: Float, heightMm: Float) -> Unit,
     onEditTemplate: (templateId: String, widthMm: Float, heightMm: Float) -> Unit,
-    onNewTemplate: (Float, Float) -> Unit
+    onNewTemplate: (Float, Float) -> Unit,
+    onToggleQuickPrint: (templateId: String, quickPrint: Boolean) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSizeDialog by remember { mutableStateOf(false) }
@@ -126,7 +129,8 @@ fun TemplateBrowserScreen(
                             CustomTemplateCard(
                                 template = template,
                                 onOpen = { onEditTemplate(template.templateId, template.widthMm, template.heightMm) },
-                                onEdit = { onEditTemplate(template.templateId, template.widthMm, template.heightMm) }
+                                onEdit = { onEditTemplate(template.templateId, template.widthMm, template.heightMm) },
+                onToggleQuickPrint = { onToggleQuickPrint(template.templateId, template.isQuickPrint) }
                             )
                         }
                     }
@@ -286,7 +290,8 @@ private fun CategoryFilter(
 private fun CustomTemplateCard(
     template: CustomTemplateInfo,
     onOpen: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onToggleQuickPrint: () -> Unit
 ) {
     Card(
         modifier = Modifier

@@ -1,4 +1,4 @@
-package com.gp.q733.data.local.db
+﻿package com.gp.q733.data.local.db
 
 import android.content.Context
 import androidx.room.Database
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 @Database(
     entities = [ProductEntity::class, CustomTemplateEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class ProductDatabase : RoomDatabase() {
@@ -68,6 +68,7 @@ private suspend fun seedBuiltInTemplates(dao: CustomTemplateDao) {
                 LabelElement.Barcode(x = 2f, y = 18f, content = "", format = BarcodeFormat.CODE128, height = 8f, textName = "barcode", variable = 1)
             )),
             isBuiltIn = true,
+            isQuickPrint = true,
             sortOrder = 0
         ),
         CustomTemplateEntity(
@@ -82,6 +83,7 @@ private suspend fun seedBuiltInTemplates(dao: CustomTemplateDao) {
                 LabelElement.Text(x = 2f, y = 20f, text = "￥", fontSize = 10f, isBold = true, textName = "price", variable = 1)
             )),
             isBuiltIn = true,
+            isQuickPrint = true,
             sortOrder = 1
         ),
         CustomTemplateEntity(
@@ -95,6 +97,7 @@ private suspend fun seedBuiltInTemplates(dao: CustomTemplateDao) {
                 LabelElement.Barcode(x = 2f, y = 16f, content = "", format = BarcodeFormat.EAN13, height = 3f, textName = "barcode", variable = 1)
             )),
             isBuiltIn = true,
+            isQuickPrint = true,
             sortOrder = 2
         )
     )

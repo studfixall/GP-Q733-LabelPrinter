@@ -1,7 +1,8 @@
-package com.gp.q733.ui.template
+﻿package com.gp.q733.ui.template
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import com.gp.q733.domain.model.Label
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.InputStream
@@ -23,6 +25,7 @@ import java.io.InputStream
 data class CustomTemplateInfo(
     val id: Long,
     val templateId: String,  // "custom_xxx" or "built_in_xxx"
+    val isQuickPrint: Boolean,  // 是否显示在扫码打印快捷选择中
     val name: String,
     val displayName: String,  // 格式："40×30mm 自定义"
     val widthMm: Float,
@@ -130,6 +133,7 @@ class TemplateBrowserViewModel @Inject constructor(
                                 heightMm = entity.heightMm,
                                 elements = elements
                             ),
+                            isQuickPrint = entity.isQuickPrint,
                             isBuiltIn = entity.isBuiltIn,
                             createdAt = entity.createdAt
                         )
@@ -153,6 +157,13 @@ class TemplateBrowserViewModel @Inject constructor(
                 isLoading = false,
                 error = "加载模板失败: ${e.message}"
             )
+        }
+    }
+
+    fun toggleQuickPrint(templateId: String, currentQuickPrint: Boolean) {
+        viewModelScope.launch {
+            customTemplateDao.setQuickPrint(templateId, !currentQuickPrint)
+            loadTemplates()
         }
     }
 

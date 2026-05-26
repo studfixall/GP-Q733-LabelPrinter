@@ -1,4 +1,4 @@
-package com.gp.q733.data.local.db
+﻿package com.gp.q733.data.local.db
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -12,6 +12,12 @@ interface CustomTemplateDao {
 
     @Query("SELECT * FROM custom_templates ORDER BY isBuiltIn DESC, sortOrder ASC, createdAt ASC")
     fun getAllSorted(): Flow<List<CustomTemplateEntity>>
+
+    @Query("SELECT * FROM custom_templates WHERE isQuickPrint = 1 ORDER BY isBuiltIn DESC, sortOrder ASC, createdAt ASC")
+    fun getQuickPrintSorted(): Flow<List<CustomTemplateEntity>>
+
+    @Query("UPDATE custom_templates SET isQuickPrint = :quickPrint WHERE templateId = :templateId")
+    suspend fun setQuickPrint(templateId: String, quickPrint: Boolean)
 
     @Query("SELECT * FROM custom_templates WHERE templateId = :templateId")
     suspend fun getByTemplateId(templateId: String): CustomTemplateEntity?
@@ -30,18 +36,17 @@ interface CustomTemplateDao {
      * 比 insert() 更安全：确保同 templateId 只保留一条记录
      */
     @Query("""
-        INSERT INTO custom_templates
-          (templateId, name, widthMm, heightMm, elementsJson, isBuiltIn, sortOrder, createdAt)
-        VALUES
-          (:templateId, :name, :widthMm, :heightMm, :elementsJson, :isBuiltIn, :sortOrder, :createdAt)
+        INSERT INTO custom_templates (templateId, name, widthMm, heightMm, elementsJson, isBuiltIn, sortOrder, createdAt, isQuickPrint)
+        VALUES (:templateId, :name, :widthMm, :heightMm, :elementsJson, :isBuiltIn, :sortOrder, :createdAt, :isQuickPrint)
         ON CONFLICT(templateId) DO UPDATE SET
-          name = :name,
-          widthMm = :widthMm,
-          heightMm = :heightMm,
-          elementsJson = :elementsJson,
-          isBuiltIn = :isBuiltIn,
-          sortOrder = :sortOrder
-    """)
+            name = :name,
+            widthMm = :widthMm,
+            heightMm = :heightMm,
+            elementsJson = :elementsJson,
+            isBuiltIn = :isBuiltIn,
+            sortOrder = :sortOrder,
+            isQuickPrint = :isQuickPrint
+        """)
     suspend fun upsert(
         templateId: String,
         name: String,
@@ -50,7 +55,8 @@ interface CustomTemplateDao {
         elementsJson: String,
         isBuiltIn: Boolean,
         sortOrder: Int,
-        createdAt: Long
+        createdAt: Long,
+        isQuickPrint: Boolean = false
     ): Long
 
     @Delete

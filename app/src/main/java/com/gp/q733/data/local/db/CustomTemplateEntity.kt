@@ -1,4 +1,4 @@
-package com.gp.q733.data.local.db
+﻿package com.gp.q733.data.local.db
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -24,5 +24,6 @@ data class CustomTemplateEntity(
     val elementsJson: String,      // 元素列表JSON序列化
     val isBuiltIn: Boolean = false, // 是否内置模板
     val sortOrder: Int = 0,        // 排序顺序（内置优先，再按sortOrder）
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val isQuickPrint: Boolean = false  // 是否显示在扫码打印快捷选择中
 )

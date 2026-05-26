@@ -53,6 +53,7 @@ data class ScanProductUiState(
     // 模板选择
     val templates: List<ScanTemplateOption> = emptyList(),
     val selectedTemplateId: String = "",
+    val showAllTemplates: Boolean = false,  // true=显示全部, false=只显示快捷打印模板
 
     // 打印状态
     val isPrinting: Boolean = false,
@@ -91,6 +92,8 @@ private fun loadTemplates() {
             val templates = mutableListOf<ScanTemplateOption>()
             // 从 Room 加载所有模板（内置 + 自定义），统一排序
             for (entity in roomTemplates) {
+                // 非快捷打印模式下，跳过未标记的模板
+                if (!_uiState.value.showAllTemplates && !entity.isQuickPrint) continue
                 val elements = TemplateJsonParser.fromJson(entity.elementsJson)
                 val prefix = if (entity.isBuiltIn) "" else "★ "
                 templates.add(ScanTemplateOption(
@@ -104,8 +107,10 @@ private fun loadTemplates() {
                     )
                 ))
             }
-            // 追加 assets 模板
-            templates.addAll(assetTemplates)
+            // 追加 assets 模板（快捷打印模式下不显示，太多了）
+            if (_uiState.value.showAllTemplates) {
+                templates.addAll(assetTemplates)
+            }
             // 保留用户当前选择，如果当前选择不在列表中则重新选
             val currentSelectedId = _uiState.value.selectedTemplateId
             val selectedId = if (currentSelectedId.isNotBlank() && templates.any { it.id == currentSelectedId }) {
@@ -275,6 +280,14 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
     /**
      * 选择模板
      */
+    fun toggleShowAllTemplates() {
+        val newShowAll = !_uiState.value.showAllTemplates
+        _uiState.value = _uiState.value.copy(showAllTemplates = newShowAll)
+        // Re-trigger load by re-collecting (Flow is already active, just need to re-filter)
+        // Actually we need to re-process, so let's reload
+        loadTemplates()
+    }
+
     fun selectTemplate(templateId: String) {
         _uiState.value = _uiState.value.copy(selectedTemplateId = templateId)
     }
