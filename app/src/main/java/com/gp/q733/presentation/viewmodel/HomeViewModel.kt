@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.viewmodel
+﻿package com.gp.q733.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,7 +27,8 @@ data class LabelTemplate(
     val widthMm: Float,
     val heightMm: Float,
     val label: Label,
-    val isBuiltIn: Boolean
+    val isBuiltIn: Boolean,
+    val isQuickPrint: Boolean = false
 )
 
 data class HomeUiState(
@@ -35,6 +36,7 @@ data class HomeUiState(
     val templates: List<LabelTemplate> = emptyList(),
     val printerStatus: PrinterStatus = PrinterStatus.Disconnected,
     val showConnectionDialog: Boolean = false,
+    val showAllTemplates: Boolean = false,
     val isLoading: Boolean = false,
     val newLabelWidth: Float = 50f,
     val newLabelHeight: Float = 30f
@@ -109,6 +111,10 @@ class HomeViewModel @Inject constructor(
 
     fun hideConnectionDialog() {
         _uiState.value = _uiState.value.copy(showConnectionDialog = false)
+    }
+
+    fun toggleShowAllTemplates() {
+        _uiState.value = _uiState.value.copy(showAllTemplates = !_uiState.value.showAllTemplates)
     }
 
     fun deleteLabel(label: Label) {

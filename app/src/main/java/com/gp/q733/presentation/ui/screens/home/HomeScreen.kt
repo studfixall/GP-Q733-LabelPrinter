@@ -1,4 +1,4 @@
-package com.gp.q733.presentation.ui.screens.home
+﻿package com.gp.q733.presentation.ui.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -144,37 +144,41 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Saved Labels Section
-            if (uiState.recentLabels.isNotEmpty()) {
-                Text(
-                    text = "已保存标签",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    uiState.recentLabels.take(5).forEach { label ->
-                        SavedLabelCard(
-                            label = label,
-                            onClick = { onEditLabel(label) },
-                            onDelete = { viewModel.deleteLabel(label) }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+
 
             // Templates
-            Text(
-                text = "标签模板",
-                style = MaterialTheme.typography.titleMedium
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "标签模板",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                TextButton(onClick = { viewModel.toggleShowAllTemplates() }) {
+                    Text(
+                        if (uiState.showAllTemplates) "仅快捷" else "全部",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.templates.forEach { template ->
+                val displayTemplates = if (uiState.showAllTemplates) uiState.templates else uiState.templates.filter { it.isQuickPrint }
+                if (displayTemplates.isEmpty()) {
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = if (uiState.showAllTemplates) "暂无模板" else "暂无快捷模板，请在模板库中星标",
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                displayTemplates.forEach { template ->
                     TemplateCard(
                         name = template.name,
                         description = template.description,
