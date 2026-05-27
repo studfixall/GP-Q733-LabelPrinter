@@ -197,11 +197,11 @@ fun ScanProductScreen(
                 ) {
                     items(uiState.templates) { template ->
                         val isSelected = template.id == uiState.selectedTemplateId
-                        FilterChip(
-                            selected = isSelected,
-                            onClick = { viewModel.selectTemplate(template.id) },
-                            label = { Text(template.name, style = MaterialTheme.typography.labelMedium) }
-                        )
+            TemplateCardWithPreview(
+                template = template,
+                isSelected = isSelected,
+                onClick = { viewModel.selectTemplate(template.id) }
+            )
                     }
                 }
 
