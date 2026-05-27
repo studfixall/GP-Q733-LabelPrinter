@@ -53,7 +53,6 @@ data class ScanProductUiState(
     // 模板选择
     val templates: List<ScanTemplateOption> = emptyList(),
     val selectedTemplateId: String = "",
-    val showAllTemplates: Boolean = true,  // true=显示全部, false=只显示快捷打印模板
 
     // 打印状态
     val isPrinting: Boolean = false,
@@ -274,17 +273,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
 
     fun dismissProductDialog() {
         _uiState.value = _uiState.value.copy(showProductDialog = false)
-    }
-
-    /**
-     * 选择模板
-     */
-    fun toggleShowAllTemplates() {
-        val newShowAll = !_uiState.value.showAllTemplates
-        _uiState.value = _uiState.value.copy(showAllTemplates = newShowAll)
-        // Re-trigger load by re-collecting (Flow is already active, just need to re-filter)
-        // Actually we need to re-process, so let's reload
-        loadTemplates()
     }
 
     fun selectTemplate(templateId: String) {
