@@ -340,9 +340,10 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    textSetting.setxMultiplication(1)
+                    val fontMultiplier = (element.fontSize / 3.0f).coerceIn(1f, 8f).toInt()
+                    textSetting.setxMultiplication(fontMultiplier)
+                    textSetting.setyMultiplication(fontMultiplier)
 
-                    textSetting.setyMultiplication(1)
 
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
 
@@ -355,9 +356,9 @@ class GpPrinterService @Inject constructor(
                     val barcodeSetting = BarcodeSetting()
 
                     barcodeSetting.printRotation = PrintRotation.Rotate0
-
-                    barcodeSetting.narrowInDot = 2
-
+val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
+barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
+barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
                     barcodeSetting.wideInDot = 4
 
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
@@ -515,10 +516,9 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    textSetting.setxMultiplication(1)
-
-                    textSetting.setyMultiplication(1)
-
+                    val fontMultiplier = (element.fontSize / 3.0f).coerceIn(1f, 8f).toInt()
+                    textSetting.setxMultiplication(fontMultiplier)
+                    textSetting.setyMultiplication(fontMultiplier)
                     cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
 
                 }
@@ -527,9 +527,9 @@ class GpPrinterService @Inject constructor(
 
                     val barcodeSetting = BarcodeSetting()
 
-                    barcodeSetting.narrowInDot = 2
-
-                    barcodeSetting.wideInDot = 4
+                    val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
+                    barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
+                    barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
 
                     barcodeSetting.heightInDot = mmToDots(element.height)
 
