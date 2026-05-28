@@ -340,7 +340,7 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    val fontMultiplier = (element.fontSize / 3.0f).coerceIn(1f, 8f).toInt()
+                    val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
 
@@ -515,7 +515,7 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    val fontMultiplier = (element.fontSize / 3.0f).coerceIn(1f, 8f).toInt()
+                    val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
                     cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
