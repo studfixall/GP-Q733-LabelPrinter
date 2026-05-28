@@ -24,6 +24,8 @@ data class SettingsUiState(
     val paperType: PaperType = PaperType.LABEL,
     val gapMm: Float = 2f,
     val blackMarkOffset: Float = 0f,
+    val printOffsetX: Float = 0f,
+    val printOffsetY: Float = 0f,
     val autoReconnect: Boolean = true,
     val reconnectInterval: Int = 5,
     val darkMode: Boolean = false,
@@ -52,6 +54,8 @@ class SettingsViewModel @Inject constructor(
                     paperType = settings.paperType,
                     gapMm = settings.gapMm,
                     blackMarkOffset = settings.blackMarkOffset,
+                printOffsetX = settings.printOffsetX,
+                printOffsetY = settings.printOffsetY,
                     autoReconnect = settings.autoReconnect,
                     reconnectInterval = settings.reconnectInterval
                 ) }
@@ -82,6 +86,14 @@ class SettingsViewModel @Inject constructor(
 
     fun updateReconnectInterval(seconds: Int) {
         if (seconds in 1..60) { _uiState.update { it.copy(reconnectInterval = seconds) } }
+    }
+
+    fun updatePrintOffsetX(offset: Float) {
+        viewModelScope.launch { settingsDataStore.savePrintOffsetX(offset) }
+    }
+
+    fun updatePrintOffsetY(offset: Float) {
+        viewModelScope.launch { settingsDataStore.savePrintOffsetY(offset) }
     }
 
     fun updateDarkMode(enabled: Boolean) { _uiState.update { it.copy(darkMode = enabled) } }

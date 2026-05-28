@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gp.q733.domain.print.PaperType
 import com.gp.q733.domain.print.PrintProtocol
@@ -29,6 +31,8 @@ fun SettingsScreen(
     var labelHeightText by remember { mutableStateOf("30") }
     var gapMmText by remember { mutableStateOf("2") }
     var blackMarkOffsetText by remember { mutableStateOf("0") }
+    var printOffsetXText by remember { mutableStateOf("0") }
+    var printOffsetYText by remember { mutableStateOf("0") }
     var showProtocolMenu by remember { mutableStateOf(false) }
     var showPaperTypeMenu by remember { mutableStateOf(false) }
     var showDensityMenu by remember { mutableStateOf(false) }
@@ -39,6 +43,8 @@ fun SettingsScreen(
     LaunchedEffect(uiState.labelHeight) { labelHeightText = uiState.labelHeight.toInt().toString() }
     LaunchedEffect(uiState.gapMm) { gapMmText = uiState.gapMm.toInt().toString() }
     LaunchedEffect(uiState.blackMarkOffset) { blackMarkOffsetText = uiState.blackMarkOffset.toInt().toString() }
+        LaunchedEffect(uiState.printOffsetX) { printOffsetXText = uiState.printOffsetX.toInt().toString() }
+        LaunchedEffect(uiState.printOffsetY) { printOffsetYText = uiState.printOffsetY.toInt().toString() }
 
     // Show save success snackbar
     val snackbarHostState = remember { SnackbarHostState() }
@@ -227,6 +233,28 @@ fun SettingsScreen(
                         )
                     }
                 }
+
+                // Print offset
+                OutlinedTextField(
+                    value = printOffsetXText,
+                    onValueChange = { text ->
+                        printOffsetXText = text
+                        text.toFloatOrNull()?.let { viewModel.updatePrintOffsetX(it) }
+                    },
+                    label = { Text("水平偏移 (mm)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = printOffsetYText,
+                    onValueChange = { text ->
+                        printOffsetYText = text
+                        text.toFloatOrNull()?.let { viewModel.updatePrintOffsetY(it) }
+                    },
+                    label = { Text("垂直偏移 (mm)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

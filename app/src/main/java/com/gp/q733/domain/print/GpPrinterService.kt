@@ -97,6 +97,37 @@ class GpPrinterService @Inject constructor(
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
 
     }
+    /**
+     * 截断长文本：先尝试缩小字号适配标签宽度，仍超则截断加…
+     * @param text 原始文本
+     * @param fontSizeMm 字号(mm)
+     * @param availableWidthMm 可用宽度(mm) = 标签宽度 - 元素x坐标
+     * @return Triple(截断后文本, 调整后字号, 是否被截断)
+     */
+    private fun truncateTextToFit(
+        text: String,
+        fontSizeMm: Float,
+        availableWidthMm: Float
+    ): Triple<String, Float, Boolean> {
+        if (text.isEmpty() || availableWidthMm <= 0f) return Triple(text, fontSizeMm, false)
+        // 估算：24点阵字体每字约3mm宽 × 缩放倍数
+        // 中文等宽约fontSize，英文半宽约fontSize/2，混合取0.7
+        val charWidthMm = fontSizeMm * 0.7f
+        val maxChars = (availableWidthMm / charWidthMm).toInt().coerceAtLeast(1)
+        if (text.length <= maxChars) return Triple(text, fontSizeMm, false)
+        // 方案D: 先尝试缩小字号到最小(6mm)，再截断
+        val minFontSize = 6f
+        val minCharWidth = minFontSize * 0.7f
+        val minMaxChars = (availableWidthMm / minCharWidth).toInt().coerceAtLeast(1)
+        if (text.length <= minMaxChars) {
+            // 缩小字号可适配
+            val fitFontSize = (availableWidthMm / (text.length * 0.7f)).coerceIn(minFontSize, fontSizeMm)
+            return Triple(text, fitFontSize, true)
+        }
+        // 最小字号也放不下，截断加…
+        val truncated = text.take(minMaxChars - 1) + "…"
+        return Triple(truncated, minFontSize, true)
+    }
 
 
 
@@ -278,7 +309,9 @@ class GpPrinterService @Inject constructor(
 
         val height = settings.labelHeight.toInt()
 
-        val offset = 0
+        val offset = 0  // horizontal print offset is applied per-element below
+        val offsetXmm = settings.printOffsetX
+        val offsetYmm = settings.printOffsetY
 
     // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
 
@@ -336,18 +369,22 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
 
-                    textSetting.txtPrintPosition = Position(mmToDots(element.x), mmToDots(element.y))
+                    textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
+                    // D方案: 长文字先缩小字号适配，仍超则截断
+                    val availableWidth = label.widthMm - element.x - settings.printOffsetX
+                    val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
+                    val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
+                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
 
 
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
 
-                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
+                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
 
                 }
 
@@ -364,7 +401,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.heightInDot = mmToDots(element.height)
 
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     val barcodeType = when (element.format) {
 
@@ -398,7 +435,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.qrcodeDotSize = qrSize
 
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     try {
 
@@ -414,9 +451,9 @@ class GpPrinterService @Inject constructor(
 
                 is LabelElement.Line -> {
 
-                    val x1 = mmToDots(element.x)
+                    val x1 = mmToDots(element.x + offsetXmm)
 
-                    val y1 = mmToDots(element.y)
+                    val y1 = mmToDots(element.y + offsetYmm)
 
                     val x2 = mmToDots(element.x + element.width)
 
@@ -453,6 +490,8 @@ class GpPrinterService @Inject constructor(
         val cmd = factory.create()
 
         val width = settings.labelWidth.toInt()
+        val offsetXmm = settings.printOffsetX
+        val offsetYmm = settings.printOffsetY
 
         val height = settings.labelHeight.toInt()
 
@@ -511,14 +550,17 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
 
-                    textSetting.txtPrintPosition = Position(mmToDots(element.x), mmToDots(element.y))
+                    textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
-                    val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
+                    val availableWidth = label.widthMm - element.x - settings.printOffsetX
+                    val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
+                    val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
+                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
-                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
+                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
 
                 }
 
@@ -536,7 +578,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.printRotation = PrintRotation.Rotate0
 
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     val barcodeType = when (element.format) {
 
@@ -570,7 +612,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.printRotation = PrintRotation.Rotate0
 
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     try {
 
@@ -586,9 +628,9 @@ class GpPrinterService @Inject constructor(
 
                 is LabelElement.Line -> {
 
-                    val x1 = mmToDots(element.x)
+                    val x1 = mmToDots(element.x + offsetXmm)
 
-                    val y1 = mmToDots(element.y)
+                    val y1 = mmToDots(element.y + offsetYmm)
 
                     val x2 = mmToDots(element.x + element.width)
 

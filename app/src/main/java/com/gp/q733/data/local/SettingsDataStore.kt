@@ -34,6 +34,8 @@ class SettingsDataStore @Inject constructor(
         val GAP_MM = floatPreferencesKey("gap_mm")
         val PAPER_TYPE = stringPreferencesKey("paper_type")
         val BLACK_MARK_OFFSET = floatPreferencesKey("black_mark_offset")
+        val PRINT_OFFSET_X = floatPreferencesKey("print_offset_x")
+        val PRINT_OFFSET_Y = floatPreferencesKey("print_offset_y")
         val AUTO_RECONNECT = stringPreferencesKey("auto_reconnect")
         val RECONNECT_INTERVAL = intPreferencesKey("reconnect_interval")
     }
@@ -63,6 +65,8 @@ class SettingsDataStore @Inject constructor(
                 }
             } ?: PaperType.LABEL,
             blackMarkOffset = prefs[BLACK_MARK_OFFSET] ?: 0f,
+            printOffsetX = prefs[PRINT_OFFSET_X] ?: 0f,
+            printOffsetY = prefs[PRINT_OFFSET_Y] ?: 0f,
             autoReconnect = prefs[AUTO_RECONNECT]?.toBoolean() ?: true,
             reconnectInterval = prefs[RECONNECT_INTERVAL] ?: 5
         )
@@ -114,6 +118,14 @@ class SettingsDataStore @Inject constructor(
         dataStore.edit { it[BLACK_MARK_OFFSET] = offset }
     }
 
+    suspend fun savePrintOffsetX(offset: Float) {
+        dataStore.edit { it[PRINT_OFFSET_X] = offset }
+    }
+
+    suspend fun savePrintOffsetY(offset: Float) {
+        dataStore.edit { it[PRINT_OFFSET_Y] = offset }
+    }
+
     suspend fun saveAutoReconnect(enabled: Boolean) {
         dataStore.edit { it[AUTO_RECONNECT] = enabled.toString() }
     }
@@ -141,6 +153,8 @@ class SettingsDataStore @Inject constructor(
                 PaperType.RECEIPT -> "RECEIPT"
             }
             prefs[BLACK_MARK_OFFSET] = settings.blackMarkOffset
+            prefs[PRINT_OFFSET_X] = settings.printOffsetX
+            prefs[PRINT_OFFSET_Y] = settings.printOffsetY
             prefs[AUTO_RECONNECT] = settings.autoReconnect.toString()
             prefs[RECONNECT_INTERVAL] = settings.reconnectInterval
         }
@@ -157,6 +171,8 @@ data class AppSettings(
     val gapMm: Float = 2f,
     val paperType: PaperType = PaperType.LABEL,
     val blackMarkOffset: Float = 0f,
+    val printOffsetX: Float = 0f,
+    val printOffsetY: Float = 0f,
     val autoReconnect: Boolean = true,
     val reconnectInterval: Int = 5
 )
