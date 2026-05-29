@@ -367,7 +367,8 @@ class GpPrinterService @Inject constructor(
 
                     val textSetting = TextSetting()
 
-                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+
+
 
                     textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
@@ -377,9 +378,12 @@ class GpPrinterService @Inject constructor(
                     val availableWidth = label.widthMm - element.x - settings.printOffsetX
                     val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
                     val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
-                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
-                    textSetting.setxMultiplication(fontMultiplier)
-                    textSetting.setyMultiplication(fontMultiplier)
+                    textSetting.cpclFontTypeEnum = if (effectiveFontSize <= 8f) CpclFontTypeEnum.Font_Chinese_16x16_custom else CpclFontTypeEnum.Font_Chinese_24x24
+                    val fontMult = if (effectiveFontSize <= 8f) (effectiveFontSize / 2.0f).coerceIn(1f, 4f).toInt() else (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
+                    textSetting.setxMultiplication(fontMult)
+                    textSetting.setyMultiplication(fontMult)
+
+
 
 
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
@@ -557,7 +561,7 @@ class GpPrinterService @Inject constructor(
                     val availableWidth = label.widthMm - element.x - settings.printOffsetX
                     val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
                     val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
-                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
+                    val fontMultiplier = (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
                     cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
