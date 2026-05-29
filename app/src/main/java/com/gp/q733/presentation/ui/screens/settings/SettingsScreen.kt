@@ -1,6 +1,9 @@
-package com.gp.q733.presentation.ui.screens.settings
+﻿package com.gp.q733.presentation.ui.screens.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.gp.q733.domain.print.PaperType
 import com.gp.q733.domain.print.PrintProtocol
 import com.gp.q733.presentation.viewmodel.SettingsViewModel
+import com.gp.q733.presentation.viewmodel.StoreInfo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +41,7 @@ fun SettingsScreen(
     var showPaperTypeMenu by remember { mutableStateOf(false) }
     var showDensityMenu by remember { mutableStateOf(false) }
     var showSpeedMenu by remember { mutableStateOf(false) }
+var showStorePicker by remember { mutableStateOf(false) }
 
     // Sync initial values
     LaunchedEffect(uiState.labelWidth) { labelWidthText = uiState.labelWidth.toInt().toString() }
@@ -527,6 +532,138 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Store & RMIS Settings — Issue #13
+            Text(
+                text = "门店设置",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // RMIS Base URL
+                    OutlinedTextField(
+                        value = uiState.rmisBaseUrl,
+                        onValueChange = { viewModel.updateRmisBaseUrl(it) },
+                        label = { Text("RMIS 服务地址") },
+                        placeholder = { Text("例: http://192.168.1.100:8777/Enjoy") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // RMIS UserNo
+                    OutlinedTextField(
+                        value = uiState.rmisUserNo,
+                        onValueChange = { viewModel.updateRmisUserNo(it) },
+                        label = { Text("应用程序编码") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // RMIS Master Key
+                    OutlinedTextField(
+                        value = uiState.rmisMasterKey,
+                        onValueChange = { viewModel.updateRmisMasterKey(it) },
+                        label = { Text("主密钥") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    // Current Store Display + Change Button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "当前门店",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                text = if (uiState.storeId.isNotBlank())
+                                    "${uiState.storeName} (${uiState.storeId})"
+                                else "未选择",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (uiState.storeId.isNotBlank())
+                                    MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.error
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = { viewModel.showStorePicker() },
+                            enabled = uiState.rmisBaseUrl.isNotBlank() && uiState.rmisUserNo.isNotBlank()
+                        ) {
+                            Text("选择门店")
+                        }
+                    }
+                    // Store loading indicator
+                    if (uiState.isLoadingStores) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
+                    // Store load error
+                    if (uiState.storeLoadError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = uiState.storeLoadError!!,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
+            // Store Picker Dialog
+            if (uiState.showStorePicker) {
+                AlertDialog(
+                    onDismissRequest = { viewModel.dismissStorePicker() },
+                    title = { Text("选择门店") },
+                    text = {
+                        if (uiState.storeList.isEmpty() && !uiState.isLoadingStores) {
+                            Text("未找到门店，请检查RMIS配置")
+                        } else {
+                            LazyColumn {
+                                items(uiState.storeList) { store ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { viewModel.selectStore(store) }
+                                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (store.id == uiState.storeId) {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = "当前",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                        }
+                                        Column {
+                                            Text(store.name, style = MaterialTheme.typography.bodyLarge)
+                                            Text(
+                                                "编码: ${store.id}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { viewModel.dismissStorePicker() }) {
+                            Text("取消")
+                        }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

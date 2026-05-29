@@ -3,6 +3,8 @@
 import com.gp.q733.data.BluetoothRepositoryImpl
 import com.gp.q733.data.local.db.ProductDao
 import com.gp.q733.data.local.db.ProductDatabase
+import com.gp.q733.data.remote.RmisApiClient
+import com.gp.q733.data.remote.RmisProductRepository
 import com.gp.q733.data.repository.ProductRepositoryImpl
 import com.gp.q733.domain.repository.BluetoothRepository
 import com.gp.q733.domain.repository.ProductRepository
@@ -26,7 +28,7 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(
-        impl: ProductRepositoryImpl
+        impl: RmisProductRepository
     ): ProductRepository
 
     companion object {
@@ -40,6 +42,13 @@ abstract class DataModule {
         @Singleton
         fun provideCustomTemplateDao(database: ProductDatabase.Provider): com.gp.q733.data.local.db.CustomTemplateDao {
             return database.get().customTemplateDao()
+        }
+
+        @Provides
+        @Singleton
+        fun provideRmisApiClient(): RmisApiClient {
+            // 初始空配置，后续由 SettingsViewModel 更新
+            return RmisApiClient(baseUrl = "", userNo = "", masterKey = "")
         }
     }
 }

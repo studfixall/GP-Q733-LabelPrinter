@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gp.q733.data.local.SettingsDataStore
 import com.gp.q733.data.local.db.ProductDao
+import com.gp.q733.domain.repository.ProductRepository
 import com.gp.q733.data.local.db.toDomain
 import com.gp.q733.domain.model.Label
 import com.gp.q733.domain.model.LabelElement
@@ -68,6 +69,7 @@ class ScanProductViewModel @Inject constructor(
     private val gpPrinterService: GpPrinterService,
     private val settingsDataStore: SettingsDataStore,
     private val productDao: ProductDao,
+    private val productRepository: ProductRepository,
     private val customTemplateDao: com.gp.q733.data.local.db.CustomTemplateDao
 ) : ViewModel() {
 
@@ -169,11 +171,11 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             showProductDialog = false
         )
         viewModelScope.launch {
-            val dbProduct = productDao.getProductByBarcode(barcode)
-            if (dbProduct != null) {
+            val product = productRepository.getProductByBarcode(barcode)
+            if (product != null) {
                 // 找到了，直接显示商品信息
                 _uiState.value = _uiState.value.copy(
-                    productInfo = dbProduct.toDomain(),
+                    productInfo = product!!,
                     productExistsInDb = true,
                     isLoading = false
                 )
