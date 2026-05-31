@@ -32,7 +32,6 @@ fun HomeScreen(
     var showNewLabelDialog by remember { mutableStateOf(false) }
     var labelWidth by remember { mutableStateOf("50") }
     var labelHeight by remember { mutableStateOf("30") }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,7 +93,6 @@ fun HomeScreen(
                     }
                 }
             }
-
             // Quick Actions - Row 1
             Text(
                 text = "快捷操作",
@@ -142,7 +140,6 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
-
             // Templates
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -189,9 +186,7 @@ fun HomeScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.weight(1f))
-
             // Settings Button
             OutlinedButton(
                 onClick = onNavigateToSettings,
@@ -203,7 +198,6 @@ fun HomeScreen(
             }
         }
     }
-
     // 新建标签对话框
     if (showNewLabelDialog) {
         AlertDialog(

@@ -56,7 +56,6 @@ object LabelTemplateFiller {
         }
         return template.copy(elements = filledElements)
     }
-
     /**
      * 根据 Barsoft textName 字段名解析商品数据
      */
@@ -72,7 +71,6 @@ object LabelTemplateFiller {
             null -> "" // 非数据绑定字段，保持原文本
         }
     }
-
     /**
      * 填充文本中的占位符
      */
@@ -85,7 +83,6 @@ object LabelTemplateFiller {
             .replace(TemplateFields.UNIT, product.unit)
             .replace(TemplateFields.ORIGIN, product.origin)
     }
-
     /**
      * 检查文本是否包含占位符
      */
@@ -97,7 +94,6 @@ object LabelTemplateFiller {
             text.contains(TemplateFields.UNIT) ||
             text.contains(TemplateFields.ORIGIN)
     }
-
     /**
      * 检查标签是否包含占位符或数据绑定字段
      */

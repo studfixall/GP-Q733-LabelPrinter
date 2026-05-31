@@ -29,7 +29,6 @@ class LabelDataStore @Inject constructor(
 
     private val dataStore = context.labelDataStore
     private val json = Json { ignoreUnknownKeys = true }
-
     companion object {
         val SAVED_LABELS = stringPreferencesKey("saved_labels")
     }
@@ -42,7 +41,6 @@ class LabelDataStore @Inject constructor(
             emptyList()
         }
     }
-
     suspend fun saveLabel(label: Label) {
         dataStore.edit { prefs ->
             val currentJson = prefs[SAVED_LABELS] ?: "[]"
@@ -51,22 +49,18 @@ class LabelDataStore @Inject constructor(
             } catch (e: Exception) {
                 emptyList()
             }
-
             // Update or add
             val updated = currentLabels.toMutableList()
             val existingIndex = updated.indexOfFirst { it.id == label.id }
             val dto = label.toDto()
-
             if (existingIndex >= 0) {
                 updated[existingIndex] = dto
             } else {
                 updated.add(dto)
             }
-
             prefs[SAVED_LABELS] = json.encodeToString(updated)
         }
     }
-
     suspend fun deleteLabel(labelId: String) {
         dataStore.edit { prefs ->
             val currentJson = prefs[SAVED_LABELS] ?: "[]"
@@ -79,7 +73,6 @@ class LabelDataStore @Inject constructor(
             prefs[SAVED_LABELS] = json.encodeToString(updated)
         }
     }
-
     suspend fun getLabel(labelId: String): Label? {
         return try {
             val prefs = dataStore.data.first()
@@ -90,7 +83,6 @@ class LabelDataStore @Inject constructor(
             null
         }
     }
-
     // Extension functions for conversion
     private fun Label.toDto(): LabelDto = LabelDto(
         id = id,
@@ -98,7 +90,6 @@ class LabelDataStore @Inject constructor(
         heightMm = heightMm,
         elements = elements.map { it.toDto() }
     )
-
     private fun LabelElement.toDto(): LabelElementDto = when (this) {
         is LabelElement.Text -> LabelElementDto(
             type = "text",
@@ -131,14 +122,12 @@ class LabelDataStore @Inject constructor(
             height = height
         )
     }
-
     private fun LabelDto.toDomain(): Label = Label(
         id = id,
         widthMm = widthMm,
         heightMm = heightMm,
         elements = elements.map { it.toDomain() }
     )
-
     private fun LabelElementDto.toDomain(): LabelElement = when (type) {
         "text" -> LabelElement.Text(
             x = x,

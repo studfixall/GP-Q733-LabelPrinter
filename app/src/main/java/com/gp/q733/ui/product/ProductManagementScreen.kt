@@ -34,7 +34,6 @@ fun ProductManagementScreen(
     val editProduct by viewModel.editProduct.collectAsState()
     val importMessage by viewModel.importMessage.collectAsState()
     val context = LocalContext.current
-
     // CSV文件选择器
     val csvLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -60,10 +59,8 @@ fun ProductManagementScreen(
             }
         }
     }
-
     // 删除确认对话框
     var productToDelete by remember { mutableStateOf<ProductInfo?>(null) }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -105,7 +102,6 @@ fun ProductManagementScreen(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true
             )
-
             // 导入提示
             importMessage?.let { msg ->
                 Snackbar(
@@ -119,7 +115,6 @@ fun ProductManagementScreen(
                     Text(msg)
                 }
             }
-
             // 商品列表
             if (products.isEmpty()) {
                 Box(
@@ -155,7 +150,6 @@ fun ProductManagementScreen(
                 }
             }
         }
-
         // 编辑/新增对话框
         if (showEditDialog) {
             ProductEditDialog(
@@ -164,7 +158,6 @@ fun ProductManagementScreen(
                 onSave = { viewModel.saveProduct(it) }
             )
         }
-
         // 删除确认对话框
         productToDelete?.let { product ->
             AlertDialog(
@@ -286,7 +279,6 @@ private fun ProductEditDialog(
     var spec by remember { mutableStateOf(product?.spec ?: "") }
     var unit by remember { mutableStateOf(product?.unit ?: "") }
     var category by remember { mutableStateOf(product?.category ?: "") }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (product == null) "添加商品" else "编辑商品") },

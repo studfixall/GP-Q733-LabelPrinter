@@ -59,7 +59,6 @@ class SettingsViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
-
     init {
         viewModelScope.launch {
             settingsDataStore.settingsFlow.collect { settings ->
@@ -88,7 +87,6 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-
     private fun syncRmisConfig(settings: AppSettings) {
         rmisApiClient.updateConfig(
             baseUrl = settings.rmisBaseUrl,
@@ -97,7 +95,6 @@ class SettingsViewModel @Inject constructor(
         )
         rmisProductRepository.storeId = settings.storeId
     }
-
     fun updateLabelWidth(width: Float) { _uiState.update { it.copy(labelWidth = width) } }
     fun updateLabelHeight(height: Float) { _uiState.update { it.copy(labelHeight = height) } }
     fun updatePrintCopies(copies: Int) { if (copies in 1..99) { _uiState.update { it.copy(printCopies = copies) } } }
@@ -112,12 +109,10 @@ class SettingsViewModel @Inject constructor(
     fun updatePrintOffsetX(offset: Float) { viewModelScope.launch { settingsDataStore.savePrintOffsetX(offset) } }
     fun updatePrintOffsetY(offset: Float) { viewModelScope.launch { settingsDataStore.savePrintOffsetY(offset) } }
     fun updateDarkMode(enabled: Boolean) { _uiState.update { it.copy(darkMode = enabled) } }
-
     // Issue #13: Multi-store + RMIS settings
     fun updateRmisBaseUrl(url: String) { _uiState.update { it.copy(rmisBaseUrl = url) } }
     fun updateRmisUserNo(userNo: String) { _uiState.update { it.copy(rmisUserNo = userNo) } }
     fun updateRmisMasterKey(key: String) { _uiState.update { it.copy(rmisMasterKey = key) } }
-
     fun selectStore(store: StoreInfo) {
         _uiState.update { it.copy(
             storeId = store.id,
@@ -130,16 +125,13 @@ class SettingsViewModel @Inject constructor(
             rmisProductRepository.storeId = store.id
         }
     }
-
     fun showStorePicker() {
         _uiState.update { it.copy(showStorePicker = true) }
         loadStoreList()
     }
-
     fun dismissStorePicker() {
         _uiState.update { it.copy(showStorePicker = false) }
     }
-
     private fun loadStoreList() {
         if (_uiState.value.rmisBaseUrl.isBlank() || _uiState.value.rmisUserNo.isBlank()) {
             _uiState.update { it.copy(storeLoadError = "请先配置RMIS地址和应用程序编码") }
@@ -161,7 +153,6 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-
     fun saveSettings() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, saveSuccess = false) }
@@ -191,7 +182,6 @@ class SettingsViewModel @Inject constructor(
             _uiState.update { it.copy(saveSuccess = false) }
         }
     }
-
     fun resetToDefaults() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }

@@ -46,7 +46,6 @@ fun EditorScreen(
     val uiState by viewModel.uiState.collectAsState()
     val label = uiState.label
     var editingElementText by remember { mutableStateOf("") }
-
     // Snackbar for save/print feedback
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.saveSuccess) {
@@ -54,7 +53,6 @@ fun EditorScreen(
             snackbarHostState.showSnackbar("标签已保存")
         }
     }
-
     // Export XML result dialog
     var exportedXml by remember { mutableStateOf<String?>(null) }
     if (exportedXml != null) {
@@ -120,14 +118,12 @@ fun EditorScreen(
             }
         )
     }
-
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { error ->
             snackbarHostState.showSnackbar(error)
             viewModel.clearError()
         }
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -191,7 +187,6 @@ fun EditorScreen(
                 // Calculate base label size in pixels (8 dots per mm at 203dpi)
                 val labelWidthPx = label.widthMm * 8f
                 val labelHeightPx = label.heightMm * 8f
-
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -229,15 +224,12 @@ fun EditorScreen(
                                 .align(Alignment.BottomEnd)
                                 .padding(4.dp)
                         )
-
                         // Render label elements
                         label.elements.forEachIndexed { index, element ->
                             val isSelected = uiState.selectedElementIndex == index
-
                             // Use element position directly - no local cache to avoid stale data
                             var dragOffsetX by remember { mutableFloatStateOf(0f) }
                             var dragOffsetY by remember { mutableFloatStateOf(0f) }
-
                             Box(
                                 modifier = Modifier
                                     .offset(
@@ -369,7 +361,6 @@ fun EditorScreen(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
-
             // Selected Element Editor
             if (uiState.selectedElementIndex != null) {
                 Card(
@@ -401,7 +392,6 @@ fun EditorScreen(
                                 )
                             }
                         }
-
                         OutlinedTextField(
                             value = editingElementText,
                             onValueChange = { text ->
@@ -569,7 +559,6 @@ fun EditorScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-
             // Element Tools
             Card(
                 modifier = Modifier
@@ -584,7 +573,6 @@ fun EditorScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)

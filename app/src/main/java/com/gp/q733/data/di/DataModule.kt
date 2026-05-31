@@ -24,26 +24,22 @@ abstract class DataModule {
     abstract fun bindBluetoothRepository(
         impl: BluetoothRepositoryImpl
     ): BluetoothRepository
-
     @Binds
     @Singleton
     abstract fun bindProductRepository(
         impl: RmisProductRepository
     ): ProductRepository
-
     companion object {
         @Provides
         @Singleton
         fun provideProductDao(database: ProductDatabase.Provider): ProductDao {
             return database.get().productDao()
         }
-
         @Provides
         @Singleton
         fun provideCustomTemplateDao(database: ProductDatabase.Provider): com.gp.q733.data.local.db.CustomTemplateDao {
             return database.get().customTemplateDao()
         }
-
         @Provides
         @Singleton
         fun provideRmisApiClient(): RmisApiClient {

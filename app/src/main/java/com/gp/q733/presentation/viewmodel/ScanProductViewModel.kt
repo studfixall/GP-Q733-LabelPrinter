@@ -42,19 +42,15 @@ data class ScanProductUiState(
     val productInfo: ProductInfo = ProductInfo(),
     val productExistsInDb: Boolean = false,
     val isLoading: Boolean = false,
-
     // 未找到商品提示
     val showNotFoundDialog: Boolean = false,
-
     // 维护商品资料弹窗
     val showProductDialog: Boolean = false,
     val dialogName: String = "",
     val dialogPrice: String = "",
-
     // 模板选择
     val templates: List<ScanTemplateOption> = emptyList(),
     val selectedTemplateId: String = "",
-
     // 打印状态
     val isPrinting: Boolean = false,
     val errorMessage: String? = null,
@@ -75,7 +71,6 @@ class ScanProductViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ScanProductUiState())
     val uiState: StateFlow<ScanProductUiState> = _uiState.asStateFlow()
-
     init {
         loadTemplates()
     }
@@ -192,21 +187,18 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             }
         }
     }
-
     /**
      * 维护弹窗：更新名称
      */
     fun updateDialogName(name: String) {
         _uiState.value = _uiState.value.copy(dialogName = name)
     }
-
     /**
      * 维护弹窗：更新价格
      */
     fun updateDialogPrice(price: String) {
         _uiState.value = _uiState.value.copy(dialogPrice = price)
     }
-
     /**
      * 维护弹窗：保存商品到数据库
      */
@@ -214,7 +206,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
         val state = _uiState.value
         val name = state.dialogName.trim()
         val price = state.dialogPrice.toDoubleOrNull() ?: 0.0
-
         if (name.isBlank()) {
             _uiState.value = state.copy(errorMessage = "请输入商品名称")
             return
@@ -223,7 +214,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             _uiState.value = state.copy(errorMessage = "请输入有效价格")
             return
         }
-
         viewModelScope.launch {
             try {
                 val product = ProductInfo(
@@ -250,7 +240,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             }
         }
     }
-
     /**
      * 关闭维护弹窗
      */
@@ -265,29 +254,24 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             dialogPrice = ""
         )
     }
-
     /**
      * 未找到提示：用户取消
      */
     fun dismissNotFound() {
         _uiState.value = _uiState.value.copy(showNotFoundDialog = false)
     }
-
     fun dismissProductDialog() {
         _uiState.value = _uiState.value.copy(showProductDialog = false)
     }
-
     fun selectTemplate(templateId: String) {
         _uiState.value = _uiState.value.copy(selectedTemplateId = templateId)
     }
-
     /**
      * 获取当前选中的模板
      */
     fun getSelectedTemplate(): ScanTemplateOption? {
         return _uiState.value.templates.find { it.id == _uiState.value.selectedTemplateId }
     }
-
     /**
      * 打印：用选中模板 + 商品数据填充 → 打印
      */
@@ -303,9 +287,7 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             _uiState.value = state.copy(errorMessage = "请选择打印模板")
             return
         }
-
         _uiState.value = state.copy(isPrinting = true, errorMessage = null)
-
         viewModelScope.launch {
             try {
                 // 检查蓝牙连接
@@ -338,14 +320,11 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
                         return@launch
                     }
                 }
-
                 // 用模板填充商品数据
                 val filledLabel = LabelTemplateFiller.fillTemplate(template.label, product)
-
                 // 生成打印指令并发送
                 val cmdBytes = gpPrinterService.generatePrintCommands(filledLabel)
                 val writeResult = bluetoothRepository.write(cmdBytes)
-
                 writeResult.onSuccess {
                     _uiState.value = _uiState.value.copy(
                         isPrinting = false,
@@ -366,7 +345,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             }
         }
     }
-
     /**
      * 将当前选中模板保存为自定义模板
      */
@@ -398,11 +376,9 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             }
         }
     }
-
     fun clearMessages() {
         _uiState.value = _uiState.value.copy(errorMessage = null, successMessage = null)
     }
-
     /**
      * 构建默认标签模板
      */

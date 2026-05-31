@@ -59,9 +59,7 @@ class EditorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EditorUiState())
     val uiState: StateFlow<EditorUiState> = _uiState.asStateFlow()
-
     private var connectedDevice: BluetoothDevice? = null
-
     init {
         viewModelScope.launch {
             bluetoothRepository.getConnectedDeviceFlow().collect { device ->
@@ -69,31 +67,24 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun setConnectedDevice(device: BluetoothDevice?) {
         connectedDevice = device
     }
-
     fun showSaveTemplateDialog() {
         _uiState.value = _uiState.value.copy(showSaveTemplateDialog = true, templateName = "自定义模板")
     }
-
     fun dismissSaveTemplateDialog() {
         _uiState.value = _uiState.value.copy(showSaveTemplateDialog = false)
     }
-
     fun updateTemplateName(name: String) {
         _uiState.value = _uiState.value.copy(templateName = name)
     }
-
     fun showAddElementDialog() {
         _uiState.value = _uiState.value.copy(showAddElementDialog = true)
     }
-
     fun hideAddElementDialog() {
         _uiState.value = _uiState.value.copy(showAddElementDialog = false)
     }
-
     fun addElement(type: ElementType, textContent: String, format: BarcodeFormat? = null) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -125,14 +116,12 @@ class EditorViewModel @Inject constructor(
             )
         }
     }
-
     fun selectElement(index: Int?) {
         _uiState.value = _uiState.value.copy(
             selectedElementIndex = index,
             isEditing = index != null
         )
     }
-
     fun updateElementContent(index: Int, newContent: String) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -151,7 +140,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateElementPosition(index: Int, x: Float, y: Float) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -170,7 +158,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun deleteElement(index: Int) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -185,7 +172,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateLabelSize(widthMm: Float, heightMm: Float) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -194,7 +180,6 @@ class EditorViewModel @Inject constructor(
             )
         }
     }
-
     fun saveLabel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, saveSuccess = false)
@@ -205,7 +190,6 @@ class EditorViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(saveSuccess = false)
         }
     }
-
         /**
      * 直接保存当前模板到Room（覆盖，不弹对话框）
      * - 有 currentTemplateId → 直接 upsert 覆盖
@@ -235,7 +219,6 @@ class EditorViewModel @Inject constructor(
                     Triple(tid, existing?.isBuiltIn ?: false, existing?.name ?: "\u81ea\u5b9a\u4e49\u6a21\u677f")
                 }
             }
-
             customTemplateDao.upsert(
                 templateId = finalTemplateId,
                 name = finalName,
@@ -266,7 +249,6 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch {
             val label = _uiState.value.label
             val elementsJson = com.gp.q733.domain.util.TemplateJsonParser.toJson(label.elements)
-
             // 根据来源决定 templateId 与 isBuiltIn
             val templateNameToUse = templateName.ifBlank { "自定义模板" }
             val (finalTemplateId, finalIsBuiltIn) = when {
@@ -288,7 +270,6 @@ class EditorViewModel @Inject constructor(
                     sourceTemplateId to false
                 }
             }
-
             customTemplateDao.upsert(
                 templateId = finalTemplateId,
                 name = templateNameToUse,
@@ -304,7 +285,6 @@ class EditorViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(saveSuccess = false)
         }
     }
-
     /**
      * Print label - generate commands via GpPrinterService, send via BluetoothRepository socket
      * FIX: No longer use SDK RTPrinter connection (unstable, disconnects after 2-3s)
@@ -321,7 +301,6 @@ class EditorViewModel @Inject constructor(
                     )
                     return@launch
                 }
-
                 // Check connection state
                 val connectionState = bluetoothRepository.getConnectionState().first()
                 if (connectionState != ConnectionState.Connected) {
@@ -359,7 +338,6 @@ class EditorViewModel @Inject constructor(
                         return@launch
                     }
                 }
-
                 // Generate commands via SDK, send via socket
                 android.util.Log.d("PrintDebug", "Editor print - generate commands, send via socket")
                 val cmdBytes = gpPrinterService.generatePrintCommands(label)
@@ -378,7 +356,6 @@ class EditorViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isPrinting = false)
         }
     }
-
     fun loadLabelFromStore(labelId: String) {
         viewModelScope.launch {
             val savedLabel = labelDataStore.getLabel(labelId)
@@ -391,11 +368,9 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun loadTemplate(templateId: String) {
         viewModelScope.launch { loadTemplateSync(templateId) }
     }
-
     suspend fun loadTemplateSync(templateId: String) {
         val label: Label? = when {
             templateId.startsWith("built_in_") || templateId.startsWith("custom_") -> {
@@ -450,7 +425,6 @@ class EditorViewModel @Inject constructor(
             )
         }
     }
-
     fun resetLabel(widthMm: Float = 50f, heightMm: Float = 30f) {
         _uiState.value = EditorUiState(
             label = Label(
@@ -461,11 +435,9 @@ class EditorViewModel @Inject constructor(
             )
         )
     }
-
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
-
     fun updateBarcodeWidth(index: Int, width: Float) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -481,7 +453,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateBarcodeHeight(index: Int, height: Float) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -497,7 +468,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     // Issue #3 fix: Barcode数据绑定字段更新
     fun updateBarcodeTextName(index: Int, textName: String) {
         viewModelScope.launch {
@@ -517,7 +487,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateTextFontSize(index: Int, fontSize: Float) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -533,7 +502,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateTextBold(index: Int, isBold: Boolean) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -549,7 +517,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     fun updateTextUnderline(index: Int, isUnderline: Boolean) {
         viewModelScope.launch {
             val currentLabel = _uiState.value.label
@@ -565,7 +532,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     /**
      * 设置文本元素的商品数据绑定字段
      * @param textName 绑定字段名（""=不绑定，固定文本）
@@ -588,7 +554,6 @@ class EditorViewModel @Inject constructor(
             }
         }
     }
-
     /**
      * 导出为 Barsoft XML 格式字符串
      */

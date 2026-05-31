@@ -25,7 +25,6 @@ fun DeviceScreen(
     val uiState by viewModel.uiState.collectAsState()
     val connectionState by viewModel.connectionState.collectAsState()
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,9 +68,7 @@ fun DeviceScreen(
                     Text("扫描设备")
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Connection Status + Test Print
             if (connectionState == ConnectionState.Connected) {
                 Card(
@@ -103,9 +100,7 @@ fun DeviceScreen(
                                 Text("断开")
                             }
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Button(
                             onClick = { viewModel.printTestPage() },
                             modifier = Modifier.fillMaxWidth(),
@@ -124,7 +119,6 @@ fun DeviceScreen(
                                 Text("测试打印")
                             }
                         }
-
                         uiState.printResult?.let { result ->
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -141,7 +135,6 @@ fun DeviceScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
             // Error Message
             uiState.errorMessage?.let { error ->
                 Card(
@@ -175,14 +168,12 @@ fun DeviceScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
             // Device List
             Text(
                 text = "可用设备",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
-
             if (discoveredDevices.isEmpty()) {
                 Card(
                     modifier = Modifier.fillMaxWidth()

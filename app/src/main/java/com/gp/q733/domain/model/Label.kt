@@ -12,7 +12,6 @@ data class Label(
 sealed class LabelElement {
     abstract val x: Float
     abstract val y: Float
-
     /**
      * 文本元素
      * @param textName Barsoft 数据绑定字段名（如 name/price/spec/unit/area/barcode），空字符串表示固定文本
@@ -41,7 +40,6 @@ sealed class LabelElement {
         val rotation: Int = 0,
         val scale: Float = 1f
     ) : LabelElement()
-
     /**
      * 条码元素
      * @param textName Barsoft 数据绑定字段名
@@ -61,14 +59,12 @@ sealed class LabelElement {
         val minBarWidth: Int = 2,
         val textPosition: Int = 0
     ) : LabelElement()
-
     data class QRCode(
         override val x: Float,
         override val y: Float,
         val content: String,
         val size: Float = 20f
     ) : LabelElement()
-
     data class Line(
         override val x: Float,
         override val y: Float,
@@ -81,7 +77,6 @@ enum class BarcodeFormat(val tsplName: String, val cpclName: String) {
     CODE128("128", "128"),
     CODE39("39", "39"),
     EAN13("EAN13", "EAN13");
-
     companion object {
         fun fromZXing(format: ZXingFormat): BarcodeFormat = when (format) {
             ZXingFormat.CODE_128 -> CODE128

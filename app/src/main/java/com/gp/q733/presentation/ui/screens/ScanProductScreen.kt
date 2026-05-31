@@ -51,7 +51,6 @@ fun ScanProductScreen(
     val uiState by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
-
     // ZXing 扫码启动器
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract()
@@ -60,7 +59,6 @@ fun ScanProductScreen(
             viewModel.onBarcodeScanned(result.contents)
         }
     }
-
     // 相机权限请求启动器
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -75,12 +73,10 @@ fun ScanProductScreen(
             scanLauncher.launch(options)
         } // 权限被拒则静默
     }
-
     // 自动聚焦到扫码输入框
     LaunchedEffect(Unit) {
         try { focusRequester.requestFocus() } catch (_: Exception) {}
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -126,9 +122,7 @@ fun ScanProductScreen(
                     }
                 })
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // ===== 扫码按钮 =====
             Button(
                 onClick = {
@@ -140,16 +134,13 @@ fun ScanProductScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("扫描条码")
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // ===== 加载中 =====
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-
             // ===== 商品信息展示 =====
             if (uiState.productInfo.name.isNotBlank() && !uiState.showProductDialog) {
                 Card(
@@ -185,13 +176,10 @@ fun ScanProductScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 // ===== 模板选择 =====
                 Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -204,9 +192,7 @@ fun ScanProductScreen(
             )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
                 // ===== 打印按钮 =====
                 Button(
                     onClick = { viewModel.print() },
@@ -224,7 +210,6 @@ fun ScanProductScreen(
                     }
                 }
             }
-
             // ===== 未扫码时的提示 =====
             if (uiState.productInfo.name.isBlank() && !uiState.isLoading && !uiState.showProductDialog) {
                 Box(
@@ -243,9 +228,7 @@ fun ScanProductScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.weight(1f))
-
             // ===== 消息提示 =====
             uiState.errorMessage?.let { msg ->
                 Spacer(modifier = Modifier.height(8.dp))
@@ -260,7 +243,6 @@ fun ScanProductScreen(
                 ) { Text(msg) }
             }
         }
-
         // ===== 未找到商品提示弹窗 =====
         if (uiState.showNotFoundDialog) {
             AlertDialog(
@@ -275,7 +257,6 @@ fun ScanProductScreen(
                 }
             )
         }
-
         // ===== 维护商品资料弹窗 =====
         if (uiState.showProductDialog) {
             AlertDialog(
@@ -375,7 +356,6 @@ fun LabelThumbnail(
     modifier: Modifier = Modifier
 ) {
     val aspectRatio = label.widthMm / label.heightMm
-
     BoxWithConstraints(modifier = modifier) {
         val boxWidth = constraints.maxWidth.toFloat()
         val boxHeight = if (constraints.maxHeight > 0) constraints.maxHeight.toFloat() else boxWidth / aspectRatio
@@ -385,7 +365,6 @@ fun LabelThumbnail(
         val labelH = label.heightMm
         val scaleX = displayW / labelW
         val scaleY = displayH / labelH
-
         Canvas(modifier = Modifier.size(
             with(LocalDensity.current) { displayW.toDp() },
             with(LocalDensity.current) { displayH.toDp() }
@@ -397,7 +376,6 @@ fun LabelThumbnail(
             drawLine(color = Color.LightGray, start = Offset(displayW, 0f), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawLine(color = Color.LightGray, start = Offset(0f, displayH), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawRect(color = Color.White)
-
             label.elements.forEach { element ->
                 when (element) {
                     is LabelElement.Text -> {

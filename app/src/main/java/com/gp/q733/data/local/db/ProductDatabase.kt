@@ -21,14 +21,12 @@ import javax.inject.Singleton
 abstract class ProductDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
     abstract fun customTemplateDao(): CustomTemplateDao
-
     @Singleton
     class Provider @Inject constructor(
         @ApplicationContext private val context: Context
     ) {
         @Volatile
         private var INSTANCE: ProductDatabase? = null
-
         fun get(): ProductDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(

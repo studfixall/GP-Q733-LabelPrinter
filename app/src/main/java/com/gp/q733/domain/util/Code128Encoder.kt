@@ -118,7 +118,6 @@ object Code128Encoder {
         intArrayOf(2,1,1,2,1,4), // 105: Start C
         intArrayOf(2,3,3,1,1,1), // 106: Stop
     )
-
     // CODE_128B: character to value mapping (ASCII 32-127 → value 0-95)
     private fun charToValue(c: Char): Int {
         val code = c.code
@@ -127,7 +126,6 @@ object Code128Encoder {
             else -> 0 // fallback to space
         }
     }
-
     /**
      * Encode a string into a list of bar segments
      * @return list of pairs (widthInModules, isBlack)
@@ -136,18 +134,15 @@ object Code128Encoder {
         if (text.isBlank()) return emptyList()
         val segments = mutableListOf<Pair<Int, Boolean>>()
         val values = mutableListOf<Int>()
-
         // Start B
         values.add(104)
         segments.addAll(patternToSegments(PATTERNS[104]))
-
         // Data characters (CODE_128B)
         for (c in text) {
             val v = charToValue(c)
             values.add(v)
             segments.addAll(patternToSegments(PATTERNS[v]))
         }
-
         // Checksum
         var checksum = values[0]
         for (i in 1 until values.size) {
@@ -155,13 +150,10 @@ object Code128Encoder {
         }
         checksum %= 103
         segments.addAll(patternToSegments(PATTERNS[checksum]))
-
         // Stop
         segments.addAll(patternToSegments(PATTERNS[106]))
-
         return segments
     }
-
     /**
      * Encode and return as a flat list of boolean values (true=black, false=white)
      * Each element = one module width
@@ -174,7 +166,6 @@ object Code128Encoder {
         }
         return modules
     }
-
     private fun patternToSegments(pattern: IntArray): List<Pair<Int, Boolean>> {
         val segments = mutableListOf<Pair<Int, Boolean>>()
         for (i in pattern.indices) {

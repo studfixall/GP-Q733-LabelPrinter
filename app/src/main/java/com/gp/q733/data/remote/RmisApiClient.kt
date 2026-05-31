@@ -32,11 +32,9 @@ class RmisApiClient(
         private const val CONNECT_TIMEOUT = 15000
         private const val READ_TIMEOUT = 30000
     }
-
     /** 缓存的令牌明文 */
     private var sessionKey: String? = null
     private var tokenExpiry: Long = 0
-
     /** 更新连接配置（门店切换/设置变更时调用） */
     fun updateConfig(baseUrl: String, userNo: String, masterKey: String) {
         this.baseUrl = baseUrl
@@ -46,9 +44,7 @@ class RmisApiClient(
         this.sessionKey = null
         this.tokenExpiry = 0
     }
-
     // ==================== DES 加密/解密 ====================
-
     /**
      * DES-ECB-Zeros 加密
      * 算法: DES/ECB/ZerosPadding, 8字节key, ASCII输入, Base64输出
@@ -59,7 +55,6 @@ class RmisApiClient(
         System.arraycopy(keyInput, 0, keyBytes, 0, minOf(keyInput.size, 8))
         val cipher = Cipher.getInstance("DES/ECB/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(keyBytes, "DES"))
-
         // Zeros padding: 补齐到8的倍数
         val input = plaintext.toByteArray(Charsets.US_ASCII)
         val paddedLen = if (input.size % 8 == 0) input.size else (input.size / 8 + 1) * 8
@@ -68,7 +63,6 @@ class RmisApiClient(
         val encrypted = cipher.doFinal(padded)
         return android.util.Base64.encodeToString(encrypted, android.util.Base64.NO_WRAP)
     }
-
     /**
      * DES-ECB-Zeros 解密
      * Base64输入 → DES解密 → 去除尾部\0 → ASCII字符串
@@ -83,7 +77,6 @@ class RmisApiClient(
         val decrypted = cipher.doFinal(decoded)
         return String(decrypted, Charsets.US_ASCII).trimEnd('\u0000')
     }
-
     /**
      * MD5 哈希 — UTF-8编码输入, 小写hex输出
      */
@@ -92,9 +85,7 @@ class RmisApiClient(
         val hash = digest.digest(input.toByteArray(Charsets.UTF_8))
         return hash.joinToString("") { "%02x".format(it) }
     }
-
     // ==================== 令牌管理 ====================
-
     /**
      * 获取令牌
      * 1. 生成8位随机数
@@ -119,7 +110,6 @@ class RmisApiClient(
         val response = postRequest(requestJson.toString())
         val respJson = JSONObject(response)
         val objectData = respJson.optString("ObjectData", "")
-
         if (objectData.isEmpty()) {
             val exception = respJson.optJSONObject("Exception")
             val msg = exception?.optString("Message") ?: "获取令牌失败"
@@ -132,9 +122,7 @@ class RmisApiClient(
         this@RmisApiClient.tokenExpiry = System.currentTimeMillis() + 7 * 24 * 3600 * 1000L
         token
     }
-
     // ==================== 通用请求 ====================
-
     /**
      * 执行RMIS接口调用
      * @param uniqueKey 接口方法名
@@ -154,14 +142,12 @@ class RmisApiClient(
         val sessionKeyHash = md5(token + requestStr)
         val response = postRequest(requestStr, sessionKeyHash)
         val respJson = JSONObject(response)
-
         // 检查异常
         val hasException = respJson.optBoolean("HasException", false)
         if (hasException) {
             val exception = respJson.optJSONObject("Exception")
             val code = exception?.optString("Code", "-1") ?: "-1"
             val message = exception?.optString("Message", "未知错误") ?: "未知错误"
-
             // 令牌失效，清除缓存重试一次
             if (code == "004") {
                 Log.w(TAG, "令牌失效，重新获取")
@@ -179,13 +165,10 @@ class RmisApiClient(
                 return@withContext retryRespJson.optJSONObject("ObjectData")
                     ?: retryRespJson
             }
-
             throw RmisException("接口调用失败[${uniqueKey}]: $message (code=$code)")
         }
-
         respJson.optJSONObject("ObjectData") ?: respJson
     }
-
     /**
      * 执行分页查询
      */
@@ -203,9 +186,7 @@ class RmisApiClient(
         }
         return call(uniqueKey, objectData)
     }
-
     // ==================== HTTP ====================
-
     private fun postRequest(jsonBody: String, sessionKey: String? = null): String {
         val url = URL("${baseUrl.trimEnd('/')}/Service")
         val conn = url.openConnection() as HttpURLConnection
@@ -217,9 +198,7 @@ class RmisApiClient(
             conn.setRequestProperty("Session-Key", sessionKey)
         }
         conn.doOutput = true
-
         Log.d(TAG, "POST ${url} | UniqueKey=${JSONObject(jsonBody).optString("UniqueKey")}")
-
         conn.outputStream.use { os ->
             os.write(jsonBody.toByteArray(Charsets.UTF_8))
         }

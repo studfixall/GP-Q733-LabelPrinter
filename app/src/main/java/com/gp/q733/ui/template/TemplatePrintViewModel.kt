@@ -48,9 +48,7 @@ class TemplatePrintViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TemplatePrintUiState())
     val uiState: StateFlow<TemplatePrintUiState> = _uiState.asStateFlow()
-
     private var templateLabel: Label? = null
-
     fun setTemplate(label: Label) {
         templateLabel = label
         val hints = mutableMapOf<String, String>()
@@ -80,7 +78,6 @@ class TemplatePrintViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(label = label, fieldHints = hints)
         updatePreview()
     }
-
     fun updateProductName(value: String) { _uiState.value = _uiState.value.copy(productName = value); updatePreview() }
     fun updateProductPrice(value: String) { _uiState.value = _uiState.value.copy(productPrice = value); updatePreview() }
     fun updateProductMprice(value: String) { _uiState.value = _uiState.value.copy(productMprice = value); updatePreview() }
@@ -88,7 +85,6 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
     fun updateProductUnit(value: String) { _uiState.value = _uiState.value.copy(productUnit = value); updatePreview() }
     fun updateProductOrigin(value: String) { _uiState.value = _uiState.value.copy(productOrigin = value); updatePreview() }
     fun updateProductBarcode(value: String) { _uiState.value = _uiState.value.copy(productBarcode = value); updatePreview() }
-
     fun fillFromProduct(product: ProductInfo) {
         _uiState.value = _uiState.value.copy(
             productName = product.name,
@@ -102,12 +98,10 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
         )
         updatePreview()
     }
-
     fun toggleProductPicker(show: Boolean) {
         _uiState.value = _uiState.value.copy(showProductPicker = show, productSearchQuery = "")
         if (show) searchProducts("")
     }
-
     fun searchProducts(query: String) {
         _uiState.value = _uiState.value.copy(productSearchQuery = query)
         viewModelScope.launch {
@@ -120,7 +114,6 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
             _uiState.value = _uiState.value.copy(productSearchResults = products)
         }
     }
-
     fun print() {
         val label = _uiState.value.filledLabel ?: return
         viewModelScope.launch {
@@ -149,15 +142,12 @@ fun updateProductSpec(value: String) { _uiState.value = _uiState.value.copy(prod
             }
         }
     }
-
     fun updatePrintCopies(copies: Int) {
         _uiState.value = _uiState.value.copy(printCopies = copies.coerceIn(1, 999))
     }
-
     fun clearPrintResult() {
         _uiState.value = _uiState.value.copy(printResult = null)
     }
-
     private fun updatePreview() {
         val template = templateLabel ?: return
         val state = _uiState.value

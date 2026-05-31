@@ -30,10 +30,8 @@ class RmisProductRepository @Inject constructor(
     companion object {
         private const val TAG = "RmisProductRepo"
     }
-
     /** 当前门店编码 */
     var storeId: String = ""
-
     /**
      * 按条码查询商品 — 优先RMIS远程，fallback本地Room
      *
@@ -48,7 +46,6 @@ class RmisProductRepository @Inject constructor(
             Log.w(TAG, "门店编码为空，使用本地查询")
             return localRepository.getProductByBarcode(barcode)
         }
-
         return try {
             queryFromRmis(barcode)
         } catch (e: Exception) {
@@ -56,13 +53,11 @@ class RmisProductRepository @Inject constructor(
             localRepository.getProductByBarcode(barcode)
         }
     }
-
     /**
      * 从RMIS远程查询商品信息
      */
     private suspend fun queryFromRmis(barcode: String): ProductInfo? = withContext(Dispatchers.IO) {
         var productInfo: ProductInfo? = null
-
         // 1. 先查门店商品SKU信息（带价格）
         if (storeId.isNotBlank()) {
             try {
@@ -90,7 +85,6 @@ class RmisProductRepository @Inject constructor(
                 Log.w(TAG, "门店SKU查询异常: ${e.message}")
             }
         }
-
         // 2. 查商品主档（补全名称/规格等）
         try {
             val tag = JSONObject().apply {
@@ -117,7 +111,6 @@ class RmisProductRepository @Inject constructor(
         } catch (e: Exception) {
             Log.w(TAG, "商品主档查询异常: ${e.message}")
         }
-
         // 3. 也尝试通过增量数据接口获取价格（如果门店SKU没查到价格）
         if (productInfo != null && productInfo.price == 0.0 && storeId.isNotBlank()) {
             try {
@@ -150,10 +143,8 @@ class RmisProductRepository @Inject constructor(
                 }
             } catch (_: Exception) {}
         }
-
         productInfo
     }
-
     /**
      * 获取门店列表 — 用于门店选择UI
      * @return List<Pair(门店编码, 门店名称)>

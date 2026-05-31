@@ -28,44 +28,35 @@ class ProductViewModel @Inject constructor(
     // 搜索关键词
     private val _searchKeyword = MutableStateFlow("")
     val searchKeyword: StateFlow<String> = _searchKeyword.asStateFlow()
-
     // 商品列表（根据搜索关键词动态切换全量/搜索结果）
     val products: StateFlow<List<ProductInfo>> = _searchKeyword.flatMapLatest { keyword ->
         if (keyword.isBlank()) productRepository.getAllProducts()
         else productRepository.searchProducts(keyword)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     // 编辑对话框状态
     private val _editProduct = MutableStateFlow<ProductInfo?>(null)
     val editProduct: StateFlow<ProductInfo?> = _editProduct.asStateFlow()
-
     // 是否显示编辑对话框
     private val _showEditDialog = MutableStateFlow(false)
     val showEditDialog: StateFlow<Boolean> = _showEditDialog.asStateFlow()
-
     // 导入结果消息
     private val _importMessage = MutableStateFlow<String?>(null)
     val importMessage: StateFlow<String?> = _importMessage.asStateFlow()
-
     fun updateSearchKeyword(keyword: String) {
         _searchKeyword.update { keyword }
     }
-
     fun showAddDialog() {
         _editProduct.update { null }
         _showEditDialog.update { true }
     }
-
     fun showEditDialog(product: ProductInfo) {
         _editProduct.update { product }
         _showEditDialog.update { true }
     }
-
     fun dismissEditDialog() {
         _showEditDialog.update { false }
         _editProduct.update { null }
     }
-
     fun saveProduct(product: ProductInfo) {
         viewModelScope.launch {
             val existing = productRepository.getProductByBarcode(product.barcode)
@@ -77,24 +68,20 @@ class ProductViewModel @Inject constructor(
             dismissEditDialog()
         }
     }
-
     fun deleteProduct(product: ProductInfo) {
         viewModelScope.launch {
             productRepository.deleteProduct(product)
         }
     }
-
     fun importFromCsv(csvData: List<ProductInfo>) {
         viewModelScope.launch {
             val count = productRepository.importProducts(csvData)
             _importMessage.update { "成功导入 $count 条商品" }
         }
     }
-
     fun setImportMessage(message: String) {
         _importMessage.update { message }
     }
-
     fun clearImportMessage() {
         _importMessage.update { null }
     }

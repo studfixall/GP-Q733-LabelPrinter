@@ -26,10 +26,8 @@ class ProductRepositoryImpl @Inject constructor(
 ) : ProductRepository {
 
     private val dao: ProductDao by lazy { productDatabase.get().productDao() }
-
     @Volatile
     private var preloaded = false
-
     private suspend fun ensurePreloaded() {
         if (preloaded) return
         if (dao.getCount() > 0) {
@@ -48,29 +46,24 @@ class ProductRepositoryImpl @Inject constructor(
         }
         preloaded = true
     }
-
     override suspend fun getProductByBarcode(barcode: String): ProductInfo? {
         ensurePreloaded()
         return dao.getProductByBarcode(barcode)?.toDomain()
     }
-
     override fun getAllProducts(): Flow<List<ProductInfo>> {
         return dao.getAllProducts().map { entities ->
             entities.map { it.toDomain() }
         }
     }
-
     override fun searchProducts(keyword: String): Flow<List<ProductInfo>> {
         return dao.searchProducts(keyword).map { entities ->
             entities.map { it.toDomain() }
         }
     }
-
     override suspend fun addProduct(product: ProductInfo): Long {
         ensurePreloaded()
         return dao.insert(product.toEntity())
     }
-
     override suspend fun updateProduct(product: ProductInfo) {
         ensurePreloaded()
         val existing = dao.getProductByBarcode(product.barcode)
@@ -80,21 +73,18 @@ class ProductRepositoryImpl @Inject constructor(
             dao.insert(product.toEntity())
         }
     }
-
     override suspend fun deleteProduct(product: ProductInfo) {
         val existing = dao.getProductByBarcode(product.barcode)
         if (existing != null) {
             dao.delete(existing)
         }
     }
-
     override suspend fun importProducts(products: List<ProductInfo>): Int {
         ensurePreloaded()
         val entities = products.map { it.toEntity() }
         dao.insertAll(entities)
         return products.size
     }
-
     override suspend fun getProductCount(): Int {
         return dao.getCount()
     }

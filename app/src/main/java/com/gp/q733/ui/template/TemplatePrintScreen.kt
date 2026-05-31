@@ -43,7 +43,6 @@ fun TemplatePrintScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -85,7 +84,6 @@ fun TemplatePrintScreen(
                     )
                 }
             }
-
             // Data Input Fields
             Card(
                 modifier = Modifier
@@ -97,7 +95,6 @@ fun TemplatePrintScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     val fieldHints = uiState.fieldHints
                     val hasBarcode = fieldHints.containsKey("barcode")
-
                     // Barcode field first (most important for scanning)
                     if (hasBarcode) {
                         OutlinedTextField(
@@ -109,7 +106,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     // Other fields based on template hints
                     if (fieldHints.containsKey("name")) {
                         OutlinedTextField(
@@ -121,7 +117,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     if (fieldHints.containsKey("price")) {
                         OutlinedTextField(
                             value = uiState.productPrice,
@@ -132,7 +127,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     if (fieldHints.containsKey("mprice")) {
                         OutlinedTextField(
                             value = uiState.productMprice,
@@ -143,7 +137,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     if (fieldHints.containsKey("spec")) {
                         OutlinedTextField(
                             value = uiState.productSpec,
@@ -154,7 +147,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     if (fieldHints.containsKey("unit")) {
                         OutlinedTextField(
                             value = uiState.productUnit,
@@ -165,7 +157,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     if (fieldHints.containsKey("area")) {
                         OutlinedTextField(
                             value = uiState.productOrigin,
@@ -176,7 +167,6 @@ fun TemplatePrintScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-
                     // Product Picker Button
                     OutlinedButton(
                         onClick = { viewModel.toggleProductPicker(true) },
@@ -188,7 +178,6 @@ fun TemplatePrintScreen(
                     }
                 }
             }
-
             // 打印份数
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
@@ -211,7 +200,6 @@ fun TemplatePrintScreen(
                     }
                 }
             }
-
             // Print Button
             Button(
                 onClick = viewModel::print,
@@ -231,7 +219,6 @@ fun TemplatePrintScreen(
                     Text("CPCL 打印")
                 }
             }
-
             // Print Result
             when (uiState.printResult) {
                 "success" -> {
@@ -261,11 +248,9 @@ fun TemplatePrintScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
-
     // Product Picker Dialog
     if (uiState.showProductPicker) {
         ProductPickerDialog(
@@ -276,7 +261,6 @@ fun TemplatePrintScreen(
             onDismiss = { viewModel.toggleProductPicker(false) }
         )
     }
-
     // Auto-clear print result after 3 seconds
     if (uiState.printResult != null) {
         LaunchedEffect(uiState.printResult) {
@@ -302,7 +286,6 @@ private fun LabelPreview(
         return
     }
     val aspectRatio = label.widthMm / label.heightMm
-
     BoxWithConstraints(modifier = modifier) {
         val boxWidth = constraints.maxWidth.toFloat()
         val boxHeight = if (constraints.maxHeight > 0) constraints.maxHeight.toFloat() else boxWidth / aspectRatio
@@ -312,14 +295,12 @@ private fun LabelPreview(
         val labelH = label.heightMm
         val scaleX = displayW / labelW
         val scaleY = displayH / labelH
-
         Canvas(modifier = Modifier.size(
             with(LocalDensity.current) { displayW.toDp() },
             with(LocalDensity.current) { displayH.toDp() }
         )) {
             drawRect(color = Color.White)
             drawRect(color = Color.LightGray, style = Stroke(width = 1f))
-
             label.elements.forEach { element ->
                 when (element) {
                     is LabelElement.Text -> {
@@ -408,7 +389,6 @@ private fun DrawScope.drawBarcodeBars(
         color = android.graphics.Color.BLACK
         style = android.graphics.Paint.Style.FILL
     }
-
     for (i in modules.indices) {
         if (modules[i]) {
             val barLeft = x + i * moduleWidth
@@ -435,12 +415,10 @@ private fun DrawScope.drawQrPattern(
         color = android.graphics.Color.BLACK
         style = android.graphics.Paint.Style.FILL
     }
-
     // Draw finder patterns (3 corners)
     drawQrFinderPattern(x, y, cellSize, paint)                      // Top-left
     drawQrFinderPattern(x + (modules - 7) * cellSize, y, cellSize, paint)  // Top-right
     drawQrFinderPattern(x, y + (modules - 7) * cellSize, cellSize, paint)  // Bottom-left
-
     // Draw data pattern (deterministic from content)
     val contentHash = content.hashCode()
     for (row in 0 until modules) {

@@ -23,7 +23,6 @@ class SettingsDataStore @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val dataStore = context.dataStore
-
     companion object {
         val LABEL_WIDTH = floatPreferencesKey("label_width")
         val LABEL_HEIGHT = floatPreferencesKey("label_height")
@@ -81,7 +80,6 @@ class SettingsDataStore @Inject constructor(
             rmisMasterKey = prefs[RMIS_MASTER_KEY] ?: ""
         )
     }
-
     suspend fun saveLabelWidth(width: Float) { dataStore.edit { it[LABEL_WIDTH] = width } }
     suspend fun saveLabelHeight(height: Float) { dataStore.edit { it[LABEL_HEIGHT] = height } }
     suspend fun savePrintCopies(copies: Int) { dataStore.edit { it[PRINT_COPIES] = copies } }
@@ -115,7 +113,6 @@ class SettingsDataStore @Inject constructor(
     suspend fun saveRmisBaseUrl(url: String) { dataStore.edit { it[RMIS_BASE_URL] = url } }
     suspend fun saveRmisUserNo(userNo: String) { dataStore.edit { it[RMIS_USER_NO] = userNo } }
     suspend fun saveRmisMasterKey(key: String) { dataStore.edit { it[RMIS_MASTER_KEY] = key } }
-
     suspend fun saveAllSettings(settings: AppSettings) {
         dataStore.edit { prefs ->
             prefs[LABEL_WIDTH] = settings.labelWidth

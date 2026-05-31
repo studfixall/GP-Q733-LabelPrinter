@@ -39,11 +39,9 @@ fun TemplateBrowserScreen(
     var showSizeDialog by remember { mutableStateOf(false) }
     var newWidth by remember { mutableStateOf("50") }
     var newHeight by remember { mutableStateOf("30") }
-
     LaunchedEffect(Unit) {
         viewModel.loadTemplates()
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -83,7 +81,6 @@ fun TemplateBrowserScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
-
             // 分类筛选（只对内置模板生效）
             CategoryFilter(
                 categories = listOf("全部", "通用", "价格", "服装", "珠宝", "自定义"),
@@ -91,9 +88,7 @@ fun TemplateBrowserScreen(
                 onCategorySelected = { viewModel.selectCategory(it) },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-
             Spacer(modifier = Modifier.height(8.dp))
-
             if (uiState.isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -114,7 +109,6 @@ fun TemplateBrowserScreen(
             } else {
                 val totalCustom = uiState.filteredCustom.size
                 val totalBuiltIn = uiState.filteredBuiltIn.size
-
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -134,7 +128,6 @@ fun TemplateBrowserScreen(
                             )
                         }
                     }
-
                     // ===== 内置模板 section =====
                     if (totalBuiltIn > 0) {
                         item {
@@ -149,7 +142,6 @@ fun TemplateBrowserScreen(
                             )
                         }
                     }
-
                     if (totalCustom == 0 && totalBuiltIn == 0) {
                         item {
                             Box(
@@ -170,7 +162,6 @@ fun TemplateBrowserScreen(
             }
         }
     }
-
     if (showSizeDialog) {
         AlertDialog(
             onDismissRequest = { showSizeDialog = false },
@@ -265,7 +256,6 @@ private fun CategoryFilter(
         "珠宝" to "jewelry",
         "自定义" to "custome"
     )
-
     ScrollableTabRow(
         selectedTabIndex = categories.indexOf(
             categoryMap.entries.find { it.value == selectedCategory }?.key ?: "全部"
@@ -336,9 +326,7 @@ private fun CustomTemplateCard(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = template.name,
@@ -372,23 +360,14 @@ private fun CustomTemplateCard(
                     }
                 }
             }
-
             // 星标/快捷打印按钮
-
             IconButton(onClick = onToggleQuickPrint) {
-
             	Icon(
-
             		if (template.isQuickPrint) Icons.Filled.Star else Icons.Outlined.StarOutline,
-
             		contentDescription = if (template.isQuickPrint) "取消快捷打印" else "设为快捷打印",
-
             		tint = if (template.isQuickPrint) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-
             	)
-
             }
-
             // 编辑按钮
             IconButton(onClick = onEdit) {
                 Icon(
@@ -449,9 +428,7 @@ private fun BuiltInTemplateCard(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = template.displayName,
@@ -485,7 +462,6 @@ private fun BuiltInTemplateCard(
                     }
                 }
             }
-
             // 编辑按钮（内置模板编辑 = 另存为自定义后编辑）
             IconButton(onClick = onEdit) {
                 Icon(

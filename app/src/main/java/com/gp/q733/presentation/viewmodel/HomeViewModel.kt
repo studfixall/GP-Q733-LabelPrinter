@@ -64,7 +64,6 @@ class HomeViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ConnectionState.Disconnected
         )
-
     init {
         // 加载所有模板（内置 + 自定义）
         viewModelScope.launch {
@@ -74,7 +73,6 @@ class HomeViewModel @Inject constructor(
                 )
             }
         }
-
         // Observe connection state and update UI
         viewModelScope.launch {
             connectionState.collect { state ->
@@ -87,11 +85,9 @@ class HomeViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(printerStatus = status)
             }
         }
-
         // Load saved labels
         loadSavedLabels()
     }
-
     private fun loadSavedLabels() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -103,25 +99,20 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
     fun showConnectionDialog() {
         _uiState.value = _uiState.value.copy(showConnectionDialog = true)
     }
-
     fun hideConnectionDialog() {
         _uiState.value = _uiState.value.copy(showConnectionDialog = false)
     }
-
     fun toggleShowAllTemplates() {
         _uiState.value = _uiState.value.copy(showAllTemplates = !_uiState.value.showAllTemplates)
     }
-
     fun deleteLabel(label: Label) {
         viewModelScope.launch {
             labelDataStore.deleteLabel(label.id)
         }
     }
-
     fun deleteTemplate(template: LabelTemplate) {
         viewModelScope.launch {
             if (!template.isBuiltIn) {
@@ -138,7 +129,6 @@ class HomeViewModel @Inject constructor(
             newLabelHeight = height
         )
     }
-
     private fun CustomTemplateEntity.toLabelTemplate(): LabelTemplate {
         val elements = TemplateJsonParser.fromJson(elementsJson)
         val description = if (isBuiltIn) {

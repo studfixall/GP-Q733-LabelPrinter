@@ -50,7 +50,6 @@ var showStorePicker by remember { mutableStateOf(false) }
     LaunchedEffect(uiState.blackMarkOffset) { blackMarkOffsetText = uiState.blackMarkOffset.toInt().toString() }
         LaunchedEffect(uiState.printOffsetX) { printOffsetXText = if (uiState.printOffsetX < 0) uiState.printOffsetX.toString() else uiState.printOffsetX.toInt().toString() }
         LaunchedEffect(uiState.printOffsetY) { printOffsetYText = if (uiState.printOffsetY < 0) uiState.printOffsetY.toString() else uiState.printOffsetY.toInt().toString() }
-
     // Show save success snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(uiState.saveSuccess) {
@@ -58,7 +57,6 @@ var showStorePicker by remember { mutableStateOf(false) }
             snackbarHostState.showSnackbar("设置已保存")
         }
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -118,9 +116,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Paper Type Settings
             Text(
                 text = "纸张设置",
@@ -182,7 +178,6 @@ var showStorePicker by remember { mutableStateOf(false) }
                             }
                         }
                     }
-
                     // Paper type description
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -194,11 +189,9 @@ var showStorePicker by remember { mutableStateOf(false) }
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-
                     Spacer(modifier = Modifier.height(12.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(12.dp))
-
                     // Gap setting (only for LABEL)
                     if (uiState.paperType == PaperType.LABEL) {
                         OutlinedTextField(
@@ -212,7 +205,6 @@ var showStorePicker by remember { mutableStateOf(false) }
                             singleLine = true
                         )
                     }
-
                     // Black mark offset (only for BLACK_MARK)
                     if (uiState.paperType == PaperType.BLACK_MARK) {
                         OutlinedTextField(
@@ -238,7 +230,6 @@ var showStorePicker by remember { mutableStateOf(false) }
                         )
                     }
                 }
-
                 // Print offset
                 OutlinedTextField(
                     value = printOffsetXText,
@@ -266,9 +257,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Print Protocol Settings
             Text(
                 text = "打印协议",
@@ -330,11 +319,9 @@ var showStorePicker by remember { mutableStateOf(false) }
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(12.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(12.dp))
-
                     // Print Density
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -370,9 +357,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                             ) { Icon(Icons.Default.Add, contentDescription = "增加") }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     // Print Speed
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -410,9 +395,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Print Settings
             Text(
                 text = "打印设置",
@@ -460,9 +443,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Connection Settings
             Text(
                 text = "连接设置",
@@ -494,7 +475,6 @@ var showStorePicker by remember { mutableStateOf(false) }
                     )
                 }
             }
-
             if (uiState.autoReconnect) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Card(
@@ -538,9 +518,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // Store & RMIS Settings — Issue #13
             Text(
                 text = "门店设置",
@@ -623,7 +601,6 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 }
             }
-
             // Store Picker Dialog
             if (uiState.showStorePicker) {
                 AlertDialog(
@@ -670,9 +647,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             // About Section
             Text(
                 text = "关于",
@@ -737,9 +712,7 @@ var showStorePicker by remember { mutableStateOf(false) }
                     }
                 }
             }
-
             Spacer(modifier = Modifier.weight(1f))
-
             // Reset Button
             OutlinedButton(
                 onClick = { viewModel.resetToDefaults() },

@@ -25,7 +25,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private var permissionCallback: ((Boolean) -> Unit)? = null
-
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -33,10 +32,8 @@ class MainActivity : ComponentActivity() {
         permissionCallback?.invoke(allGranted)
         permissionCallback = null
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // 延迟初始化，避免启动时立即访问蓝牙
         setContent {
             GPQ733Theme {
@@ -49,11 +46,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     private fun PermissionScreen() {
         var permissionState by remember { mutableStateOf(PermissionState.CHECKING) }
-
         LaunchedEffect(Unit) {
             // 延迟检查权限，确保Activity完全初始化
             kotlinx.coroutines.delay(500)
@@ -64,7 +59,6 @@ class MainActivity : ComponentActivity() {
                 PermissionState.REQUESTING
             }
         }
-
         when (permissionState) {
             PermissionState.CHECKING -> {
                 LoadingScreen("正在检查权限...")
@@ -100,7 +94,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     private fun LoadingScreen(message: String) {
         Box(
@@ -116,7 +109,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     private fun RequestPermissionScreen(onRequestPermission: () -> Unit) {
         Box(
@@ -144,7 +136,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     private fun PermissionDeniedScreen(
         onOpenSettings: () -> Unit,
@@ -179,19 +170,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     private fun requestPermissions(callback: (Boolean) -> Unit) {
         permissionCallback = callback
         val permissions = getRequiredPermissions().toTypedArray()
         permissionLauncher.launch(permissions)
     }
-
     private fun checkBluetoothPermissions(): Boolean {
         return getRequiredPermissions().all { permission ->
             ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
         }
     }
-
     private fun getRequiredPermissions(): List<String> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             listOf(
@@ -208,7 +196,6 @@ class MainActivity : ComponentActivity() {
             )
         }
     }
-
     private enum class PermissionState {
         CHECKING,
         REQUESTING,

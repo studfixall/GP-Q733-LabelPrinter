@@ -51,7 +51,6 @@ object BarsoftTemplateParser {
             null
         }
     }
-
     fun parse(inputStream: InputStream): Label {
         val items = mutableListOf<LabelElement>()
         var widthMm = 40f
@@ -81,14 +80,12 @@ object BarsoftTemplateParser {
             }
             eventType = parser.next()
         }
-
         return Label(
             elements = items,
             widthMm = widthMm,
             heightMm = heightMm
         )
     }
-
     /**
      * 解析单个 item 节点
      */
@@ -110,7 +107,6 @@ object BarsoftTemplateParser {
         val rotation = parser.getAttributeValue(null, "rotation")?.toIntOrNull() ?: 0
         val scaleX = parser.getAttributeValue(null, "scale")?.toFloatOrNull() ?: 1f
         val variable = parser.getAttributeValue(null, "variable")?.toIntOrNull() ?: 0
-
         return when (viewtype) {
             0 -> LabelElement.Text(
                 x = left,
@@ -154,7 +150,6 @@ object BarsoftTemplateParser {
             else -> null
         }
     }
-
     /**
      * 解析对齐方式
      */
@@ -165,7 +160,6 @@ object BarsoftTemplateParser {
             else -> 0                             // LEFT / ALIGN_NORMAL
         }
     }
-
     /**
      * 解析条码格式
      */
@@ -177,7 +171,6 @@ object BarsoftTemplateParser {
             else -> BarcodeFormat.CODE128
         }
     }
-
     /**
      * Barsoft textName → ProductInfo 字段映射
      * 用于将模板中的数据绑定字段映射到实际商品数据
@@ -194,7 +187,6 @@ object BarsoftTemplateParser {
             else -> null
         }
     }
-
     /**
      * 判断 textName 是否为数据绑定字段（非固定文本/占位提示）
      */

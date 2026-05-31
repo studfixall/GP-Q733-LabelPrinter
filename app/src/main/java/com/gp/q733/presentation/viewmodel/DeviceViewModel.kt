@@ -57,16 +57,13 @@ class DeviceViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-
     private var scanTimeoutJob: Job? = null
-
     init {
         viewModelScope.launch {
             val settings = settingsDataStore.settingsFlow.first()
             _uiState.value = _uiState.value.copy(currentProtocol = settings.printProtocol)
         }
     }
-
     fun startScan() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
@@ -82,7 +79,6 @@ class DeviceViewModel @Inject constructor(
             }
         }
     }
-
     fun stopScan() {
         scanTimeoutJob?.cancel()
         viewModelScope.launch {
@@ -90,11 +86,9 @@ class DeviceViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isScanning = false)
         }
     }
-
     fun selectDevice(device: PrinterDevice) {
         _uiState.value = _uiState.value.copy(selectedDevice = device)
     }
-
     /**
      * 连接打印机 - 统一走 BluetoothRepository socket 直连
      * 不再使用 SDK 的 RTPrinter 连接（日志证实 SDK 连接 2-3 秒后自动断开）
@@ -120,12 +114,10 @@ class DeviceViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isConnecting = false)
         }
     }
-
     fun connect() {
         val device = _uiState.value.selectedDevice ?: return
         connect(device)
     }
-
     fun disconnect() {
         viewModelScope.launch {
             bluetoothRepository.disconnect()
@@ -134,11 +126,9 @@ class DeviceViewModel @Inject constructor(
             )
         }
     }
-
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
-
     /**
      * 打印测试页 - 生成命令 + 通过 socket 发送
      * 架构：GpPrinterService 只生成命令，BluetoothRepository.write() 发送
@@ -150,7 +140,6 @@ class DeviceViewModel @Inject constructor(
                 printResult = null
             )
             val deviceName = _uiState.value.selectedDevice?.name ?: "Unknown"
-
             // 检查是否已连接
             val connectionState = bluetoothRepository.getConnectionState().first()
             if (connectionState != ConnectionState.Connected) {
@@ -182,7 +171,6 @@ class DeviceViewModel @Inject constructor(
                     return@launch
                 }
             }
-
             try {
                 val cmdBytes = gpPrinterService.generateTestPageCommands(deviceName)
                 val writeResult = bluetoothRepository.write(cmdBytes)
@@ -207,11 +195,9 @@ class DeviceViewModel @Inject constructor(
             }
         }
     }
-
     fun clearPrintResult() {
         _uiState.value = _uiState.value.copy(printResult = null)
     }
-
     override fun onCleared() {
         super.onCleared()
         scanTimeoutJob?.cancel()

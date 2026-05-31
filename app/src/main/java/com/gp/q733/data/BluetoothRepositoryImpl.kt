@@ -32,19 +32,14 @@ class BluetoothRepositoryImpl @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-
     private val _connectionState = MutableStateFlow(ConnectionState.Disconnected)
     override fun getConnectionState(): Flow<ConnectionState> = _connectionState.asStateFlow()
-
     private val _discoveredDevices = MutableStateFlow<List<PrinterDevice>>(emptyList())
     override fun getDiscoveredDevices(): Flow<List<PrinterDevice>> = _discoveredDevices.asStateFlow()
-
     private var bluetoothAdapter: BluetoothAdapter? = null
-
     private val _connectedDevice = MutableStateFlow<BluetoothDevice?>(null)
     override fun getConnectedDeviceFlow(): StateFlow<BluetoothDevice?> = _connectedDevice.asStateFlow()
     override fun getConnectedDevice(): BluetoothDevice? = _connectedDevice.value
-
     private fun getBluetoothAdapter(): BluetoothAdapter? {
         if (bluetoothAdapter == null) {
             try {
@@ -54,9 +49,7 @@ class BluetoothRepositoryImpl @Inject constructor(
         }
         return bluetoothAdapter
     }
-
     private var connectedSocket: BluetoothSocket? = null
-
     private val discoveryReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
             when (intent.action) {
@@ -88,7 +81,6 @@ class BluetoothRepositoryImpl @Inject constructor(
         }
     }
     private var isReceiverRegistered = false
-
     @SuppressLint("MissingPermission")
     override fun startScan() {
         val adapter = getBluetoothAdapter() ?: return
@@ -104,24 +96,20 @@ class BluetoothRepositoryImpl @Inject constructor(
         if (adapter.isDiscovering) { adapter.cancelDiscovery() }
         adapter.startDiscovery()
     }
-
     @SuppressLint("MissingPermission")
     override fun stopScan() {
         getBluetoothAdapter()?.cancelDiscovery()
     }
-
     @SuppressLint("MissingPermission")
     override suspend fun connect(device: PrinterDevice): Result<Unit> {
         return try {
             val adapter = getBluetoothAdapter()
                 ?: return Result.failure(Exception("Bluetooth not available"))
-
             _connectionState.value = ConnectionState.Connecting
             adapter.cancelDiscovery()
             val btDevice: BluetoothDevice = adapter.getRemoteDevice(device.address)
             val socket = btDevice.createRfcommSocketToServiceRecord(SPP_UUID)
             socket.connect()
-
             connectedSocket = socket
             _connectedDevice.value = btDevice
             _connectionState.value = ConnectionState.Connected
@@ -132,14 +120,12 @@ class BluetoothRepositoryImpl @Inject constructor(
             Result.failure(Exception(e.message ?: "Connection failed"))
         }
     }
-
     override suspend fun disconnect() {
         try { connectedSocket?.close() } catch (_: IOException) { }
         connectedSocket = null
         _connectedDevice.value = null
         _connectionState.value = ConnectionState.Disconnected
     }
-
     override suspend fun write(data: ByteArray): Result<Unit> {
         val socket = connectedSocket
         if (socket == null || !socket.isConnected) {
@@ -162,7 +148,6 @@ class BluetoothRepositoryImpl @Inject constructor(
             Result.failure(Exception("Write failed: ${e.message}"))
         }
     }
-
     fun cleanup() {
         if (isReceiverRegistered) {
             try { context.unregisterReceiver(discoveryReceiver) } catch (_: Exception) { }

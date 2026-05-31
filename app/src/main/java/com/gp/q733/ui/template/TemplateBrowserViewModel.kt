@@ -75,7 +75,6 @@ class TemplateBrowserViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TemplateBrowserUiState())
     val uiState: StateFlow<TemplateBrowserUiState> = _uiState.asStateFlow()
-
     suspend fun loadTemplates() = withContext(Dispatchers.IO) {
         try {
             // 1. Load built-in templates from assets
@@ -103,7 +102,6 @@ class TemplateBrowserViewModel @Inject constructor(
                 }
             }
             builtInTemplates.sortWith(compareBy({ it.widthMm * it.heightMm }, { it.fileName }))
-
             // 2. Load custom/built-in templates from Room
             val customTemplates = mutableListOf<CustomTemplateInfo>()
             val entities = customTemplateDao.getAllSorted().first()
@@ -144,7 +142,6 @@ class TemplateBrowserViewModel @Inject constructor(
             }
             // 自定义按 createdAt DESC（新的在前）
             customTemplates.sortByDescending { it.createdAt }
-
             _uiState.value = _uiState.value.copy(
                 builtInTemplates = builtInTemplates,
                 customTemplates = customTemplates,
@@ -159,14 +156,12 @@ class TemplateBrowserViewModel @Inject constructor(
             )
         }
     }
-
     fun toggleQuickPrint(templateId: String, currentQuickPrint: Boolean) {
         viewModelScope.launch {
             customTemplateDao.setQuickPrint(templateId, !currentQuickPrint)
             loadTemplates()
         }
     }
-
     fun selectCategory(category: String) {
         val current = _uiState.value
         val builtInFiltered = if (category == "全部") {
@@ -193,7 +188,6 @@ class TemplateBrowserViewModel @Inject constructor(
             filteredCustom = customFiltered
         )
     }
-
     fun search(query: String) {
         val current = _uiState.value
         val builtInFiltered = current.builtInTemplates.let { list ->
@@ -213,7 +207,6 @@ class TemplateBrowserViewModel @Inject constructor(
             filteredCustom = customFiltered
         )
     }
-
     private fun parseTemplate(
         inputStream: InputStream,
         assetPath: String,
@@ -242,7 +235,6 @@ class TemplateBrowserViewModel @Inject constructor(
             null
         }
     }
-
     private fun generateDisplayName(fileName: String, width: Float, height: Float, category: String): String {
         val sizeStr = "${width.toInt()}×${height.toInt()}mm"
         val categoryLabel = when (category) {

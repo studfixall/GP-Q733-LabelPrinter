@@ -65,7 +65,6 @@ object TemplateJsonParser {
         }
         return arr.toString()
     }
-
     fun fromJson(json: String): List<LabelElement> {
         val arr = JSONArray(json)
         val elements = mutableListOf<LabelElement>()

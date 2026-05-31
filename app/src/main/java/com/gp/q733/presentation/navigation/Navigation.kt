@@ -73,7 +73,6 @@ fun Q733NavHost(
     ) {
         composable(Screen.Home.route) {
             val viewModel: HomeViewModel = hiltViewModel()
-
             HomeScreen(
                 viewModel = viewModel,
                 onNavigateToDevice = { navController.navigate(Screen.Device.route) },
@@ -89,7 +88,6 @@ fun Q733NavHost(
                 }
             )
         }
-
         composable(Screen.Device.route) {
             val viewModel: DeviceViewModel = hiltViewModel()
             DeviceScreen(
@@ -97,7 +95,6 @@ fun Q733NavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
         composable(
             route = Screen.Editor.route,
             arguments = listOf(
@@ -120,10 +117,8 @@ fun Q733NavHost(
             val height = backStackEntry.arguments?.getFloat("height") ?: 30f
             var lastLoadedTemplate by rememberSaveable { mutableStateOf("") }
             var lastLabelSize by rememberSaveable { mutableStateOf(Pair(0f, 0f)) }
-
             LaunchedEffect(templateId, width, height) {
                 val currentSize = Pair(width, height)
-
                 when {
                     templateId == "new" && (templateId != lastLoadedTemplate || currentSize != lastLabelSize) -> {
                         viewModel.resetLabel(width, height)
@@ -135,14 +130,12 @@ fun Q733NavHost(
                 }
                 lastLoadedTemplate = templateId
             }
-
             EditorScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onPrint = { /* Print is handled inside ViewModel */ }
             )
         }
-
         composable(Screen.Settings.route) {
             val viewModel: SettingsViewModel = hiltViewModel()
             SettingsScreen(
@@ -150,7 +143,6 @@ fun Q733NavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
         composable(Screen.ScanProduct.route) {
             val viewModel: ScanProductViewModel = hiltViewModel()
             ScanProductScreen(
@@ -161,7 +153,6 @@ fun Q733NavHost(
                 }
             )
         }
-
         composable(Screen.ProductManagement.route) {
             val viewModel: ProductViewModel = hiltViewModel()
             ProductManagementScreen(
@@ -169,7 +160,6 @@ fun Q733NavHost(
                 onBack = { navController.popBackStack() }
             )
         }
-
         composable(Screen.TemplateBrowser.route) {
             val viewModel: TemplateBrowserViewModel = hiltViewModel()
             TemplateBrowserScreen(
@@ -189,7 +179,6 @@ fun Q733NavHost(
                 }
             )
         }
-
         composable(Screen.TemplatePrint.route) {
             val viewModel: TemplatePrintViewModel = hiltViewModel()
             LaunchedEffect(Unit) {
