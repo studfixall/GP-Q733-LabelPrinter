@@ -22,6 +22,8 @@ data class CustomTemplateEntity(
     val widthMm: Float,             // 标签宽度mm
     val heightMm: Float,           // 标签高度mm
     val elementsJson: String,      // 元素列表JSON序列化
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f,
     val isBuiltIn: Boolean = false, // 是否内置模板
     val sortOrder: Int = 0,        // 排序顺序（内置优先，再按sortOrder）
     val createdAt: Long = System.currentTimeMillis(),

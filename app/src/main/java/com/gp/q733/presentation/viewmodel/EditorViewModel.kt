@@ -180,6 +180,15 @@ class EditorViewModel @Inject constructor(
             )
         }
     }
+    fun updateLabelOffset(offsetX: Float, offsetY: Float) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            _uiState.value = _uiState.value.copy(
+                label = currentLabel.copy(offsetX = offsetX, offsetY = offsetY)
+            )
+        }
+    }
+
     fun saveLabel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, saveSuccess = false)
@@ -225,6 +234,8 @@ class EditorViewModel @Inject constructor(
                 widthMm = label.widthMm,
                 heightMm = label.heightMm,
                 elementsJson = elementsJson,
+                offsetX = label.offsetX,
+                offsetY = label.offsetY,
                 isBuiltIn = finalIsBuiltIn,
                 sortOrder = 0,
                 createdAt = System.currentTimeMillis()
@@ -276,6 +287,8 @@ class EditorViewModel @Inject constructor(
                 widthMm = label.widthMm,
                 heightMm = label.heightMm,
                 elementsJson = elementsJson,
+                offsetX = label.offsetX,
+                offsetY = label.offsetY,
                 isBuiltIn = finalIsBuiltIn,
                 sortOrder = 0,
                 createdAt = System.currentTimeMillis()
@@ -380,6 +393,8 @@ class EditorViewModel @Inject constructor(
                         id = "template_${System.currentTimeMillis()}",
                         widthMm = it.widthMm,
                         heightMm = it.heightMm,
+                        offsetX = it.offsetX,
+                        offsetY = it.offsetY,
                         elements = TemplateJsonParser.fromJson(it.elementsJson)
                     )
                 }
@@ -395,6 +410,8 @@ class EditorViewModel @Inject constructor(
                             id = "template_${e.id}",
                             widthMm = e.widthMm,
                             heightMm = e.heightMm,
+                            offsetX = e.offsetX,
+                            offsetY = e.offsetY,
                             elements = TemplateJsonParser.fromJson(e.elementsJson)
                         )
                     }
@@ -408,6 +425,8 @@ class EditorViewModel @Inject constructor(
                         id = "template_${savedEntity.id}",
                         widthMm = savedEntity.widthMm,
                         heightMm = savedEntity.heightMm,
+                        offsetX = savedEntity.offsetX,
+                        offsetY = savedEntity.offsetY,
                         elements = TemplateJsonParser.fromJson(savedEntity.elementsJson)
                     )
                 } else {

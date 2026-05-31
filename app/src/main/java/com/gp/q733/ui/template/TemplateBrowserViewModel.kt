@@ -30,6 +30,8 @@ data class CustomTemplateInfo(
     val displayName: String,  // 格式："40×30mm 自定义"
     val widthMm: Float,
     val heightMm: Float,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f,
     val elementCount: Int,
     val fieldNames: List<String>,
     val label: Label,
@@ -123,12 +125,16 @@ class TemplateBrowserViewModel @Inject constructor(
                             displayName = "$sizeStr $categoryLabel",
                             widthMm = entity.widthMm,
                             heightMm = entity.heightMm,
+                            offsetX = entity.offsetX,
+                            offsetY = entity.offsetY,
                             elementCount = elements.size,
                             fieldNames = fieldNames,
                             label = Label(
                                 id = "template_${entity.id}",
                                 widthMm = entity.widthMm,
                                 heightMm = entity.heightMm,
+                                offsetX = entity.offsetX,
+                                offsetY = entity.offsetY,
                                 elements = elements
                             ),
                             isQuickPrint = entity.isQuickPrint,

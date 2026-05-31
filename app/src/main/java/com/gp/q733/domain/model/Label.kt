@@ -6,7 +6,9 @@ data class Label(
     val id: String = System.currentTimeMillis().toString(),
     val elements: List<LabelElement> = emptyList(),
     val widthMm: Float = 50f,
-    val heightMm: Float = 25f
+    val heightMm: Float = 25f,
+    val offsetX: Float = 0f,
+    val offsetY: Float = 0f
 )
 
 sealed class LabelElement {

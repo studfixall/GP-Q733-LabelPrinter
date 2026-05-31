@@ -586,7 +586,66 @@ fun EditorScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            // Element Tools
+                        // Label Offset Card
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                val labelOffsetXText = remember { mutableStateOf(label.offsetX.toString()) }
+                val labelOffsetYText = remember { mutableStateOf(label.offsetY.toString()) }
+                LaunchedEffect(label.offsetX) { labelOffsetXText.value = label.offsetX.toString() }
+                LaunchedEffect(label.offsetY) { labelOffsetYText.value = label.offsetY.toString() }
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "标签偏移",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = labelOffsetXText.value,
+                            onValueChange = { text ->
+                                labelOffsetXText.value = text
+                                val filtered = text.filter { it.isDigit() || it == '-' || it == '.' }
+                                if (filtered == text) {
+                                    text.toFloatOrNull()?.let { viewModel.updateLabelOffset(it, label.offsetY) }
+                                }
+                            },
+                            label = { Text("水平偏移(mm)") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = labelOffsetYText.value,
+                            onValueChange = { text ->
+                                labelOffsetYText.value = text
+                                val filtered = text.filter { it.isDigit() || it == '-' || it == '.' }
+                                if (filtered == text) {
+                                    text.toFloatOrNull()?.let { viewModel.updateLabelOffset(label.offsetX, it) }
+                                }
+                            },
+                            label = { Text("垂直偏移(mm)") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                    }
+                    Text(
+                        text = "负数向左/上偏移，叠加全局设置偏移",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+// Element Tools
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -364,6 +364,8 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
                     widthMm = template.label.widthMm,
                     heightMm = template.label.heightMm,
                     elementsJson = json,
+                offsetX = template.label.offsetX,
+                offsetY = template.label.offsetY,
                     isBuiltIn = false,
                     sortOrder = 0,
                     createdAt = System.currentTimeMillis()

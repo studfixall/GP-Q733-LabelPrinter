@@ -29,13 +29,15 @@ interface CustomTemplateDao {
      * 比 insert() 更安全：确保同 templateId 只保留一条记录
      */
     @Query("""
-        INSERT INTO custom_templates (templateId, name, widthMm, heightMm, elementsJson, isBuiltIn, sortOrder, createdAt, isQuickPrint)
-        VALUES (:templateId, :name, :widthMm, :heightMm, :elementsJson, :isBuiltIn, :sortOrder, :createdAt, :isQuickPrint)
+        INSERT INTO custom_templates (templateId, name, widthMm, heightMm, elementsJson, offsetX, offsetY, isBuiltIn, sortOrder, createdAt, isQuickPrint)
+        VALUES (:templateId, :name, :widthMm, :heightMm, :elementsJson, :offsetX, :offsetY, :isBuiltIn, :sortOrder, :createdAt, :isQuickPrint)
         ON CONFLICT(templateId) DO UPDATE SET
             name = :name,
             widthMm = :widthMm,
             heightMm = :heightMm,
             elementsJson = :elementsJson,
+        offsetX = :offsetX,
+        offsetY = :offsetY,
             isBuiltIn = :isBuiltIn,
             sortOrder = :sortOrder,
             isQuickPrint = :isQuickPrint
@@ -46,6 +48,8 @@ interface CustomTemplateDao {
         widthMm: Float,
         heightMm: Float,
         elementsJson: String,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
         isBuiltIn: Boolean,
         sortOrder: Int,
         createdAt: Long,
