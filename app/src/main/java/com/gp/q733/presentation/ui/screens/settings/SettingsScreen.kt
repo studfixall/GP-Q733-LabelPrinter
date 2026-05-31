@@ -244,21 +244,26 @@ var showStorePicker by remember { mutableStateOf(false) }
                 OutlinedTextField(
                     value = printOffsetXText,
                     onValueChange = { text ->
-                        printOffsetXText = text
+                        // 允许负数输入（如-2表示向左偏移）
+                        val filtered = text.replace(Regex("[^0-9\\-.]"), "")
+                        printOffsetXText = filtered
+                        filtered.toFloatOrNull()?.let { viewModel.updatePrintOffsetX(it) }
                         text.toFloatOrNull()?.let { viewModel.updatePrintOffsetX(it) }
                     },
-                    label = { Text("水平偏移 (mm)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("水平偏移 (mm, 负数=向左)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = printOffsetYText,
                     onValueChange = { text ->
-                        printOffsetYText = text
+                        val filtered = text.replace(Regex("[^0-9\\-.]"), "")
+                        printOffsetYText = filtered
+                        filtered.toFloatOrNull()?.let { viewModel.updatePrintOffsetY(it) }
                         text.toFloatOrNull()?.let { viewModel.updatePrintOffsetY(it) }
                     },
-                    label = { Text("垂直偏移 (mm)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("垂直偏移 (mm, 负数=向上)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
