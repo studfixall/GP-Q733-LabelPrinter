@@ -176,14 +176,10 @@ class GpPrinterService @Inject constructor(
         cmd.setChartsetName("GBK")
         val width = settings.labelWidth.toInt()
         val height = settings.labelHeight.toInt()
-        val offset = 0  // horizontal print offset is applied per-element below
         val offsetXmm = settings.printOffsetX
         val offsetYmm = settings.printOffsetY
-    // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
-    val widthDots = width * 8
-    val heightDots = height * 8
-    val header = "! $offset $DPI $DPI ${heightDots} $copies\r\nPW ${widthDots}\r\n"
-    cmd.append(header.toByteArray(Charsets.US_ASCII))
+        // 使用SDK的getCpclHeaderCmd生成标准CPCL header
+        cmd.append(cmd.getCpclHeaderCmd(width, height, copies, 0))
         // 根据纸张类型添加检纸指令
         when (settings.paperType) {
             PaperType.LABEL -> {
@@ -216,16 +212,7 @@ class GpPrinterService @Inject constructor(
                     textSetting.setxMultiplication(fontMult)
                     textSetting.setyMultiplication(fontMult)
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
-                    // 直接拼CPCL TEXT命令，绕过SDK编码问题
-                    val fontId = if (effectiveFontSize <= 8f) "24" else "55" // 24=Chinese_16x16, 55=Chinese_24x24
-                    val xDots = mmToDots(element.x + offsetXmm)
-                    val yDots = mmToDots(element.y + offsetYmm)
-                    val boldFlag = if (element.isBold) 1 else 0
-                    val textCmd = "TEXT $xDots $yDots $fontId $fontMult $fontMult $boldFlag\r\n"
-                    val textBytes = displayText.toByteArray(charset("GBK"))
-                    cmd.append(textCmd.toByteArray(Charsets.US_ASCII))
-                    cmd.append(textBytes)
-                    cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
+                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
                 }
                 is LabelElement.Barcode -> {
                     val barcodeSetting = BarcodeSetting()
@@ -268,8 +255,7 @@ class GpPrinterService @Inject constructor(
                 }
             }
         }
-    // 手动构建 CPCL footer（不含 !U1 END-PAGE）
-    cmd.append("FORM\r\nPRINT\r\n".toByteArray(Charsets.US_ASCII))
+    cmd.append(cmd.endCmd)  // SDK endCmd includes FORM+PRINT
         return cmd
     }
     /**
@@ -316,11 +302,7 @@ class GpPrinterService @Inject constructor(
                     val fontMultiplier = (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
-                    // TSPL: 手动拼 TEXT 命令，绕过SDK编码问题
-                    val xDots = mmToDots(element.x + offsetXmm)
-                    val yDots = mmToDots(element.y + offsetYmm)
-                    val tsplText = "TEXT $xDots,$yDots,\"TSS24.BF2\",0,$fontMultiplier,$fontMultiplier,\"$displayText\"\r\n"
-                    cmd.append(tsplText.toByteArray(charset("GBK")))
+                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
                 }
                 is LabelElement.Barcode -> {
                     val barcodeSetting = BarcodeSetting()
@@ -470,8 +452,7 @@ class GpPrinterService @Inject constructor(
         } catch (e: SdkException) {
             android.util.Log.e("PrintDebug", "CPCL test QR error: ${e.message}")
         }
-    // 手动构建 CPCL footer（不含 !U1 END-PAGE）
-    cmd.append("FORM\r\nPRINT\r\n".toByteArray(Charsets.US_ASCII))
+    cmd.append(cmd.endCmd)  // SDK endCmd includes FORM+PRINT
         return cmd
     }
 
