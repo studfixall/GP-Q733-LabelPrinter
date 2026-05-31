@@ -1,4 +1,4 @@
-﻿package com.gp.q733.presentation.navigation
+package com.gp.q733.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

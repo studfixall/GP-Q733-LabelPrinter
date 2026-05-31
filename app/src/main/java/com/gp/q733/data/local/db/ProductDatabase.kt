@@ -1,4 +1,4 @@
-﻿package com.gp.q733.data.local.db
+package com.gp.q733.data.local.db
 
 import android.content.Context
 import androidx.room.Database

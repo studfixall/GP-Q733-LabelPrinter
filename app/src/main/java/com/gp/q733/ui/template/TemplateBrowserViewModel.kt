@@ -1,4 +1,4 @@
-﻿package com.gp.q733.ui.template
+package com.gp.q733.ui.template
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

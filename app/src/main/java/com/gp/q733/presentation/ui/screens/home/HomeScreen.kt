@@ -1,4 +1,4 @@
-﻿package com.gp.q733.presentation.ui.screens.home
+package com.gp.q733.presentation.ui.screens.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

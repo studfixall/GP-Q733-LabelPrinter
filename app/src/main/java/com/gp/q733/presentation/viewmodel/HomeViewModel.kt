@@ -1,4 +1,4 @@
-﻿package com.gp.q733.presentation.viewmodel
+package com.gp.q733.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

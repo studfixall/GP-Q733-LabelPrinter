@@ -1,4 +1,4 @@
-﻿package com.gp.q733.presentation.ui.screens.editor
+package com.gp.q733.presentation.ui.screens.editor
 
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor

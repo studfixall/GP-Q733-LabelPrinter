@@ -1,4 +1,4 @@
-﻿package com.gp.q733.data.di
+package com.gp.q733.data.di
 
 import com.gp.q733.data.BluetoothRepositoryImpl
 import com.gp.q733.data.local.db.ProductDao

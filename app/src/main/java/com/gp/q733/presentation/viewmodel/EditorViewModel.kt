@@ -1,4 +1,4 @@
-﻿package com.gp.q733.presentation.viewmodel
+package com.gp.q733.presentation.viewmodel
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager

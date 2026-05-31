@@ -1,4 +1,4 @@
-﻿package com.gp.q733.ui.template
+package com.gp.q733.ui.template
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -373,21 +373,21 @@ private fun CustomTemplateCard(
                 }
             }
 
-            // 星标/快捷打印按钮
+            // 星标/快捷打印按钮
 
-            IconButton(onClick = onToggleQuickPrint) {
+            IconButton(onClick = onToggleQuickPrint) {
 
-            	Icon(
+            	Icon(
 
-            		if (template.isQuickPrint) Icons.Filled.Star else Icons.Outlined.StarOutline,
+            		if (template.isQuickPrint) Icons.Filled.Star else Icons.Outlined.StarOutline,
 
-            		contentDescription = if (template.isQuickPrint) "取消快捷打印" else "设为快捷打印",
+            		contentDescription = if (template.isQuickPrint) "取消快捷打印" else "设为快捷打印",
 
-            		tint = if (template.isQuickPrint) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            		tint = if (template.isQuickPrint) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
 
-            	)
+            	)
 
-            }
+            }
 
             // 编辑按钮
             IconButton(onClick = onEdit) {

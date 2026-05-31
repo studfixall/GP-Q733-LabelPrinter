@@ -1,4 +1,4 @@
-﻿package com.gp.q733.domain.print
+package com.gp.q733.domain.print
 
 import com.gp.q733.data.local.SettingsDataStore
 
@@ -1070,4 +1070,4 @@ class GpPrinterService @Inject constructor(
     }
 
 }
-
+
