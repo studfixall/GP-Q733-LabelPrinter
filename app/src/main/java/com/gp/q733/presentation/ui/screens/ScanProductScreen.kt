@@ -315,10 +315,7 @@ fun ScanProductScreen(
         }
     }
 
-
-
 }
-
 
 /**
  * 模板卡片+缩略预览
@@ -400,7 +397,6 @@ fun LabelThumbnail(
             drawLine(color = Color.LightGray, start = Offset(displayW, 0f), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawLine(color = Color.LightGray, start = Offset(0f, displayH), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawRect(color = Color.White)
-
 
             label.elements.forEach { element ->
                 when (element) {

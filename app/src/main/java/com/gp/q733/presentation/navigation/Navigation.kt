@@ -118,7 +118,6 @@ fun Q733NavHost(
             )
             val width = backStackEntry.arguments?.getFloat("width") ?: 50f
             val height = backStackEntry.arguments?.getFloat("height") ?: 30f
-
             var lastLoadedTemplate by rememberSaveable { mutableStateOf("") }
             var lastLabelSize by rememberSaveable { mutableStateOf(Pair(0f, 0f)) }
 

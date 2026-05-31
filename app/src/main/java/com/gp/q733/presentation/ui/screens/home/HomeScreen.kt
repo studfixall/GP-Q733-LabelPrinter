@@ -29,7 +29,6 @@ fun HomeScreen(
     onEditLabel: (Label) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     var showNewLabelDialog by remember { mutableStateOf(false) }
     var labelWidth by remember { mutableStateOf("50") }
     var labelHeight by remember { mutableStateOf("30") }
@@ -143,8 +142,6 @@ fun HomeScreen(
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
-
-
 
             // Templates
             Row(

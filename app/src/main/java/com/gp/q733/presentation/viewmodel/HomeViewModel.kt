@@ -58,7 +58,6 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-
     val connectionState: StateFlow<ConnectionState> = bluetoothRepository.getConnectionState()
         .stateIn(
             scope = viewModelScope,

@@ -56,12 +56,10 @@ object BarsoftTemplateParser {
         val items = mutableListOf<LabelElement>()
         var widthMm = 40f
         var heightMm = 30f
-
         val factory = XmlPullParserFactory.newInstance()
         factory.isNamespaceAware = false
         val parser = factory.newPullParser()
         parser.setInput(InputStreamReader(inputStream, "UTF-8"))
-
         var eventType = parser.eventType
         while (eventType != XmlPullParser.END_DOCUMENT) {
             when (eventType) {

@@ -134,7 +134,6 @@ object Code128Encoder {
      */
     fun encode(text: String): List<Pair<Int, Boolean>> {
         if (text.isBlank()) return emptyList()
-
         val segments = mutableListOf<Pair<Int, Boolean>>()
         val values = mutableListOf<Int>()
 

@@ -44,16 +44,13 @@ class DeviceViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DeviceUiState())
     val uiState: StateFlow<DeviceUiState> = _uiState.asStateFlow()
-
     val connectionState: StateFlow<ConnectionState> = bluetoothRepository.getConnectionState()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ConnectionState.Disconnected
         )
-
     val connectedDeviceFlow: StateFlow<BluetoothDevice?> = bluetoothRepository.getConnectedDeviceFlow()
-
     val discoveredDevices: StateFlow<List<PrinterDevice>> = bluetoothRepository.getDiscoveredDevices()
         .stateIn(
             scope = viewModelScope,
@@ -112,7 +109,6 @@ class DeviceViewModel @Inject constructor(
             )
             // 保存 MAC 用于重连
             gpPrinterService.setLastConnectedMac(device.address)
-
             val result = bluetoothRepository.connect(device)
             if (result.isFailure) {
                 _uiState.value = _uiState.value.copy(
@@ -153,7 +149,6 @@ class DeviceViewModel @Inject constructor(
                 isPrinting = true,
                 printResult = null
             )
-
             val deviceName = _uiState.value.selectedDevice?.name ?: "Unknown"
 
             // 检查是否已连接

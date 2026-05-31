@@ -46,7 +46,6 @@ object CsvParser {
         for (i in 1 until lines.size) {
             val line = lines[i].trim()
             if (line.isBlank()) continue
-
             val fields = line.split(",").map { it.trim() }
 
             try {

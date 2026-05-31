@@ -57,7 +57,6 @@ class RmisApiClient(
         val keyBytes = ByteArray(8)
         val keyInput = key.toByteArray(Charsets.US_ASCII)
         System.arraycopy(keyInput, 0, keyBytes, 0, minOf(keyInput.size, 8))
-
         val cipher = Cipher.getInstance("DES/ECB/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(keyBytes, "DES"))
 
@@ -66,7 +65,6 @@ class RmisApiClient(
         val paddedLen = if (input.size % 8 == 0) input.size else (input.size / 8 + 1) * 8
         val padded = ByteArray(paddedLen)
         System.arraycopy(input, 0, padded, 0, input.size)
-
         val encrypted = cipher.doFinal(padded)
         return android.util.Base64.encodeToString(encrypted, android.util.Base64.NO_WRAP)
     }
@@ -79,10 +77,8 @@ class RmisApiClient(
         val keyBytes = ByteArray(8)
         val keyInput = key.toByteArray(Charsets.US_ASCII)
         System.arraycopy(keyInput, 0, keyBytes, 0, minOf(keyInput.size, 8))
-
         val cipher = Cipher.getInstance("DES/ECB/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(keyBytes, "DES"))
-
         val decoded = android.util.Base64.decode(ciphertext, android.util.Base64.NO_WRAP)
         val decrypted = cipher.doFinal(decoded)
         return String(decrypted, Charsets.US_ASCII).trimEnd('\u0000')
@@ -110,11 +106,9 @@ class RmisApiClient(
         if (sessionKey != null && System.currentTimeMillis() < tokenExpiry) {
             return@withContext sessionKey!!
         }
-
         val random8 = (10000000..99999999).random().toString()
         val tokenPayload = random8 + userNo
         val encryptedToken = desEncrypt(tokenPayload, masterKey)
-
         val requestJson = JSONObject().apply {
             put("UniqueKey", "获取令牌")
             put("ClientTime", java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS'Z'")
@@ -122,7 +116,6 @@ class RmisApiClient(
             put("UserNo", userNo)
             put("Token", encryptedToken)
         }
-
         val response = postRequest(requestJson.toString())
         val respJson = JSONObject(response)
         val objectData = respJson.optString("ObjectData", "")
@@ -132,7 +125,6 @@ class RmisApiClient(
             val msg = exception?.optString("Message") ?: "获取令牌失败"
             throw RmisException("令牌获取失败: $msg")
         }
-
         val token = desDecrypt(objectData, masterKey)
         Log.d(TAG, "令牌获取成功: ${token.take(4)}****")
         // 缓存7天
@@ -151,7 +143,6 @@ class RmisApiClient(
      */
     suspend fun call(uniqueKey: String, objectData: Any): JSONObject = withContext(Dispatchers.IO) {
         val token = ensureToken()
-
         val requestJson = JSONObject().apply {
             put("UniqueKey", uniqueKey)
             put("ObjectData", objectData)
@@ -159,10 +150,8 @@ class RmisApiClient(
                 .format(java.util.Date()))
             put("UserNo", userNo)
         }
-
         val requestStr = requestJson.toString()
         val sessionKeyHash = md5(token + requestStr)
-
         val response = postRequest(requestStr, sessionKeyHash)
         val respJson = JSONObject(response)
 
@@ -234,13 +223,11 @@ class RmisApiClient(
         conn.outputStream.use { os ->
             os.write(jsonBody.toByteArray(Charsets.UTF_8))
         }
-
         val responseCode = conn.responseCode
         if (responseCode != 200) {
             val errorStream = conn.errorStream?.bufferedReader()?.readText() ?: ""
             throw RmisException("HTTP $responseCode: $errorStream")
         }
-
         val response = conn.inputStream.bufferedReader(Charsets.UTF_8).readText()
         conn.disconnect()
         return response

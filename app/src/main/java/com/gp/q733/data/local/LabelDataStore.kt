@@ -33,7 +33,6 @@ class LabelDataStore @Inject constructor(
     companion object {
         val SAVED_LABELS = stringPreferencesKey("saved_labels")
     }
-
     val savedLabelsFlow: Flow<List<Label>> = dataStore.data.map { prefs ->
         val labelsJson = prefs[SAVED_LABELS] ?: "[]"
         try {
@@ -76,7 +75,6 @@ class LabelDataStore @Inject constructor(
             } catch (e: Exception) {
                 emptyList()
             }
-
             val updated = currentLabels.filter { it.id != labelId }
             prefs[SAVED_LABELS] = json.encodeToString(updated)
         }

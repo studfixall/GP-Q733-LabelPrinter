@@ -298,7 +298,6 @@ private fun loadAssetTemplates(): List<ScanTemplateOption> {
             _uiState.value = state.copy(errorMessage = "请先扫码并确认商品信息")
             return
         }
-
         val template = state.templates.find { it.id == state.selectedTemplateId }
         if (template == null) {
             _uiState.value = state.copy(errorMessage = "请选择打印模板")

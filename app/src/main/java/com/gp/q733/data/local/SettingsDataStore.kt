@@ -45,7 +45,6 @@ class SettingsDataStore @Inject constructor(
         val RMIS_USER_NO = stringPreferencesKey("rmis_user_no")
         val RMIS_MASTER_KEY = stringPreferencesKey("rmis_master_key")
     }
-
     val settingsFlow: Flow<AppSettings> = dataStore.data.map { prefs ->
         AppSettings(
             labelWidth = prefs[LABEL_WIDTH] ?: 50f,

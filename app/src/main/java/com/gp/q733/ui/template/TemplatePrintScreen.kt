@@ -95,7 +95,6 @@ fun TemplatePrintScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("数据填充", style = MaterialTheme.typography.titleSmall)
                     Spacer(modifier = Modifier.height(8.dp))
-
                     val fieldHints = uiState.fieldHints
                     val hasBarcode = fieldHints.containsKey("barcode")
 
@@ -302,7 +301,6 @@ private fun LabelPreview(
         }
         return
     }
-
     val aspectRatio = label.widthMm / label.heightMm
 
     BoxWithConstraints(modifier = modifier) {
@@ -403,10 +401,8 @@ private fun DrawScope.drawBarcodeBars(
     height: Float
 ) {
     if (content.isBlank()) return
-
     val modules = com.gp.q733.domain.util.Code128Encoder.encodeToModules(content)
     if (modules.isEmpty()) return
-
     val moduleWidth = width / modules.size
     val paint = android.graphics.Paint().apply {
         color = android.graphics.Color.BLACK
@@ -451,7 +447,6 @@ private fun DrawScope.drawQrPattern(
         for (col in 0 until modules) {
             // Skip finder pattern areas
             if ((row < 8 && col < 8) || (row < 8 && col >= modules - 8) || (row >= modules - 8 && col < 8)) continue
-
             val isDark = ((contentHash * 31 + row * 7 + col * 13) and 1) == 0
             if (isDark) {
                 drawContext.canvas.nativeCanvas.drawRect(

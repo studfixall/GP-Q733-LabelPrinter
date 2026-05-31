@@ -216,7 +216,6 @@ class EditorViewModel @Inject constructor(
             val label = _uiState.value.label
             val elementsJson = TemplateJsonParser.toJson(label.elements)
             val tid = _uiState.value.currentTemplateId
-
             val (finalTemplateId, finalIsBuiltIn, finalName) = when {
                 tid == null -> {
                     val autoName = "\u6807\u7b7e ${label.widthMm.toInt()}x${label.heightMm.toInt()}"

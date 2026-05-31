@@ -167,7 +167,6 @@ class RmisProductRepository @Inject constructor(
             }
             val result = rmisApiClient.call("获取增量数据", objectData)
             val dataTable = result.optJSONArray("DataTable") ?: return@withContext emptyList()
-
             val stores = mutableListOf<Pair<String, String>>()
             for (i in 0 until dataTable.length()) {
                 val item = dataTable.getJSONObject(i)

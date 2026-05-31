@@ -118,7 +118,6 @@ class BluetoothRepositoryImpl @Inject constructor(
 
             _connectionState.value = ConnectionState.Connecting
             adapter.cancelDiscovery()
-
             val btDevice: BluetoothDevice = adapter.getRemoteDevice(device.address)
             val socket = btDevice.createRfcommSocketToServiceRecord(SPP_UUID)
             socket.connect()

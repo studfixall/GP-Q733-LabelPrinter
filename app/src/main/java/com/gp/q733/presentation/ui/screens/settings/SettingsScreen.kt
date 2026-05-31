@@ -31,7 +31,6 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     var labelWidthText by remember { mutableStateOf("50") }
     var labelHeightText by remember { mutableStateOf("30") }
     var gapMmText by remember { mutableStateOf("2") }
