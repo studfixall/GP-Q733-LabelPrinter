@@ -212,7 +212,15 @@ class GpPrinterService @Inject constructor(
                     textSetting.setxMultiplication(fontMult)
                     textSetting.setyMultiplication(fontMult)
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
-                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
+                    // SDK bug: getTextCmd ignores charset param, manual TEXT cmd with GBK encoding
+                    val fontId = if (effectiveFontSize <= 8f) 24 else 55  // 24=Chinese_16x16, 55=Chinese_24x24
+                    val xDots = mmToDots(element.x + offsetXmm)
+                    val yDots = mmToDots(element.y + offsetYmm)
+                    val boldFlag = if (element.isBold) 1 else 0
+                    val textHeader = "TEXT $xDots $yDots $fontId $fontMult $fontMult $boldFlag\r\n"
+                    cmd.append(textHeader.toByteArray(Charsets.US_ASCII))
+                    cmd.append(displayText.toByteArray(charset("GBK")))
+                    cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
                 }
                 is LabelElement.Barcode -> {
                     val barcodeSetting = BarcodeSetting()
@@ -299,10 +307,12 @@ class GpPrinterService @Inject constructor(
                     val availableWidth = label.widthMm - element.x - settings.printOffsetX
                     val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
                     val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
-                    val fontMultiplier = (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
-                    textSetting.setxMultiplication(fontMultiplier)
-                    textSetting.setyMultiplication(fontMultiplier)
-                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
+                    val fontMult = (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
+                    textSetting.setxMultiplication(fontMult)
+                    textSetting.setyMultiplication(fontMult)
+                    // SDK bug: getTextCmd ignores charset param, manual TEXT cmd with GBK encoding
+                    val tsplText = "TEXT ${mmToDots(element.x + offsetXmm)},${mmToDots(element.y + offsetYmm)},\"TSS24.BF2\",0,$fontMult,$fontMult,\"$displayText\"\r\n"
+                    cmd.append(tsplText.toByteArray(charset("GBK")))
                 }
                 is LabelElement.Barcode -> {
                     val barcodeSetting = BarcodeSetting()

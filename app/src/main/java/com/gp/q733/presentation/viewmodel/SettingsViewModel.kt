@@ -168,6 +168,8 @@ class SettingsViewModel @Inject constructor(
                     paperType = current.paperType,
                     gapMm = current.gapMm,
                     blackMarkOffset = current.blackMarkOffset,
+            printOffsetX = current.printOffsetX,
+            printOffsetY = current.printOffsetY,
                     autoReconnect = current.autoReconnect,
                     reconnectInterval = current.reconnectInterval,
                     storeId = current.storeId,
