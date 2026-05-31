@@ -475,18 +475,45 @@ fun EditorScreen(
                                         }
                                     }
                                 }
-                                is LabelElement.Text -> {
-                                    Text(
-                                        text = "字号: ${element.fontSize.toInt()}",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    Slider(
-                                        value = element.fontSize,
-                                        onValueChange = { size -> viewModel.updateTextFontSize(index, size) },
-                                        valueRange = 6f..36f,
-                                        steps = 15,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+            is LabelElement.Text -> {
+                // 离散字号档位 — 对应CPCL打印机实际支持的字体大小
+                // 16x16字体: 1x=2mm, 2x=4mm, 3x=6mm, 4x=8mm
+                // 24x24字体: 1x=3mm, 2x=6mm, 3x=9mm, 4x=12mm, 5x=15mm, 6x=18mm, 7x=21mm, 8x=24mm
+                // 去重合并排序: 2,3,4,6,8,9,12,15,18,21,24
+                val fontSizeOptions = listOf(2f, 3f, 4f, 6f, 8f, 9f, 12f, 15f, 18f, 21f, 24f)
+                val fontSizeLabels = fontSizeOptions.map { "${it.toInt()}mm" }
+                var fontSizeExpanded by remember { mutableStateOf(false) }
+                                Text(
+                    text = "字号",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                ExposedDropdownMenuBox(
+                    expanded = fontSizeExpanded,
+                    onExpandedChange = { fontSizeExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = "${element.fontSize.toInt()}mm",
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = fontSizeExpanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = fontSizeExpanded,
+                        onDismissRequest = { fontSizeExpanded = false }
+                    ) {
+                        fontSizeOptions.forEachIndexed { idx, size ->
+                            DropdownMenuItem(
+                                text = { Text(fontSizeLabels[idx]) },
+                                onClick = {
+                                    viewModel.updateTextFontSize(index, size)
+                                    fontSizeExpanded = false
+                                },
+                                contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                            )
+                        }
+                    }
+                }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),

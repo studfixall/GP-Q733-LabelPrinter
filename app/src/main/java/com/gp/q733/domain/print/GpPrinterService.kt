@@ -365,7 +365,7 @@ class GpPrinterService @Inject constructor(
                 val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
                 val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
                 textSetting.cpclFontTypeEnum = if (effectiveFontSize <= 8f) CpclFontTypeEnum.Font_Chinese_16x16_custom else CpclFontTypeEnum.Font_Chinese_24x24
-                val fontMult = if (effectiveFontSize <= 8f) (effectiveFontSize / 2.0f).coerceIn(1f, 4f).toInt() else (effectiveFontSize / 3.0f).coerceIn(1f, 6f).toInt()
+                val fontMult = if (effectiveFontSize <= 8f) (effectiveFontSize / 2.0f).coerceIn(1f, 4f).toInt() else (effectiveFontSize / 3.0f).coerceIn(1f, 8f).toInt()
                 textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
                 textSetting.printRotation = PrintRotation.Rotate0
                 textSetting.setxMultiplication(fontMult)
