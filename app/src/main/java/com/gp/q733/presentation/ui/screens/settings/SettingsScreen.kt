@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.gp.q733.domain.print.PaperType
@@ -48,8 +49,8 @@ var showStorePicker by remember { mutableStateOf(false) }
     LaunchedEffect(uiState.labelHeight) { labelHeightText = uiState.labelHeight.toInt().toString() }
     LaunchedEffect(uiState.gapMm) { gapMmText = uiState.gapMm.toInt().toString() }
     LaunchedEffect(uiState.blackMarkOffset) { blackMarkOffsetText = uiState.blackMarkOffset.toInt().toString() }
-        LaunchedEffect(uiState.printOffsetX) { printOffsetXText = uiState.printOffsetX.toInt().toString() }
-        LaunchedEffect(uiState.printOffsetY) { printOffsetYText = uiState.printOffsetY.toInt().toString() }
+        LaunchedEffect(uiState.printOffsetX) { printOffsetXText = if (uiState.printOffsetX < 0) uiState.printOffsetX.toString() else uiState.printOffsetX.toInt().toString() }
+        LaunchedEffect(uiState.printOffsetY) { printOffsetYText = if (uiState.printOffsetY < 0) uiState.printOffsetY.toString() else uiState.printOffsetY.toInt().toString() }
 
     // Show save success snackbar
     val snackbarHostState = remember { SnackbarHostState() }
