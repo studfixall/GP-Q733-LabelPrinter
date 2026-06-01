@@ -371,7 +371,15 @@ class GpPrinterService @Inject constructor(
                 textSetting.setxMultiplication(fontMult)
                 textSetting.setyMultiplication(fontMult)
                 textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
-                cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
+                // SDK bug: getTextCmd ignores charsetName param, all getBytes() use UTF-8
+            // Manual CPCL TEXT command with GBK encoding
+            val fontId = if (effectiveFontSize <= 8f) 24 else 55  // 24=Chinese 16x16, 55=Chinese 24x24
+            val xDots = mmToDots(element.x + offsetXmm)
+            val yDots = mmToDots(element.y + offsetYmm)
+            val textHeader = "TEXT $xDots $yDots $fontId $fontMult $fontMult ${if (element.isBold) 1 else 0}\r\n"
+            cmd.append(textHeader.toByteArray(Charsets.US_ASCII))
+            cmd.append(displayText.toByteArray(charset("GBK")))
+            cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
             }
 
                 is LabelElement.Barcode -> {
@@ -548,7 +556,15 @@ class GpPrinterService @Inject constructor(
                     val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
-                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
+            // SDK bug: getTextCmd ignores charsetName, manual TSPL TEXT with GBK
+
+            val xDots = mmToDots(element.x + offsetXmm)
+
+            val yDots = mmToDots(element.y + offsetYmm)
+
+            val tsplText = "TEXT $xDots,$yDots,\"TSS24.BF2\",0,$fontMultiplier,$fontMultiplier,\"${element.text}\"\r\n"
+
+            cmd.append(tsplText.toByteArray(charset("GBK")))
 
                 }
 
@@ -672,7 +688,15 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.align = CommonEnum.ALIGN_LEFT
 
-                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
+            // SDK bug workaround: manual TSPL TEXT with GBK
+
+            val xDots2 = mmToDots(element.x)
+
+            val yDots2 = mmToDots(element.y)
+
+            val tsplText2 = "TEXT $xDots2,$yDots2,\"TSS24.BF2\",0,1,1,\"${element.text}\"\r\n"
+
+            cmd.append(tsplText2.toByteArray(charset("GBK")))
 
                     cmd.append(cmd.getLFCRCmd())
 
@@ -818,7 +842,13 @@ class GpPrinterService @Inject constructor(
 
         cnSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
-        cmd.append(cmd.getTextCmd(cnSetting, "\u6d4b\u8bd5\u4e2d\u6587", "GBK"))
+            // SDK bug workaround: manual CPCL TEXT with GBK
+
+            cmd.append("TEXT 10 10 55 1 1 0\r\n".toByteArray(Charsets.US_ASCII))
+
+            cmd.append("\u6d4b\u8bd5\u4e2d\u6587".toByteArray(charset("GBK")))
+
+            cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
 
         yPosMm += 5f
 
