@@ -146,7 +146,9 @@ class HomeViewModel @Inject constructor(
                 id = templateId,
                 elements = elements,
                 widthMm = widthMm,
-                heightMm = heightMm
+                heightMm = heightMm,
+                offsetX = offsetX,
+                offsetY = offsetY
             ),
             isBuiltIn = isBuiltIn
         )

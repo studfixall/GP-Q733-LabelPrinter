@@ -99,7 +99,9 @@ private fun loadTemplates() {
                         id = entity.templateId,
                         elements = elements,
                         widthMm = entity.widthMm,
-                        heightMm = entity.heightMm
+                        heightMm = entity.heightMm,
+                    offsetX = entity.offsetX,
+                    offsetY = entity.offsetY
                     )
                 ))
             }
