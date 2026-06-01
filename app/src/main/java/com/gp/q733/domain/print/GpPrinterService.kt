@@ -404,7 +404,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.qrcodeDotSize = qrSize
 
-                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     try {
 
@@ -424,9 +424,9 @@ class GpPrinterService @Inject constructor(
 
                     val y1 = mmToDots(element.y + offsetYmm)
 
-                    val x2 = mmToDots(element.x + element.width)
+                    val x2 = mmToDots(element.x + element.width + offsetXmm)
 
-                    val y2 = mmToDots(element.y + element.height)
+                    val y2 = mmToDots(element.y + element.height + offsetYmm)
 
                     cmd.append("BOX $x1 $y1 $x2 $y2 1\r\n".toByteArray(Charsets.UTF_8))
 
@@ -593,9 +593,9 @@ val offsetYmm = settings.printOffsetY + label.offsetY
 
                     val y1 = mmToDots(element.y + offsetYmm)
 
-                    val x2 = mmToDots(element.x + element.width)
+                    val x2 = mmToDots(element.x + element.width + offsetXmm)
 
-                    val y2 = mmToDots(element.y + element.height)
+                    val y2 = mmToDots(element.y + element.height + offsetYmm)
 
                     cmd.append("BAR $x1,$y1,$x2,$y2,1\r\n".toByteArray(Charsets.UTF_8))
 
