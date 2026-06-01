@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -124,243 +126,16 @@ fun EditorScreen(
             viewModel.clearError()
         }
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("标签编辑 - ${label.widthMm.toInt()}×${label.heightMm.toInt()}mm") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
-                    }
-                },
-                actions = {
-                    if (uiState.isPrinting) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        IconButton(onClick = { viewModel.printLabel() }) {
-                            Icon(Icons.Default.Print, contentDescription = "打印")
-                        }
-                    }
-                    IconButton(onClick = { viewModel.saveCurrentTemplate() }) {
-                            Icon(Icons.Default.Save, contentDescription = "保存")
-                        }
-                        IconButton(onClick = { viewModel.showSaveTemplateDialog() }) {
-                            Icon(Icons.Default.AddCircle, contentDescription = "存为模板")
-                        }
-                        IconButton(onClick = {
-                            val xml = viewModel.exportBarsoftXml()
-                            exportedXml = xml
-                        }) {
-                            Icon(Icons.Default.Download, contentDescription = "导出XML")
-                        }
-                    }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
+    BottomSheetScaffold(
+    sheetPeekHeight = 80.dp,
+    sheetContent = {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // Label Preview Area with pan and zoom support
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                val density = LocalDensity.current
-                
-                // Calculate initial auto-fit scale
-                var autoScale by remember { mutableFloatStateOf(2.7f) } // 默认缩放 270%
-                var userScale by remember { mutableFloatStateOf(1f) }
-                val scale = autoScale * userScale
-                
-                // Pan offset for moving the canvas
-                var panOffset by remember { mutableStateOf(Offset.Zero) }
-                
-                // Calculate base label size in pixels (8 dots per mm at 203dpi)
-                val labelWidthPx = label.widthMm * 8f
-                val labelHeightPx = label.heightMm * 8f
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        // Detect pinch zoom gestures
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                // Update user scale with zoom gesture
-                                userScale = (userScale * zoom).coerceIn(0.5f, 5f)
-                                // Update pan offset
-                                panOffset = panOffset + pan
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Label canvas with pan and zoom applied
-                    Box(
-                        modifier = Modifier
-                            .offset { 
-                                IntOffset(
-                                    panOffset.x.toInt(),
-                                    panOffset.y.toInt()
-                                )
-                            }
-                            .width(with(density) { (labelWidthPx * scale).toDp() })
-                            .height(with(density) { (labelHeightPx * scale).toDp() })
-                            .border(1.dp, Color.Gray, RoundedCornerShape(2.dp))
-                            .background(Color.White)
-                    ) {
-                        // Show label dimensions
-                        Text(
-                            text = "${label.widthMm.toInt()}×${label.heightMm.toInt()}mm",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.LightGray,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(4.dp)
-                        )
-                        // Render label elements
-                        label.elements.forEachIndexed { index, element ->
-                            val isSelected = uiState.selectedElementIndex == index
-                            // Use element position directly - no local cache to avoid stale data
-                            var dragOffsetX by remember { mutableFloatStateOf(0f) }
-                            var dragOffsetY by remember { mutableFloatStateOf(0f) }
-                            Box(
-                                modifier = Modifier
-                                    .offset(
-                                        x = with(density) { ((element.x + dragOffsetX) * 8f * scale).toDp() },
-                                        y = with(density) { ((element.y + dragOffsetY) * 8f * scale).toDp() }
-                                    )
-                                    .pointerInput(element) {
-                                        detectDragGestures(
-                                            onDragEnd = {
-                                                viewModel.updateElementPosition(index, element.x + dragOffsetX, element.y + dragOffsetY)
-                                                dragOffsetX = 0f
-                                                dragOffsetY = 0f
-                                            }
-                                        ) { change, dragAmount ->
-                                            change.consume()
-                                            // Convert drag amount to mm
-                                            val dragMmX = dragAmount.x / (8f * scale)
-                                            val dragMmY = dragAmount.y / (8f * scale)
-                                            dragOffsetX = (dragOffsetX + dragMmX).coerceIn(-element.x, label.widthMm - element.x)
-                                            dragOffsetY = (dragOffsetY + dragMmY).coerceIn(-element.y, label.heightMm - element.y)
-                                        }
-                                    }
-                                    .clickable {
-                                        viewModel.selectElement(index)
-                                        editingElementText = when (element) {
-                                            is LabelElement.Text -> element.text
-                                            is LabelElement.Barcode -> element.content
-                                            is LabelElement.QRCode -> element.content
-                                            is LabelElement.Line -> ""
-                                        }
-                                    }
-                                    .then(
-                                        if (isSelected) Modifier.border(
-                                            2.dp,
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(2.dp)
-                                        ) else Modifier
-                                    )
-                            ) {
-                                when (element) {
-                                    is LabelElement.Text -> Text(
-                                        text = element.text,
-                                        fontSize = (element.fontSize * scale).sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = Color.Black
-                                    )
-                                    is LabelElement.Barcode -> {
-                                        val barcodeHeightMm = element.height
-                                        val barcodeWidthMm = element.widthMm
-                                        val barcodeBitmap = remember(element.content, barcodeWidthMm, barcodeHeightMm, scale) {
-                                            generateBarcodeBitmap(element.content, barcodeWidthMm, barcodeHeightMm)
-                                        }
-                                        Column(
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ) {
-                                            barcodeBitmap?.let { bitmap ->
-                                                // 使用设置的宽度 + 两侧各2mm边距
-                                                val displayWidthMm = barcodeWidthMm + 4f
-                                                val barcodeWidth = with(density) { (displayWidthMm * 8f * scale).toDp() }
-                                                val barcodeHeight = with(density) { (barcodeHeightMm * 8f * scale).toDp() }
-                                                Image(
-                                                    bitmap = bitmap.asImageBitmap(),
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .width(barcodeWidth)
-                                                        .height(barcodeHeight)
-                                                )
-                                            } ?: Icon(
-                                                imageVector = Icons.Default.ViewWeek,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(with(density) { (element.height * 8f * scale).toDp() }),
-                                                tint = Color.Black
-                                            )
-                                            Text(
-                                                text = element.content,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = Color.Black,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                    }
-                                    is LabelElement.QRCode -> {
-                                        val qrBitmap = remember(element.content, element.size, scale) {
-                                            generateQRCodeBitmap(element.content, element.size)
-                                        }
-                                        qrBitmap?.let { bitmap ->
-                                            Image(
-                                                bitmap = bitmap.asImageBitmap(),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(with(density) { (element.size * 8f * scale).toDp() })
-                                            )
-                                        } ?: Icon(
-                                            imageVector = Icons.Default.QrCode,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(with(density) { (element.size * 8f * scale).toDp() }),
-                                            tint = Color.Black
-                                        )
-                                    }
-                                    is LabelElement.Line -> {
-                                        val lineWidth = with(density) { (element.width * 8f * scale).toDp() }
-                                        val lineHeight = with(density) { (element.height.coerceAtLeast(0.5f) * 8f * scale).toDp() }
-                                        Box(
-                                            modifier = Modifier
-                                                .width(lineWidth)
-                                                .height(lineHeight)
-                                                .background(Color.Black)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Zoom indicator
-                Text(
-                    text = "${(scale * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                            RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
             // Selected Element Editor
             if (uiState.selectedElementIndex != null) {
                 Card(
@@ -404,9 +179,9 @@ fun EditorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                        
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        
+
                         // 元素属性编辑（条码 / 文本）
                         uiState.selectedElementIndex?.let { index ->
                             val element = label.elements.getOrNull(index)
@@ -697,6 +472,242 @@ fun EditorScreen(
                         )
                     }
                 }
+            }
+        }
+    },
+        topBar = {
+            TopAppBar(
+                title = { Text("标签编辑 - ${label.widthMm.toInt()}×${label.heightMm.toInt()}mm") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
+                actions = {
+                    if (uiState.isPrinting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        IconButton(onClick = { viewModel.printLabel() }) {
+                            Icon(Icons.Default.Print, contentDescription = "打印")
+                        }
+                    }
+                    IconButton(onClick = { viewModel.saveCurrentTemplate() }) {
+                            Icon(Icons.Default.Save, contentDescription = "保存")
+                        }
+                        IconButton(onClick = { viewModel.showSaveTemplateDialog() }) {
+                            Icon(Icons.Default.AddCircle, contentDescription = "存为模板")
+                        }
+                        IconButton(onClick = {
+                            val xml = viewModel.exportBarsoftXml()
+                            exportedXml = xml
+                        }) {
+                            Icon(Icons.Default.Download, contentDescription = "导出XML")
+                        }
+                    }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val density = LocalDensity.current
+                
+                // Calculate initial auto-fit scale
+                var autoScale by remember { mutableFloatStateOf(2.7f) } // 默认缩放 270%
+                var userScale by remember { mutableFloatStateOf(1f) }
+                val scale = autoScale * userScale
+                
+                // Pan offset for moving the canvas
+                var panOffset by remember { mutableStateOf(Offset.Zero) }
+                
+                // Calculate base label size in pixels (8 dots per mm at 203dpi)
+                val labelWidthPx = label.widthMm * 8f
+                val labelHeightPx = label.heightMm * 8f
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Detect pinch zoom gestures
+                        .pointerInput(Unit) {
+                            detectTransformGestures { _, pan, zoom, _ ->
+                                // Update user scale with zoom gesture
+                                userScale = (userScale * zoom).coerceIn(0.5f, 5f)
+                                // Update pan offset
+                                panOffset = panOffset + pan
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Label canvas with pan and zoom applied
+                    Box(
+                        modifier = Modifier
+                            .offset { 
+                                IntOffset(
+                                    panOffset.x.toInt(),
+                                    panOffset.y.toInt()
+                                )
+                            }
+                            .width(with(density) { (labelWidthPx * scale).toDp() })
+                            .height(with(density) { (labelHeightPx * scale).toDp() })
+                            .border(1.dp, Color.Gray, RoundedCornerShape(2.dp))
+                            .background(Color.White)
+                    ) {
+                        // Show label dimensions
+                        Text(
+                            text = "${label.widthMm.toInt()}×${label.heightMm.toInt()}mm",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.LightGray,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
+                        )
+                        // Render label elements
+                        label.elements.forEachIndexed { index, element ->
+                            val isSelected = uiState.selectedElementIndex == index
+                            // Use element position directly - no local cache to avoid stale data
+                            var dragOffsetX by remember { mutableFloatStateOf(0f) }
+                            var dragOffsetY by remember { mutableFloatStateOf(0f) }
+                            Box(
+                                modifier = Modifier
+                                    .offset(
+                                        x = with(density) { ((element.x + dragOffsetX) * 8f * scale).toDp() },
+                                        y = with(density) { ((element.y + dragOffsetY) * 8f * scale).toDp() }
+                                    )
+                                    .pointerInput(element) {
+                                        detectDragGestures(
+                                            onDragEnd = {
+                                                viewModel.updateElementPosition(index, element.x + dragOffsetX, element.y + dragOffsetY)
+                                                dragOffsetX = 0f
+                                                dragOffsetY = 0f
+                                            }
+                                        ) { change, dragAmount ->
+                                            change.consume()
+                                            // Convert drag amount to mm
+                                            val dragMmX = dragAmount.x / (8f * scale)
+                                            val dragMmY = dragAmount.y / (8f * scale)
+                                            dragOffsetX = (dragOffsetX + dragMmX).coerceIn(-element.x, label.widthMm - element.x)
+                                            dragOffsetY = (dragOffsetY + dragMmY).coerceIn(-element.y, label.heightMm - element.y)
+                                        }
+                                    }
+                                    .clickable {
+                                        viewModel.selectElement(index)
+                                        editingElementText = when (element) {
+                                            is LabelElement.Text -> element.text
+                                            is LabelElement.Barcode -> element.content
+                                            is LabelElement.QRCode -> element.content
+                                            is LabelElement.Line -> ""
+                                        }
+                                    }
+                                    .then(
+                                        if (isSelected) Modifier.border(
+                                            2.dp,
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(2.dp)
+                                        ) else Modifier
+                                    )
+                            ) {
+                                when (element) {
+                                    is LabelElement.Text -> Text(
+                                        text = element.text,
+                                        fontSize = (element.fontSize * scale).sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = Color.Black
+                                    )
+                                    is LabelElement.Barcode -> {
+                                        val barcodeHeightMm = element.height
+                                        val barcodeWidthMm = element.widthMm
+                                        val barcodeBitmap = remember(element.content, barcodeWidthMm, barcodeHeightMm, scale) {
+                                            generateBarcodeBitmap(element.content, barcodeWidthMm, barcodeHeightMm)
+                                        }
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            barcodeBitmap?.let { bitmap ->
+                                                // 使用设置的宽度 + 两侧各2mm边距
+                                                val displayWidthMm = barcodeWidthMm + 4f
+                                                val barcodeWidth = with(density) { (displayWidthMm * 8f * scale).toDp() }
+                                                val barcodeHeight = with(density) { (barcodeHeightMm * 8f * scale).toDp() }
+                                                Image(
+                                                    bitmap = bitmap.asImageBitmap(),
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .width(barcodeWidth)
+                                                        .height(barcodeHeight)
+                                                )
+                                            } ?: Icon(
+                                                imageVector = Icons.Default.ViewWeek,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(with(density) { (element.height * 8f * scale).toDp() }),
+                                                tint = Color.Black
+                                            )
+                                            Text(
+                                                text = element.content,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.Black,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+                                    is LabelElement.QRCode -> {
+                                        val qrBitmap = remember(element.content, element.size, scale) {
+                                            generateQRCodeBitmap(element.content, element.size)
+                                        }
+                                        qrBitmap?.let { bitmap ->
+                                            Image(
+                                                bitmap = bitmap.asImageBitmap(),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(with(density) { (element.size * 8f * scale).toDp() })
+                                            )
+                                        } ?: Icon(
+                                            imageVector = Icons.Default.QrCode,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(with(density) { (element.size * 8f * scale).toDp() }),
+                                            tint = Color.Black
+                                        )
+                                    }
+                                    is LabelElement.Line -> {
+                                        val lineWidth = with(density) { (element.width * 8f * scale).toDp() }
+                                        val lineHeight = with(density) { (element.height.coerceAtLeast(0.5f) * 8f * scale).toDp() }
+                                        Box(
+                                            modifier = Modifier
+                                                .width(lineWidth)
+                                                .height(lineHeight)
+                                                .background(Color.Black)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Zoom indicator
+                Text(
+                    text = "${(scale * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                )
             }
         }
     }
