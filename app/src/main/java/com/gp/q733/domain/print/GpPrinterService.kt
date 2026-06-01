@@ -1,7 +1,5 @@
 package com.gp.q733.domain.print
 
-
-
 import com.gp.q733.data.local.SettingsDataStore
 
 import com.gp.q733.domain.print.PaperType
@@ -60,8 +58,6 @@ import javax.inject.Inject
 
 import javax.inject.Singleton
 
-
-
 /**
 
  * 打印命令生成服务
@@ -96,8 +92,6 @@ class GpPrinterService @Inject constructor(
 
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
 
-    }
-
     /**
      * 截断长文本：先尝试缩小字号适配标签宽度，仍超则截断加…
      */
@@ -121,14 +115,11 @@ class GpPrinterService @Inject constructor(
         return Triple(truncated, minFontSize, true)
     }
 
-
-
+    }
 
     /** Last connected device MAC address - for reconnection tracking */
 
     private var lastConnectedMac: String? = null
-
-
 
     fun setLastConnectedMac(mac: String?) {
 
@@ -136,11 +127,7 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     fun getLastConnectedMac(): String? = lastConnectedMac
-
-
 
     /**
 
@@ -155,8 +142,6 @@ class GpPrinterService @Inject constructor(
         CpclCmd.Vertical_Resolution = DPI.toString()
 
     }
-
-
 
     /**
 
@@ -203,8 +188,6 @@ class GpPrinterService @Inject constructor(
         return bytes
 
     }
-
-
 
     /**
 
@@ -264,8 +247,6 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     private fun createPrintCommand(cmdType: Int, label: Label, settings: com.gp.q733.data.local.AppSettings, copies: Int = 1): Cmd {
 
         return when (cmdType) {
@@ -279,8 +260,6 @@ class GpPrinterService @Inject constructor(
         }
 
     }
-
-
 
     /**
 
@@ -302,11 +281,9 @@ class GpPrinterService @Inject constructor(
 
         val height = settings.labelHeight.toInt()
 
-    val offsetXmm = settings.printOffsetX
-
-    val offsetYmm = settings.printOffsetY
-
-        val offset = 0
+        val offset = 0  // CPCL header offset (not used for element positioning)
+        val offsetXmm = settings.printOffsetX + label.offsetX
+        val offsetYmm = settings.printOffsetY + label.offsetY
 
     // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
 
@@ -352,53 +329,48 @@ class GpPrinterService @Inject constructor(
 
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-
-
         label.elements.forEach { element ->
 
             when (element) {
 
-            is LabelElement.Text -> {
-                val textSetting = TextSetting()
-                // D方案: 长文字先缩小字号适配，仍超则截断
-                val availableWidth = label.widthMm - element.x - offsetXmm
-                val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
-                val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
-                textSetting.cpclFontTypeEnum = if (effectiveFontSize <= 8f) CpclFontTypeEnum.Font_Chinese_16x16_custom else CpclFontTypeEnum.Font_Chinese_24x24
-                val fontMult = if (effectiveFontSize <= 8f) (effectiveFontSize / 2.0f).coerceIn(1f, 4f).toInt() else (effectiveFontSize / 3.0f).coerceIn(1f, 8f).toInt()
-                textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
-                textSetting.printRotation = PrintRotation.Rotate0
-                textSetting.setxMultiplication(fontMult)
-                textSetting.setyMultiplication(fontMult)
-                textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
-                // SDK bug: getTextCmd ignores charsetName param, all getBytes() use UTF-8
-            // Manual CPCL TEXT command with GBK encoding
-            val fontId = if (effectiveFontSize <= 8f) 24 else 55  // 24=Chinese 16x16, 55=Chinese 24x24
-            val xDots = mmToDots(element.x + offsetXmm)
-            val yDots = mmToDots(element.y + offsetYmm)
-            val textHeader = "TEXT $xDots $yDots $fontId $fontMult $fontMult ${if (element.isBold) 1 else 0}\r\n"
-            cmd.append(textHeader.toByteArray(Charsets.US_ASCII))
-            cmd.append(displayText.toByteArray(charset("GBK")))
-            cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
-            }
+                is LabelElement.Text -> {
+
+                    val textSetting = TextSetting()
+
+                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+
+                    textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
+
+                    textSetting.printRotation = PrintRotation.Rotate0
+
+            // D方案: 长文字先缩小字号适配，仍超则截断
+            val availableWidth = label.widthMm - element.x - offsetXmm
+            val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
+            val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
+                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
+                    textSetting.setxMultiplication(fontMultiplier)
+                    textSetting.setyMultiplication(fontMultiplier)
+
+                    textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
+
+                    cmd.append(cmd.getTextCmd(textSetting, displayText, "GBK"))
+
+                }
 
                 is LabelElement.Barcode -> {
 
                     val barcodeSetting = BarcodeSetting()
 
                     barcodeSetting.printRotation = PrintRotation.Rotate0
+                    val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
+                    barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
+                    barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
 
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
 
                     barcodeSetting.heightInDot = mmToDots(element.height)
 
-                barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
-
-                val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
-
-                barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
-
-                barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
+                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     val barcodeType = when (element.format) {
 
@@ -432,7 +404,7 @@ class GpPrinterService @Inject constructor(
 
                     barcodeSetting.qrcodeDotSize = qrSize
 
-                    barcodeSetting.position = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
+                    barcodeSetting.position = Position(mmToDots(element.x), mmToDots(element.y))
 
                     try {
 
@@ -448,9 +420,9 @@ class GpPrinterService @Inject constructor(
 
                 is LabelElement.Line -> {
 
-                    val x1 = mmToDots(element.x)
+                    val x1 = mmToDots(element.x + offsetXmm)
 
-                    val y1 = mmToDots(element.y)
+                    val y1 = mmToDots(element.y + offsetYmm)
 
                     val x2 = mmToDots(element.x + element.width)
 
@@ -472,8 +444,6 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     /**
 
      * TSPL label print
@@ -486,6 +456,8 @@ class GpPrinterService @Inject constructor(
 
         val cmd = factory.create()
 
+val offsetXmm = settings.printOffsetX + label.offsetX
+val offsetYmm = settings.printOffsetY + label.offsetY
         val width = settings.labelWidth.toInt()
 
         val height = settings.labelHeight.toInt()
@@ -528,16 +500,9 @@ class GpPrinterService @Inject constructor(
 
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
 
-
-
-    val offsetXmm = settings.printOffsetX
-
-    val offsetYmm = settings.printOffsetY
         cmd.append(cmd.headerCmd)
 
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
-
-
 
         label.elements.forEach { element ->
 
@@ -549,22 +514,14 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
 
-                textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
+                    textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     textSetting.printRotation = PrintRotation.Rotate0
 
                     val fontMultiplier = (element.fontSize / 6.0f).coerceIn(1f, 8f).toInt()
                     textSetting.setxMultiplication(fontMultiplier)
                     textSetting.setyMultiplication(fontMultiplier)
-            // SDK bug: getTextCmd ignores charsetName, manual TSPL TEXT with GBK
-
-            val xDots = mmToDots(element.x + offsetXmm)
-
-            val yDots = mmToDots(element.y + offsetYmm)
-
-            val tsplText = "TEXT $xDots,$yDots,\"TSS24.BF2\",0,$fontMultiplier,$fontMultiplier,\"${element.text}\"\r\n"
-
-            cmd.append(tsplText.toByteArray(charset("GBK")))
+                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
 
                 }
 
@@ -632,9 +589,9 @@ class GpPrinterService @Inject constructor(
 
                 is LabelElement.Line -> {
 
-                    val x1 = mmToDots(element.x)
+                    val x1 = mmToDots(element.x + offsetXmm)
 
-                    val y1 = mmToDots(element.y)
+                    val y1 = mmToDots(element.y + offsetYmm)
 
                     val x2 = mmToDots(element.x + element.width)
 
@@ -664,8 +621,6 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     private fun createEscCommand(label: Label, settings: com.gp.q733.data.local.AppSettings): Cmd {
 
         val factory = EscFactory()
@@ -688,15 +643,7 @@ class GpPrinterService @Inject constructor(
 
                     textSetting.align = CommonEnum.ALIGN_LEFT
 
-            // SDK bug workaround: manual TSPL TEXT with GBK
-
-            val xDots2 = mmToDots(element.x)
-
-            val yDots2 = mmToDots(element.y)
-
-            val tsplText2 = "TEXT $xDots2,$yDots2,\"TSS24.BF2\",0,1,1,\"${element.text}\"\r\n"
-
-            cmd.append(tsplText2.toByteArray(charset("GBK")))
+                    cmd.append(cmd.getTextCmd(textSetting, element.text, "GBK"))
 
                     cmd.append(cmd.getLFCRCmd())
 
@@ -718,8 +665,6 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     /**
 
      * CPCL test page
@@ -734,7 +679,7 @@ class GpPrinterService @Inject constructor(
 
         val cmd = factory.create()
 
-        val offset = 0
+        val offset = 0  // TSPL header offset
 
         // 手动构建纯 CPCL header（不含佳博私有 !U1 BEGIN-PAGE）
 
@@ -746,21 +691,15 @@ class GpPrinterService @Inject constructor(
 
     cmd.append(testHeader.toByteArray(Charsets.US_ASCII))
 
-
-
         val commonSetting = CommonSetting()
 
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
 
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
 
-
-
         var yPosMm = 2f
 
         val leftMarginMm = 2f
-
-
 
         // === ASCII font test (Font_4) - should always work ===
 
@@ -774,15 +713,11 @@ class GpPrinterService @Inject constructor(
 
         asciiSetting.setyMultiplication(2)
 
-
-
         asciiSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(asciiSetting, "GP-Q733 TEST PAGE", Charsets.US_ASCII.name()))
 
         yPosMm += 6f
-
-
 
         val smallAscii = TextSetting()
 
@@ -794,15 +729,11 @@ class GpPrinterService @Inject constructor(
 
         smallAscii.setyMultiplication(1)
 
-
-
         smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(smallAscii, "Device: $deviceName", Charsets.US_ASCII.name()))
 
         yPosMm += 4f
-
-
 
         smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
@@ -810,23 +741,17 @@ class GpPrinterService @Inject constructor(
 
         yPosMm += 4f
 
-
-
         smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(smallAscii, "Label: ${width}x${height}mm", Charsets.US_ASCII.name()))
 
         yPosMm += 4f
 
-
-
         smallAscii.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(smallAscii, "DPI:203 D:${settings.printDensity} S:${settings.printSpeed}", Charsets.US_ASCII.name()))
 
         yPosMm += 6f
-
-
 
         // === Chinese font test (Font 24) ===
 
@@ -842,17 +767,9 @@ class GpPrinterService @Inject constructor(
 
         cnSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
-            // SDK bug workaround: manual CPCL TEXT with GBK
-
-            cmd.append("TEXT 10 10 55 1 1 0\r\n".toByteArray(Charsets.US_ASCII))
-
-            cmd.append("\u6d4b\u8bd5\u4e2d\u6587".toByteArray(charset("GBK")))
-
-            cmd.append("\r\n".toByteArray(Charsets.US_ASCII))
+        cmd.append(cmd.getTextCmd(cnSetting, "\u6d4b\u8bd5\u4e2d\u6587", "GBK"))
 
         yPosMm += 5f
-
-
 
         // Test barcode
 
@@ -882,8 +799,6 @@ class GpPrinterService @Inject constructor(
 
         yPosMm += 12f
 
-
-
         // Test QR
 
         val qrSetting = BarcodeSetting()
@@ -903,8 +818,6 @@ class GpPrinterService @Inject constructor(
             android.util.Log.e("PrintDebug", "CPCL test QR error: ${e.message}")
 
         }
-
-
 
     // 手动构建 CPCL footer（不含 !U1 END-PAGE）
 
@@ -964,20 +877,15 @@ class GpPrinterService @Inject constructor(
 
         commonSetting.speedEnum = SpeedEnum.getEnumByString(settings.printSpeed.toString())
 
-
         cmd.append(cmd.headerCmd)
 
         cmd.append(cmd.getCommonSettingCmd(commonSetting))
-
-
 
         var yPosMm = 5f
 
         val lineHeightMm = 5f
 
         val leftMarginMm = 10f
-
-
 
         val titleSetting = TextSetting()
 
@@ -995,8 +903,6 @@ class GpPrinterService @Inject constructor(
 
         yPosMm += lineHeightMm + 3f
 
-
-
         val normalSetting = TextSetting()
 
         normalSetting.tsplFontTypeEnum = TsplFontTypeEnum.Font_TSS24_BF2_For_Simple_Chinese
@@ -1007,15 +913,11 @@ class GpPrinterService @Inject constructor(
 
         normalSetting.setyMultiplication(1)
 
-
-
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(normalSetting, "\u8bbe\u5907: $deviceName", "GBK"))
 
         yPosMm += lineHeightMm
-
-
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
@@ -1023,23 +925,17 @@ class GpPrinterService @Inject constructor(
 
         yPosMm += lineHeightMm
 
-
-
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(normalSetting, "\u6807\u7b7e: ${width}x${height}mm", "GBK"))
 
         yPosMm += lineHeightMm
 
-
-
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm))
 
         cmd.append(cmd.getTextCmd(normalSetting, "\u5bc6\u5ea6: ${settings.printDensity} \u901f\u5ea6: ${settings.printSpeed}", "GBK"))
 
         yPosMm += lineHeightMm + 3f
-
-
 
         val barcodeSetting = BarcodeSetting()
 
@@ -1067,8 +963,6 @@ class GpPrinterService @Inject constructor(
 
         yPosMm += 15f
 
-
-
         val qrSetting = BarcodeSetting()
 
         qrSetting.qrcodeDotSize = 6
@@ -1087,15 +981,11 @@ class GpPrinterService @Inject constructor(
 
         }
 
-
-
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
 
         normalSetting.txtPrintPosition = Position(mmToDots(leftMarginMm), mmToDots(yPosMm + 15f))
 
         cmd.append(cmd.getTextCmd(normalSetting, "\u65f6\u95f4: $timestamp", "GBK"))
-
-
 
         try {
 
@@ -1109,8 +999,6 @@ class GpPrinterService @Inject constructor(
 
     }
 
-
-
     private fun createEscTestCommand(deviceName: String, settings: com.gp.q733.data.local.AppSettings): Cmd {
 
         val factory = EscFactory()
@@ -1120,8 +1008,6 @@ class GpPrinterService @Inject constructor(
         cmd.append(cmd.headerCmd)
 
         cmd.setChartsetName("GBK")
-
-
 
         val centerSetting = TextSetting()
 
@@ -1134,8 +1020,6 @@ class GpPrinterService @Inject constructor(
         cmd.append(cmd.getLFCRCmd())
 
         cmd.append(cmd.getLFCRCmd())
-
-
 
         val leftSetting = TextSetting()
 
@@ -1154,8 +1038,6 @@ class GpPrinterService @Inject constructor(
         cmd.append(cmd.getTextCmd(leftSetting, "Density: ${settings.printDensity}", "GBK"))
 
         cmd.append(cmd.getLFCRCmd())
-
-
 
         val timestamp = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
 
