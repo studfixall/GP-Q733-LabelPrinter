@@ -252,10 +252,10 @@ fun EditorScreen(
                                 }
             is LabelElement.Text -> {
                 // 离散字号档位 — 对应CPCL打印机实际支持的字体大小
-                // 16x16字体: 1x=2mm, 2x=4mm, 3x=6mm, 4x=8mm
-                // 24x24字体: 1x=3mm, 2x=6mm, 3x=9mm, 4x=12mm, 5x=15mm, 6x=18mm, 7x=21mm, 8x=24mm
-                // 去重合并排序: 2,3,4,6,8,9,12,15,18,21,24
-                val fontSizeOptions = listOf(2f, 3f, 4f, 6f, 8f, 9f, 12f, 15f, 18f, 21f, 24f)
+                // 16x16CN(2mm基): 1x=2, 2x=4, 3x=6, 4x=8, 5x=10, 6x=12, 7x=14, 8x=16mm
+                // 24x24CN(3mm基): 1x=3, 2x=6, 3x=9, 4x=12, 5x=15, 6x=18, 7x=21, 8x=24mm
+                // 去重合并排序: 2,3,4,6,8,9,10,12,14,15,16,18,21,24
+                val fontSizeOptions = listOf(2f, 3f, 4f, 6f, 8f, 9f, 10f, 12f, 14f, 15f, 16f, 18f, 21f, 24f)
                 val fontSizeLabels = fontSizeOptions.map { "${it.toInt()}mm" }
                 var fontSizeExpanded by remember { mutableStateOf(false) }
                                 Text(

@@ -337,8 +337,6 @@ class GpPrinterService @Inject constructor(
 
                     val textSetting = TextSetting()
 
-                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
-
                     textSetting.txtPrintPosition = Position(mmToDots(element.x + offsetXmm), mmToDots(element.y + offsetYmm))
 
                     textSetting.printRotation = PrintRotation.Rotate0
@@ -347,9 +345,23 @@ class GpPrinterService @Inject constructor(
             val availableWidth = label.widthMm - element.x - offsetXmm
             val (displayText, adjustedFontSize, wasTruncated) = truncateTextToFit(element.text, element.fontSize, availableWidth.coerceAtLeast(0f))
             val effectiveFontSize = if (wasTruncated) adjustedFontSize else element.fontSize
-                    val fontMultiplier = (effectiveFontSize / 6.0f).coerceIn(1f, 8f).toInt()
-                    textSetting.setxMultiplication(fontMultiplier)
-                    textSetting.setyMultiplication(fontMultiplier)
+
+            // 按目标mm选最优字体+倍率:
+            // 16x16CN(2mm基) x1~8 = 2,4,6,8,10,12,14,16mm
+            // 24x24CN(3mm基) x1~8 = 3,6,9,12,15,18,21,24mm
+            // 16x16CN独占档: 2,4,8,10,14,16mm (其余档用24x24CN更清晰)
+            val useSmallFont = effectiveFontSize in setOf(2f, 4f, 8f, 10f, 14f, 16f)
+            if (useSmallFont) {
+                textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_16x16_custom
+                val mag = (effectiveFontSize / 2f).toInt().coerceIn(1, 8)
+                textSetting.setxMultiplication(mag)
+                textSetting.setyMultiplication(mag)
+            } else {
+                textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+                val mag = (effectiveFontSize / 3f).toInt().coerceIn(1, 8)
+                textSetting.setxMultiplication(mag)
+                textSetting.setyMultiplication(mag)
+            }
 
                     textSetting.bold = if (element.isBold) SettingEnum.Enable else SettingEnum.Disable
 
