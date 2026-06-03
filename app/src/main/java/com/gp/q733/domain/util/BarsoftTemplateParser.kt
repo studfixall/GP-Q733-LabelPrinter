@@ -147,6 +147,14 @@ object BarsoftTemplateParser {
                 width = width,
                 height = height
             )
+            3 -> LabelElement.QRCode(
+                x = left,
+                y = top,
+                content = text,
+                size = width.coerceAtLeast(10f),
+                textName = textName,
+                variable = variable
+            )
             else -> null
         }
     }

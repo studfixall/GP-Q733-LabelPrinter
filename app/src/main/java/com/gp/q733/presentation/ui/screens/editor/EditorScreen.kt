@@ -354,7 +354,58 @@ fun EditorScreen(
                                         }
                                     }
                                 }
-                                else -> {}
+                                is LabelElement.QRCode -> {
+                Text(
+                    text = "尺寸: ${element.size.toInt()}mm",
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Slider(
+                    value = element.size,
+                    onValueChange = { size -> viewModel.updateQrSize(index, size) },
+                    valueRange = 5f..40f,
+                    steps = 7,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                // 数据绑定字段选择
+                var qrBindingExpanded by remember { mutableStateOf(false) }
+                val qrBindingOptions = listOf(
+                    "" to "不绑定（固定内容）",
+                    "barcode" to "条码",
+                    "name" to "商品名称",
+                    "price" to "价格",
+                    "mprice" to "会员价"
+                )
+                val currentQrBindingLabel = qrBindingOptions.find { it.first == element.textName }?.second ?: "不绑定（固定内容）"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("绑定字段", style = MaterialTheme.typography.labelMedium)
+                    Box {
+                        TextButton(onClick = { qrBindingExpanded = true }) {
+                            Text(currentQrBindingLabel)
+                            Icon(Icons.Default.ArrowDropDown, null)
+                        }
+                        DropdownMenu(
+                            expanded = qrBindingExpanded,
+                            onDismissRequest = { qrBindingExpanded = false }
+                        ) {
+                            qrBindingOptions.forEach { (value, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        viewModel.updateQrTextName(index, value)
+                                        qrBindingExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            else -> {}
                             }
                         }
                     }

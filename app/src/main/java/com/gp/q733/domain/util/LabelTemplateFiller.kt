@@ -106,6 +106,7 @@ object LabelTemplateFiller {
                             BarsoftTemplateParser.isDataBindingField(element.textName))
                 }
                 is LabelElement.Barcode -> element.textName == "barcode"
+                is LabelElement.QRCode -> element.variable == 1 && element.textName.isNotEmpty()
                 else -> false
             }
         }
