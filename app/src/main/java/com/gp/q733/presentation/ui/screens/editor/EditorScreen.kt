@@ -620,7 +620,9 @@ fun EditorScreen(
                                 when (element) {
                                     is LabelElement.Text -> Text(
                                         text = element.text,
-                                        fontSize = (element.fontSize * scale).sp,
+                                        // mm转sp: 画布坐标1mm=8dots*scale->dp, 文字高度也按此比例
+                                        // sp系数=8dots/mm * 0.3(sp_per_dp近似) = 2.4, 取2.5微调
+                                        fontSize = (element.fontSize * 2.5f * scale).sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         color = Color.Black
