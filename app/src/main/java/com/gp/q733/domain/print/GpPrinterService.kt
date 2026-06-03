@@ -90,6 +90,51 @@ class GpPrinterService @Inject constructor(
 
         private const val DPI = 203
 
+    /**
+     * 根据目标宽度mm反算CPCL/TSPL条码的narrowInDot
+     * CPCL BARCODE命令没有width参数, 条码总宽度由内容长度 + narrowInDot决定
+     *
+     * EAN-13: 113个模块单位 (95编码 + 左右11静默区)
+     * CODE128: 起始码(35模块) + 内容字符数*11 + 校验(11) + 终止码(13) + 静默区(20)
+     * CODE39: 字符数*(宽窄比模块数) + 字符间距
+     *
+     * @param format 条码格式
+     * @param content 条码内容
+     * @param targetWidthMm 目标宽度(mm), 0表示使用默认值
+     * @return narrowInDot (1~4, CPCL条码允许范围)
+     */
+    private fun calculateBarcodeNarrowDot(
+        format: com.gp.q733.domain.model.BarcodeFormat,
+        content: String,
+        targetWidthMm: Float
+    ): Int {
+        // 条码总模块数 (包含静默区)
+        val totalModules = when (format) {
+            com.gp.q733.domain.model.BarcodeFormat.EAN13 -> {
+                // EAN-13固定113模块
+                113
+            }
+            com.gp.q733.domain.model.BarcodeFormat.CODE128 -> {
+                // CODE128: 起始码(35) + content字符*11 + 校验(11) + 终止码(13) + quiet(20)
+                val charCount = content.length.coerceAtLeast(1)
+                35 + charCount * 11 + 11 + 13 + 20
+            }
+            com.gp.q733.domain.model.BarcodeFormat.CODE39 -> {
+                // CODE39: 每个字符约16.5模块(5bars+4spaces+间距) + 起始终止
+                val charCount = content.length.coerceAtLeast(1)
+                (charCount + 2) * 16 + 20  // +2起始终止码, +20 quiet zone
+            }
+        }
+        
+        if (targetWidthMm <= 0f) return 2  // 默认narrowInDot=2
+        
+        // 反算: narrowInDot = 目标宽度(mm) * 8(dots/mm) / 总模块数
+        val calculated = (targetWidthMm * 8f / totalModules).toInt()
+        return calculated.coerceIn(1, 4)
+    }
+
+
+
         private fun mmToDots(mm: Number): Int = (mm.toFloat() * DPI / 25.4f).toInt()
 
     /**
@@ -374,9 +419,11 @@ class GpPrinterService @Inject constructor(
                     val barcodeSetting = BarcodeSetting()
 
                     barcodeSetting.printRotation = PrintRotation.Rotate0
-                    val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
-                    barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
-                    barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
+                    // 根据目标宽度mm反算narrowInDot, 而非固定40mm基准比
+                    val narrowInDot = calculateBarcodeNarrowDot(element.format, element.content, element.widthMm)
+                    val wideInDot = (narrowInDot * 2).coerceIn(2, 8)
+                    barcodeSetting.narrowInDot = narrowInDot
+                    barcodeSetting.wideInDot = wideInDot
 
                     barcodeSetting.barcodeStringPosition = BarcodeStringPosition.BELOW_BARCODE
 
@@ -541,9 +588,11 @@ val offsetYmm = settings.printOffsetY + label.offsetY
 
                     val barcodeSetting = BarcodeSetting()
 
-                    val barWidthRatio = if (element.widthMm > 0f) (element.widthMm / 40f).coerceIn(0.5f, 3f) else 1f
-                    barcodeSetting.narrowInDot = (2 * barWidthRatio).toInt().coerceIn(1, 4)
-                    barcodeSetting.wideInDot = (4 * barWidthRatio).toInt().coerceIn(2, 8)
+                    // 根据目标宽度mm反算narrowInDot
+                    val narrowInDot = calculateBarcodeNarrowDot(element.format, element.content, element.widthMm)
+                    val wideInDot = (narrowInDot * 2).coerceIn(2, 8)
+                    barcodeSetting.narrowInDot = narrowInDot
+                    barcodeSetting.wideInDot = wideInDot
 
                     barcodeSetting.heightInDot = mmToDots(element.height)
 
