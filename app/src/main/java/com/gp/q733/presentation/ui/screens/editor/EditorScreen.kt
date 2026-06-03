@@ -404,6 +404,18 @@ fun EditorScreen(
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("显示内容", style = MaterialTheme.typography.labelMedium)
+                    Switch(
+                        checked = element.showText,
+                        onCheckedChange = { show -> viewModel.updateQrShowText(index, show) }
+                    )
+                }
             }
             else -> {}
                             }
@@ -718,6 +730,9 @@ fun EditorScreen(
                                         val qrBitmap = remember(element.content, element.size, scale) {
                                             generateQRCodeBitmap(element.content, element.size)
                                         }
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
                                         qrBitmap?.let { bitmap ->
                                             Image(
                                                 bitmap = bitmap.asImageBitmap(),
@@ -729,9 +744,19 @@ fun EditorScreen(
                                             contentDescription = null,
                                             modifier = Modifier.size(with(density) { (element.size * 8f * scale).toDp() }),
                                             tint = Color.Black
-                                        )
+                                            )
+                                        if (element.showText) {
+                                            Text(
+                                                text = element.content,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = Color.Black,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        }
                                     }
-                                    is LabelElement.Line -> {
+                                        is LabelElement.Line -> {
                                         val lineWidth = with(density) { (element.width * 8f * scale).toDp() }
                                         val lineHeight = with(density) { (element.height.coerceAtLeast(0.5f) * 8f * scale).toDp() }
                                         Box(

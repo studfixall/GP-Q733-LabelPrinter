@@ -473,10 +473,23 @@ class GpPrinterService @Inject constructor(
 
                         android.util.Log.e("PrintDebug", "CPCL QR cmd error: ${e.message}")
 
-                    }
 
+
+                if (element.showText) {
+                    val textSetting = TextSetting()
+                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+                    textSetting.setxMultiplication(1)
+                    textSetting.setyMultiplication(1)
+                    textSetting.printRotation = PrintRotation.Rotate0
+                    // 二维码下方文字位置: x居中，y在二维码底部+1mm
+                    val qrWidthMm = element.size
+                    val textX = element.x + offsetXmm + (qrWidthMm - element.content.length * 1.5f) / 2f
+                    val textY = element.y + offsetYmm + element.size + 1f
+                    textSetting.txtPrintPosition = Position(mmToDots(textX.coerceAtLeast(0f)), mmToDots(textY))
+                    cmd.append(cmd.getTextCmd(textSetting, element.content, "GBK"))
                 }
-
+                }
+                }
                 is LabelElement.Line -> {
 
                     val x1 = mmToDots(element.x + offsetXmm)
@@ -644,10 +657,22 @@ val offsetYmm = settings.printOffsetY + label.offsetY
 
                         android.util.Log.e("PrintDebug", "TSPL QR cmd error: ${e.message}")
 
-                    }
 
+
+                if (element.showText) {
+                    val textSetting = TextSetting()
+                    textSetting.cpclFontTypeEnum = CpclFontTypeEnum.Font_Chinese_24x24
+                    textSetting.setxMultiplication(1)
+                    textSetting.setyMultiplication(1)
+                    textSetting.printRotation = PrintRotation.Rotate0
+                    val qrWidthMm = element.size
+                    val textX = element.x + offsetXmm + (qrWidthMm - element.content.length * 1.5f) / 2f
+                    val textY = element.y + offsetYmm + element.size + 1f
+                    textSetting.txtPrintPosition = Position(mmToDots(textX.coerceAtLeast(0f)), mmToDots(textY))
+                    cmd.append(cmd.getTextCmd(textSetting, element.content, "GBK"))
                 }
-
+                }
+                }
                 is LabelElement.Line -> {
 
                     val x1 = mmToDots(element.x + offsetXmm)

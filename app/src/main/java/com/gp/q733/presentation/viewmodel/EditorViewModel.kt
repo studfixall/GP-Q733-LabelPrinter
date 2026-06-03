@@ -608,6 +608,22 @@ class EditorViewModel @Inject constructor(
         }
     }
 
+    fun updateQrShowText(index: Int, showText: Boolean) {
+        viewModelScope.launch {
+            val currentLabel = _uiState.value.label
+            val elements = currentLabel.elements.toMutableList()
+            if (index in elements.indices) {
+                val element = elements[index]
+                if (element is LabelElement.QRCode) {
+                    elements[index] = element.copy(showText = showText)
+                    _uiState.value = _uiState.value.copy(
+                        label = currentLabel.copy(elements = elements)
+                    )
+                }
+            }
+        }
+    }
+
     /**
      * 导出为 Barsoft XML 格式字符串
      */

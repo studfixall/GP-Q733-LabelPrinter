@@ -67,7 +67,8 @@ sealed class LabelElement {
         val content: String,
         val size: Float = 20f,
         val textName: String = "",
-        val variable: Int = 0
+        val variable: Int = 0,
+        val showText: Boolean = false
     ) : LabelElement()
     data class Line(
         override val x: Float,

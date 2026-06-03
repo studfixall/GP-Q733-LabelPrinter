@@ -153,7 +153,8 @@ object BarsoftTemplateParser {
                 content = text,
                 size = width.coerceAtLeast(10f),
                 textName = textName,
-                variable = variable
+                variable = variable,
+                showText = parser.getAttributeValue(null, "showText")?.toBooleanStrictOrNull() ?: false
             )
             else -> null
         }
