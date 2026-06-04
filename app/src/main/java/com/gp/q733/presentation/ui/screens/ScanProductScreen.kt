@@ -1,9 +1,8 @@
 package com.gp.q733.presentation.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -18,12 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.gp.q733.domain.model.LabelElement
 import com.gp.q733.domain.model.Label
 import androidx.compose.ui.graphics.Color
@@ -36,10 +37,11 @@ import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.presentation.viewmodel.ScanTemplateOption
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
+import com.journeyapps.barcodescanner.CaptureManager
+import com.journeyapps.barcodescanner.CompoundBarcodeView
+import com.journeyapps.barcodescanner.DecoratedBarcodeView
+import com.google.zxing.client.android.BeepManager
+import android.content.pm.PackageManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,34 +51,28 @@ fun ScanProductScreen(
     onNavigateToEditor: (String, Float?, Float?) -> Unit = { _, _, _ -> }
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
-    // ZXing 扫码启动器
-    val scanLauncher = rememberLauncherForActivityResult(
-        contract = ScanContract()
-    ) { result ->
-        if (result.contents != null) {
-            viewModel.onBarcodeScanned(result.contents)
-        }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val focusRequester = remember { FocusRequester() }
+
+    // 相机权限状态
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            context.checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
     }
-    // 相机权限请求启动器
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+
+    val cameraPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            val options = ScanOptions()
-                .setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
-                .setPrompt("将条码对准扫描框")
-                .setCameraId(0)
-                .setBeepEnabled(true)
-                .setBarcodeImageEnabled(false)
-            scanLauncher.launch(options)
-        } // 权限被拒则静默
+        hasCameraPermission = isGranted
     }
-    // 自动聚焦到扫码输入框
+
+    // 自动聚焦到输入框
     LaunchedEffect(Unit) {
         try { focusRequester.requestFocus() } catch (_: Exception) {}
     }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -93,63 +89,111 @@ fun ScanProductScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
         ) {
+            // ===== 内嵌扫码区域 =====
+            if (hasCameraPermission) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                ) {
+                    EmbeddedBarcodeScanner(
+                        onBarcodeScanned = { barcode ->
+                            viewModel.onBarcodeScanned(barcode)
+                        }
+                    )
+
+                    // 扫码提示覆盖层
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 8.dp),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Text(
+                            "将条码对准扫描框",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier
+                                .background(
+                                    color = Color.Black.copy(alpha = 0.5f),
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            } else {
+                // 无相机权限时显示占位
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.QrCodeScanner,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) }) {
+                            Text("开启相机扫码")
+                        }
+                    }
+                }
+            }
+
             // ===== 扫码输入栏 =====
-            var barcodeInput by remember { mutableStateOf("") }
-            OutlinedTextField(
-                value = barcodeInput,
-                onValueChange = { barcodeInput = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                placeholder = { Text("扫描条码或手动输入") },
-                leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = null) },
-                trailingIcon = {
-                    IconButton(onClick = {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                var barcodeInput by remember { mutableStateOf("") }
+                OutlinedTextField(
+                    value = barcodeInput,
+                    onValueChange = { barcodeInput = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    placeholder = { Text("手动输入条码") },
+                    leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = null) },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            if (barcodeInput.isNotBlank()) {
+                                viewModel.onBarcodeScanned(barcodeInput.trim())
+                                barcodeInput = ""
+                            }
+                        }) {
+                            Icon(Icons.Default.Search, contentDescription = "查询")
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = {
                         if (barcodeInput.isNotBlank()) {
                             viewModel.onBarcodeScanned(barcodeInput.trim())
+                            barcodeInput = ""
                         }
-                    }) {
-                        Icon(Icons.Default.Search, contentDescription = "查询")
-                    }
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {
-                    if (barcodeInput.isNotBlank()) {
-                        viewModel.onBarcodeScanned(barcodeInput.trim())
-                    }
-                })
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            // ===== 扫码按钮 =====
-            Button(
-                onClick = {
-                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                },
-                modifier = Modifier.fillMaxWidth().height(50.dp)
-            ) {
-                Icon(Icons.Default.QrCodeScanner, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("扫描条码")
+                    })
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // ===== 加载中 =====
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
+
             // ===== 商品信息展示 =====
             if (uiState.productInfo.name.isNotBlank() && !uiState.showProductDialog) {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (uiState.productExistsInDb)
-                            MaterialTheme.colorScheme.primaryContainer
-                        else
-                            MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = if (uiState.productExistsInDb) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.secondaryContainer
                     )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -157,7 +201,8 @@ fun ScanProductScreen(
                             Icon(
                                 imageVector = if (uiState.productExistsInDb) Icons.Default.CheckCircle else Icons.Default.Info,
                                 contentDescription = null,
-                                tint = if (uiState.productExistsInDb) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                tint = if (uiState.productExistsInDb) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.secondary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -176,27 +221,29 @@ fun ScanProductScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // ===== 模板选择 =====
-                Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.templates) { template ->
-                        val isSelected = template.id == uiState.selectedTemplateId
-            TemplateCardWithPreview(
-                template = template,
-                isSelected = isSelected,
-                onClick = { viewModel.selectTemplate(template.id) }
-            )
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text("选择打印模板", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(uiState.templates) { template ->
+                            val isSelected = template.id == uiState.selectedTemplateId
+                            TemplateCardWithPreview(
+                                template = template,
+                                isSelected = isSelected,
+                                onClick = { viewModel.selectTemplate(template.id) }
+                            )
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // ===== 打印按钮 =====
                 Button(
                     onClick = { viewModel.print() },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 16.dp),
                     enabled = !uiState.isPrinting && uiState.selectedTemplateId.isNotBlank()
                 ) {
                     if (uiState.isPrinting) {
@@ -210,92 +257,143 @@ fun ScanProductScreen(
                     }
                 }
             }
+
             // ===== 未扫码时的提示 =====
             if (uiState.productInfo.name.isBlank() && !uiState.isLoading && !uiState.showProductDialog) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().padding(top = 60.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.QrCodeScanner,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                            modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("扫描商品条码开始打印", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            if (hasCameraPermission) "对准条码自动识别" else "扫描商品条码开始打印",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.outline
+                        )
                     }
                 }
             }
+
             Spacer(modifier = Modifier.weight(1f))
+
             // ===== 消息提示 =====
-            uiState.errorMessage?.let { msg ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Snackbar(
-                    action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
-                ) { Text(msg) }
-            }
-            uiState.successMessage?.let { msg ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Snackbar(
-                    action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
-                ) { Text(msg) }
-            }
-        }
-        // ===== 未找到商品提示弹窗 =====
-        if (uiState.showNotFoundDialog) {
-            AlertDialog(
-                onDismissRequest = { viewModel.dismissNotFound() },
-                title = { Text("未查到商品") },
-                text = { Text("条码 ${uiState.productInfo.barcode} 在商品库中未找到，是否维护商品信息？") },
-                confirmButton = {
-                    TextButton(onClick = { viewModel.confirmNotFound() }) { Text("去维护") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.dismissNotFound() }) { Text("取消") }
+            Column(modifier = Modifier.padding(16.dp)) {
+                uiState.errorMessage?.let { msg ->
+                    Snackbar(
+                        action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
+                    ) { Text(msg) }
                 }
-            )
-        }
-        // ===== 维护商品资料弹窗 =====
-        if (uiState.showProductDialog) {
-            AlertDialog(
-                onDismissRequest = { viewModel.dismissProductDialog() },
-                title = { Text("商品未入库") },
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text("条码: ${uiState.productInfo.barcode}", style = MaterialTheme.typography.bodyMedium)
-                        OutlinedTextField(
-                            value = uiState.dialogName,
-                            onValueChange = { viewModel.updateDialogName(it) },
-                            label = { Text("商品名称") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
-                        )
-                        OutlinedTextField(
-                            value = uiState.dialogPrice,
-                            onValueChange = { viewModel.updateDialogPrice(it) },
-                            label = { Text("价格") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { viewModel.saveProductFromDialog() }) {
-                        Text("保存并继续")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { viewModel.dismissProductDialog() }) {
-                        Text("取消")
-                    }
+                uiState.successMessage?.let { msg ->
+                    Snackbar(
+                        action = { TextButton(onClick = { viewModel.clearMessages() }) { Text("关闭") } }
+                    ) { Text(msg) }
                 }
-            )
+            }
         }
     }
 
+    // ===== 弹窗 =====
+    if (uiState.showNotFoundDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissNotFound() },
+            title = { Text("未查到商品") },
+            text = { Text("条码 ${uiState.productInfo.barcode} 在商品库中未找到，是否维护商品信息？") },
+            confirmButton = { TextButton(onClick = { viewModel.confirmNotFound() }) { Text("去维护") } },
+            dismissButton = { TextButton(onClick = { viewModel.dismissNotFound() }) { Text("取消") } }
+        )
+    }
+
+    if (uiState.showProductDialog) {
+        AlertDialog(
+            onDismissRequest = { viewModel.dismissProductDialog() },
+            title = { Text("商品未入库") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("条码: ${uiState.productInfo.barcode}", style = MaterialTheme.typography.bodyMedium)
+                    OutlinedTextField(
+                        value = uiState.dialogName,
+                        onValueChange = { viewModel.updateDialogName(it) },
+                        label = { Text("商品名称") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = uiState.dialogPrice,
+                        onValueChange = { viewModel.updateDialogPrice(it) },
+                        label = { Text("价格") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    )
+                }
+            },
+            confirmButton = { TextButton(onClick = { viewModel.saveProductFromDialog() }) { Text("保存并继续") } },
+            dismissButton = { TextButton(onClick = { viewModel.dismissProductDialog() }) { Text("取消") } }
+        )
+    }
+}
+
+/**
+ * 内嵌扫码组件 — 使用 DecoratedBarcodeView 在 Compose 中嵌入实时扫码
+ */
+@Composable
+fun EmbeddedBarcodeScanner(
+    onBarcodeScanned: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var captureManager by remember { mutableStateOf<CaptureManager?>(null) }
+    var beepManager by remember { mutableStateOf<BeepManager?>(null) }
+
+    AndroidView(
+        factory = { ctx ->
+            val barcodeView = DecoratedBarcodeView(ctx)
+            barcodeView.cameraSettings.requestedCameraId = 0
+
+            barcodeView.decodeSingle { result ->
+                result.text?.let { barcode ->
+                    beepManager?.playBeepSound()
+                    onBarcodeScanned(barcode)
+                }
+                // 扫到一个后继续扫下一个
+                barcodeView.resume()
+            }
+
+            captureManager = CaptureManager(ctx as androidx.fragment.app.FragmentActivity, barcodeView).also {
+                it.initializeFromIntent(null, null)
+                it.decode()
+            }
+            beepManager = BeepManager(ctx).also { it.isBeepEnabled = true }
+
+            barcodeView
+        },
+        modifier = Modifier.fillMaxSize()
+    )
+
+    // 生命周期管理
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> captureManager?.onResume()
+                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> captureManager?.onPause()
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            captureManager?.onDestroy()
+            captureManager = null
+            beepManager = null
+        }
+    }
 }
 
 /**
@@ -311,7 +409,7 @@ fun TemplateCardWithPreview(
         onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surfaceVariant
+            else MaterialTheme.colorScheme.surfaceVariant
         ),
         border = if (isSelected) CardDefaults.outlinedCardBorder() else null,
         modifier = Modifier.width(100.dp)
@@ -320,11 +418,7 @@ fun TemplateCardWithPreview(
             modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 缩略预览
-            LabelThumbnail(
-                label = template.label,
-                modifier = Modifier.size(80.dp)
-            )
+            LabelThumbnail(label = template.label, modifier = Modifier.size(80.dp))
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = template.name,
@@ -336,12 +430,8 @@ fun TemplateCardWithPreview(
             )
             if (isSelected) {
                 Spacer(modifier = Modifier.height(2.dp))
-                Icon(
-                    Icons.Default.CheckCircle,
-                    contentDescription = "已选中",
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                Icon(Icons.Default.CheckCircle, contentDescription = "已选中",
+                    modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -365,17 +455,18 @@ fun LabelThumbnail(
         val labelH = label.heightMm
         val scaleX = displayW / labelW
         val scaleY = displayH / labelH
+
         Canvas(modifier = Modifier.size(
             with(LocalDensity.current) { displayW.toDp() },
             with(LocalDensity.current) { displayH.toDp() }
         )) {
             drawRect(color = Color.White)
-            // 简单边框
             drawLine(color = Color.LightGray, start = Offset.Zero, end = Offset(displayW, 0f), strokeWidth = 1f)
             drawLine(color = Color.LightGray, start = Offset.Zero, end = Offset(0f, displayH), strokeWidth = 1f)
             drawLine(color = Color.LightGray, start = Offset(displayW, 0f), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawLine(color = Color.LightGray, start = Offset(0f, displayH), end = Offset(displayW, displayH), strokeWidth = 1f)
             drawRect(color = Color.White)
+
             label.elements.forEach { element ->
                 when (element) {
                     is LabelElement.Text -> {
@@ -383,8 +474,7 @@ fun LabelThumbnail(
                         val y = element.y * scaleY
                         val fontSize = (element.fontSize * minOf(scaleX, scaleY) * 0.8f).coerceAtLeast(4f)
                         drawContext.canvas.nativeCanvas.drawText(
-                            element.text,
-                            x, y + fontSize,
+                            element.text, x, y + fontSize,
                             android.graphics.Paint().apply {
                                 textSize = fontSize
                                 color = android.graphics.Color.BLACK
@@ -398,19 +488,17 @@ fun LabelThumbnail(
                         val y = element.y * scaleY
                         val w = if (element.widthMm > 0f) element.widthMm * scaleX else labelW * 0.8f * scaleX
                         val h = element.height * scaleY
-                        // 简化条码显示
                         val barCount = element.content.length.coerceAtMost(20)
                         val barW = w / (barCount * 2)
                         for (i in 0 until barCount) {
                             drawRect(
                                 color = Color.Black,
                                 topLeft = Offset(x + i * barW * 2, y),
-                                size = androidx.compose.ui.geometry.Size(barW, h * 0.7f)
+                                size = Size(barW, h * 0.7f)
                             )
                         }
                         drawContext.canvas.nativeCanvas.drawText(
-                            element.content.take(12),
-                            x, y + h,
+                            element.content.take(12), x, y + h,
                             android.graphics.Paint().apply {
                                 textSize = 6f * minOf(scaleX, scaleY)
                                 color = android.graphics.Color.BLACK
@@ -427,7 +515,6 @@ fun LabelThumbnail(
                             color = android.graphics.Color.BLACK
                             style = android.graphics.Paint.Style.FILL
                         }
-                        // 三个定位符
                         for (corner in listOf(0f to 0f, 14f * cellSize to 0f, 0f to 14f * cellSize)) {
                             for (row in 0..6) {
                                 for (col in 0..6) {
@@ -451,12 +538,7 @@ fun LabelThumbnail(
                         val y = element.y * scaleY
                         val w = element.width * scaleX
                         val h = element.height * scaleY
-                        drawLine(
-                            color = Color.Black,
-                            start = Offset(x, y),
-                            end = Offset(x + w, y + h),
-                            strokeWidth = 1f
-                        )
+                        drawLine(color = Color.Black, start = Offset(x, y), end = Offset(x + w, y + h), strokeWidth = 1f)
                     }
                 }
             }
