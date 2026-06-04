@@ -37,10 +37,9 @@ import com.gp.q733.domain.repository.ConnectionState
 import com.gp.q733.presentation.viewmodel.ScanTemplateOption
 import com.gp.q733.presentation.viewmodel.ScanProductUiState
 import com.gp.q733.presentation.viewmodel.ScanProductViewModel
-import com.journeyapps.barcodescanner.CaptureManager
-import com.journeyapps.barcodescanner.CompoundBarcodeView
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
-import com.google.zxing.client.android.BeepManager
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.Result
 import android.content.pm.PackageManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +54,9 @@ fun ScanProductScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val focusRequester = remember { FocusRequester() }
 
+    // 扫码面板是否展开
+    var isScanning by remember { mutableStateOf(false) }
+
     // 相机权限状态
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -66,6 +68,7 @@ fun ScanProductScreen(
         contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         hasCameraPermission = isGranted
+        if (isGranted) isScanning = true
     }
 
     // 自动聚焦到输入框
@@ -90,20 +93,33 @@ fun ScanProductScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // ===== 内嵌扫码区域 =====
-            if (hasCameraPermission) {
+            // ===== 内嵌扫码区域 (按钮触发) =====
+            if (isScanning && hasCameraPermission) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
+                        .height(240.dp)
                 ) {
                     EmbeddedBarcodeScanner(
                         onBarcodeScanned = { barcode ->
                             viewModel.onBarcodeScanned(barcode)
+                            // 扫到码后收起扫码面板
+                            isScanning = false
                         }
                     )
 
-                    // 扫码提示覆盖层
+                    // 关闭扫码按钮
+                    IconButton(
+                        onClick = { isScanning = false },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.5f), shape = androidx.compose.foundation.shape.CircleShape)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "关闭扫码", tint = Color.White)
+                    }
+
+                    // 扫码提示
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -124,25 +140,20 @@ fun ScanProductScreen(
                     }
                 }
             } else {
-                // 无相机权限时显示占位
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.QrCodeScanner,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA) }) {
-                            Text("开启相机扫码")
+                // 扫码按钮
+                Button(
+                    onClick = {
+                        if (hasCameraPermission) {
+                            isScanning = true
+                        } else {
+                            cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
                         }
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("扫描条码")
                 }
             }
 
@@ -273,7 +284,7 @@ fun ScanProductScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            if (hasCameraPermission) "对准条码自动识别" else "扫描商品条码开始打印",
+                            "扫描商品条码开始打印",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.outline
                         )
@@ -341,7 +352,7 @@ fun ScanProductScreen(
 }
 
 /**
- * 内嵌扫码组件 — 使用 DecoratedBarcodeView 在 Compose 中嵌入实时扫码
+ * 内嵌扫码组件 — DecoratedBarcodeView + 手动生命周期管理（不用CaptureManager）
  */
 @Composable
 fun EmbeddedBarcodeScanner(
@@ -349,49 +360,39 @@ fun EmbeddedBarcodeScanner(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    var captureManager by remember { mutableStateOf<CaptureManager?>(null) }
-    var beepManager by remember { mutableStateOf<BeepManager?>(null) }
+    var barcodeView by remember { mutableStateOf<DecoratedBarcodeView?>(null) }
 
     AndroidView(
         factory = { ctx ->
-            val barcodeView = DecoratedBarcodeView(ctx)
-            barcodeView.cameraSettings.requestedCameraId = 0
-
-            barcodeView.decodeSingle { result ->
-                result.text?.let { barcode ->
-                    beepManager?.playBeepSound()
-                    onBarcodeScanned(barcode)
+            DecoratedBarcodeView(ctx).also { view ->
+                barcodeView = view
+                view.cameraSettings.requestedCameraId = 0
+                view.decodeContinuous { result ->
+                    result.text?.let { barcode ->
+                        view.pause()
+                        onBarcodeScanned(barcode)
+                    }
                 }
-                // 扫到一个后继续扫下一个
-                barcodeView.resume()
+                view.resume()
             }
-
-            captureManager = CaptureManager(ctx as androidx.fragment.app.FragmentActivity, barcodeView).also {
-                it.initializeFromIntent(null, null)
-                it.decode()
-            }
-            beepManager = BeepManager(ctx).also { it.isBeepEnabled = true }
-
-            barcodeView
         },
         modifier = Modifier.fillMaxSize()
     )
 
-    // 生命周期管理
+    // 生命周期管理：仅管理 pause/resume，不依赖 CaptureManager
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             when (event) {
-                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> captureManager?.onResume()
-                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> captureManager?.onPause()
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> barcodeView?.resume()
+                androidx.lifecycle.Lifecycle.Event.ON_PAUSE -> barcodeView?.pause()
                 else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            captureManager?.onDestroy()
-            captureManager = null
-            beepManager = null
+            barcodeView?.pause()
+            barcodeView = null
         }
     }
 }
