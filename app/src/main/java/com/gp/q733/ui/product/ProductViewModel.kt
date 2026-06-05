@@ -73,6 +73,12 @@ class ProductViewModel @Inject constructor(
             productRepository.deleteProduct(product)
         }
     }
+    fun deleteAllProducts() {
+        viewModelScope.launch {
+            productRepository.deleteAllProducts()
+        }
+    }
+
     fun importFromCsv(csvData: List<ProductInfo>) {
         viewModelScope.launch {
             val count = productRepository.importProducts(csvData)

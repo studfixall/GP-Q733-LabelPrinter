@@ -85,6 +85,10 @@ class ProductRepositoryImpl @Inject constructor(
         dao.insertAll(entities)
         return products.size
     }
+    override suspend fun deleteAllProducts() {
+        dao.deleteAll()
+    }
+
     override suspend fun getProductCount(): Int {
         return dao.getCount()
     }

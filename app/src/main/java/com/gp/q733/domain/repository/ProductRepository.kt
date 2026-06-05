@@ -23,6 +23,9 @@ interface ProductRepository {
     suspend fun deleteProduct(product: ProductInfo)
     /** 批量导入（CSV），返回导入数量 */
     suspend fun importProducts(products: List<ProductInfo>): Int
+    /** 清空所有商品 */
+    suspend fun deleteAllProducts()
+
     /** 获取商品总数 */
     suspend fun getProductCount(): Int
 }

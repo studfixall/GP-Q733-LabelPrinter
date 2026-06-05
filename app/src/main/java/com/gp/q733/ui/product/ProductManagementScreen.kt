@@ -61,6 +61,8 @@ fun ProductManagementScreen(
     }
     // 删除确认对话框
     var productToDelete by remember { mutableStateOf<ProductInfo?>(null) }
+    // 清空所有数据确认
+    var showClearDialog by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,6 +79,10 @@ fun ProductManagementScreen(
                     }) {
                         Icon(Icons.Default.FileUpload, contentDescription = "导入CSV")
                     }
+                // 清空数据按钮
+                IconButton(onClick = { showClearDialog = true }) {
+                    Icon(Icons.Default.DeleteSweep, contentDescription = "清空数据")
+                }
                 }
             )
         },
@@ -184,6 +190,29 @@ fun ProductManagementScreen(
                 }
             )
         }
+    }
+
+    // 清空数据确认对话框
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text("清空所有商品") },
+            text = { Text("确定要清空所有商品数据吗？此操作不可撤销。") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAllProducts()
+                        showClearDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) { Text("清空") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) { Text("取消") }
+            }
+        )
     }
 }
 
